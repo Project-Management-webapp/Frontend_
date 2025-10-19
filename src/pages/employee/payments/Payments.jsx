@@ -140,13 +140,13 @@ const Payments = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">My Payments</h2>
         {/* Link to request payment page (assuming route exists) */}
-        <Link
+        {/* <Link
           to="/employee/payments/request"
           className="flex items-center gap-2 px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
         >
           <RiAddLine size={20} />
           Request Payment
-        </Link>
+        </Link> */}
       </div>
 
       {/* Stats - Updated */}

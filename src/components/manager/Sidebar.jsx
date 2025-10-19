@@ -79,7 +79,15 @@ const Sidebar = ({
           active={activeView === 'dashboard'}
           onClick={() => handleItemClick('dashboard')}
         />
-        <SidebarGroup
+
+        <SidebarItem
+          icon={<FiFolder size={20} />}
+          text="Projects"
+          collapsed={isCollapsed}
+          active={activeView === 'projects'}
+          onClick={() => handleItemClick('projects')}
+        />
+        {/* <SidebarGroup
           icon={<FiFolder size={20} />}
           text="Projects"
           collapsed={isCollapsed}
@@ -88,7 +96,7 @@ const Sidebar = ({
             { text: "All Projects", view: "projects" },
             { text: "Completed Projects", view: "completedProject" },
           ]}
-        />
+        /> */}
         <SidebarGroup
           icon={<FiUsers size={20} />}
           text="Employees"
@@ -125,14 +133,25 @@ const Sidebar = ({
           active={activeView === 'supportTickets'}
           onClick={() => handleItemClick('supportTickets')}
         />
-        <SidebarItem
+        {/* <SidebarItem
           icon={<FiDollarSign size={20} />}
           text="Payments"
           collapsed={isCollapsed}
           active={activeView === 'payments'}
           onClick={() => handleItemClick('payments')}
-        />
+        /> */}
+
         <SidebarGroup
+          icon={<FiDollarSign size={20} />}
+          text="Payments"
+          collapsed={isCollapsed}
+          onSubItemClick={handleItemClick}
+          items={[
+            { text: "Payments", view: "payments" },
+            { text: "Pending pements", view: "completedProject" },
+          ]}
+        />
+        {/* <SidebarGroup
           icon={<FiFileText size={20} />}
           text="Reports"
           collapsed={isCollapsed}
@@ -142,7 +161,7 @@ const Sidebar = ({
             { text: "Task Reports", path: "/reports/tasks" },
             { text: "Financial Reports", path: "/reports/finance" },
           ]}
-        />
+        /> */}
         {/* <SidebarItem
           icon={<FiMessageSquare size={20} />}
           text="Messages"

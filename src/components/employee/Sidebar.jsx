@@ -145,7 +145,7 @@ const Sidebar = ({
           ]}
         />
 
-        <SidebarGroup
+        {/* <SidebarGroup
           icon={<FiBarChart2 size={20} />}
           text="My Earnings"
           collapsed={isCollapsed}
@@ -155,7 +155,7 @@ const Sidebar = ({
             { text: "Project Earnings", view: "earnings" },
             { text: "Payment History", view: "earningsHistory" },
           ]}
-        />
+        /> */}
 
      
 
