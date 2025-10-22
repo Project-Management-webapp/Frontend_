@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { getMyTickets } from "../../../api/employee/supportTicket";
 import TicketStatusBadge from "../../../components/atoms/TicketStatusBadge";
 import PriorityBadge from "../../../components/atoms/PriorityBadge";
-import SupportTicketDetailModal from "../../../components/modals/SupportTicketDetailModal"; 
+import SupportTicketDetailModal from "../../../components/employee/modals/SupportTicketDetailModal"; 
 
 // --- Skeleton Component for Loading ---
 const TicketSkeleton = () => (

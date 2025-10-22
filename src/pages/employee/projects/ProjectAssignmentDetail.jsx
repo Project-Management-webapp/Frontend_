@@ -8,6 +8,7 @@ import {
   IoCheckmarkDoneCircleOutline,
 } from 'react-icons/io5';
 import { formatDate } from '../../../components/atoms/FormatedDate';
+import { Link } from 'react-router-dom';
 
 const DetailRow = ({ label, value, isTag = false, isDate = false }) => {
   if (!value && typeof value !== 'number') return null;
@@ -57,12 +58,10 @@ const DetailSection = ({ title, icon, children }) => (
   </div>
 );
 
-// --- Modified Detail Page Component ---
 const ProjectAssignmentDetail = ({ 
   assignment, 
   onBack, 
-  onOpenChatModal, 
-  onFinishWork // Changed from onOpenSubmitModal
+  onFinishWork 
 }) => {
   const { project, assigner, role, allocatedAmount, paymentSchedule, paymentTerms, responsibilities, deliverables, workStatus } = assignment;
 
@@ -79,7 +78,7 @@ const ProjectAssignmentDetail = ({
 
   return (
     <div>
-      {/* --- Header with Actions --- */}
+     
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <button
           onClick={onBack}
@@ -90,15 +89,16 @@ const ProjectAssignmentDetail = ({
         </button>
         
         <div className="flex items-center gap-3">
-          <button
-            onClick={onOpenChatModal}
+          <Link
+            to='/chat'
+            // onClick={onOpenChatModal}
             className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
           >
             <IoChatbubblesOutline />
             <span>Chat</span>
-          </button>
+          </Link>
           <button
-            onClick={onFinishWork} // Changed from onOpenSubmitModal
+            onClick={onFinishWork} 
             disabled={isWorkSubmitted}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:opacity-50"
           >

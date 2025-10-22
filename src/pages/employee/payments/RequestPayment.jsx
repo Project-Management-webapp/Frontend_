@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { IoMdClose } from "react-icons/io";
 import { toast } from "react-hot-toast";
 import { getMyAssignments } from "../../../api/employee/assignProject"; 
@@ -179,7 +178,6 @@ const ProjectPaymentCard = ({ assignment, onRequestPayment }) => {
 // ===================================================================
 
 const RequestPayment = () => {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [allAssignments, setAllAssignments] = useState([]);
   const [selectedAssignment, setSelectedAssignment] = useState(null);

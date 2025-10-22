@@ -5,14 +5,12 @@ import { toast } from "react-hot-toast";
 import { getAllTickets } from "../../../api/manager/supportTicket";
 import TicketStatusBadge from "../../../components/atoms/TicketStatusBadge";
 import PriorityBadge from "../../../components/atoms/PriorityBadge";
-import TicketDetailsModalformanager from "../../../components/modals/TicketDetailsModalformanager";
+import TicketDetailsModalformanager from "../../../components/manager/modals/TicketDetailsModalformanager";
 
-// --- Skeleton for Stat Cards ---
 const SkeletonStat = () => (
   <div className="h-8 w-12 bg-gray-700/50 rounded-md animate-pulse"></div>
 );
 
-// --- Skeleton for Ticket List ---
 const TicketListSkeleton = () => (
   <div className="space-y-4">
     {[...Array(3)].map((_, i) => (

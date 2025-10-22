@@ -8,9 +8,9 @@ import {
   RiSendPlaneFill,
 } from "react-icons/ri";
 import { toast } from "react-hot-toast";
-import { getTicketById, addTicketResponse, updateTicketStatus } from "../../api/manager/supportTicket";
-import TicketStatusBadge from "../atoms/TicketStatusBadge";
-import PriorityBadge from "../atoms/PriorityBadge";
+import { getTicketById, addTicketResponse, updateTicketStatus } from "../../../api/manager/supportTicket";
+import TicketStatusBadge from "../../atoms/TicketStatusBadge";
+import PriorityBadge from "../../atoms/PriorityBadge";
 
 // --- Skeleton Loader Component ---
 const TicketDetailsSkeleton = () => (
@@ -45,7 +45,7 @@ const TicketDetailsSkeleton = () => (
   </div>
 );
 
-// --- Main Modal Component ---
+
 const TicketDetailsModalformanager = ({ isOpen, onClose, ticketId, onTicketUpdate }) => {
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);

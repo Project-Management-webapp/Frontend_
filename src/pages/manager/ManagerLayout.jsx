@@ -11,7 +11,7 @@ import AllEmployee from "./AllEmployee";
 
 import AllProjects from "./project/AllProjects";
 import SupportTickets from "./support-tickets/SupportTickets";
-import TicketDetails from "./support-tickets/TicketDetails";
+// import TicketDetails from "./support-tickets/TicketDetails";
 import Payments from "./payments/Payments";
 
 const AssignEmployee = () => <div className="text-white text-2xl">Assign Employee Page</div>;
@@ -45,8 +45,8 @@ const ManagerLayout = () => {
         return <AllProjects />;
       case "supportTickets":
         return <SupportTickets setActiveView={setActiveView} />;
-      case "ticketDetails":
-        return <TicketDetails setActiveView={setActiveView} />;
+      // case "ticketDetails":
+        // return <TicketDetails setActiveView={setActiveView} />;
       case "payments":
         return <Payments />;
       default:
