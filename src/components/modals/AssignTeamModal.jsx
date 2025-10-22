@@ -4,7 +4,7 @@ import Toaster from '../Toaster'; // This can be removed
 import { FormSelect, FormInput, FormTextarea } from '../atoms/FormFields';
 import { assignProject } from '../../api/manager/projectAssign';
 import { getAllEmployees } from '../../api/manager/employeedetail';
-import EmployeeDetailModal from './EmployeeDetailModal';
+import EmployeeDetailModal from '../manager/modals/EmployeeDetailModal';
 const AssignTeamModal = ({ project, onClose, onSuccess }) => {
 
   const [employeeId, setEmployeeId] = useState('');

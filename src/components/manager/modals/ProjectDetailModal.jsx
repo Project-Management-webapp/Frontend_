@@ -9,7 +9,7 @@ import {
   IoInformationCircleOutline,
   IoCalendarClearOutline,
 } from 'react-icons/io5';
-import { formatDate } from '../atoms/FormatedDate';
+import { formatDate } from '../../atoms/FormatedDate';
 
 const DetailRow = ({ label, value, isTag = false, isDate = false }) => {
   if (!value && typeof value !== 'number') return null; 
@@ -54,7 +54,6 @@ const DetailRow = ({ label, value, isTag = false, isDate = false }) => {
   }
 
   return (
-    // Stacking label above value is cleaner
     <div className="py-2">
       <strong className="text-sm font-medium text-gray-400 block mb-0.5 uppercase tracking-wide">
         {label}

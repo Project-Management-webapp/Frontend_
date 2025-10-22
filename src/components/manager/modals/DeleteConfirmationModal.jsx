@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { deleteProject } from '../../api/manager/project';
+import { deleteProject } from '../../../api/manager/project';
 
 const DeleteConfirmationModal = ({ project, onClose, onSuccess, setToast }) => {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiEye, FiClock } from 'react-icons/fi';
-import { formatDate } from '../../components/atoms/FormatedDate'; 
+import { formatDate } from '../../atoms/FormatedDate'; 
 
 const PendingProjectCard = ({ assignment, onAccept, onReject, onViewDetails }) => {
     const { project, role, allocatedAmount, responseDeadline } = assignment;

@@ -9,7 +9,7 @@ import {
 } from "react-icons/ri";
 import { FiAlertCircle, FiUsers } from "react-icons/fi";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import DashboardCard from "../../components/manager/DashboardCard";
+import DashboardCard from "../../components/manager/cards/DashboardCard";
 import { getAllProject } from "../../api/manager/project";
 import { getAllEmployees } from "../../api/manager/employeedetail";
 import Toaster from "../../components/Toaster";

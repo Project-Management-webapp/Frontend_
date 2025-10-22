@@ -1,14 +1,5 @@
 import api from '../index';
 
-export const employeeSignup = async (formData) => {
-  try {
-    const response = await api.post('/auth/employee/signup', formData);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: 'Something went wrong' };
-  }
-};
-
 export const employeeLogin = async (credentials) => {
   try {
     const response = await api.post('/auth/employee/login', credentials);
@@ -106,13 +97,5 @@ export const resetPassword = async (token, newPassword) => {
   }
 };
 
-// export const checkAuth = async () => {
-//   try {
-//     const response = await api.get('/auth/employee/check-auth');
-//     return response.data;
-//   } catch (error) {
-//     throw error.response?.data || { message: 'Not authenticated' };
-//   }
-// };
 
 

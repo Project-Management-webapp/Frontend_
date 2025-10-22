@@ -1,29 +1,51 @@
 import React, { useState, useRef, useEffect } from "react";
-import ManagerProfileEditModal from "../../components/modals/ManagerProfileEditModal";
+import ManagerProfileEditModal from "../../components/manager/modals/ManagerProfileEditModal";
 import Toaster from "../../components/Toaster";
 import { getManagerProfile, updateManagerProfileImage } from "../../api/manager/auth";
 
-// --- Icon Imports ---
 import {
+  FaClock ,
   FaPencilAlt, FaBriefcase, FaSitemap, FaCalendarAlt, FaTint, FaRing,
-  FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt
+  FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt, FaInfoCircle,
+  FaLayerGroup, FaBirthdayCake, FaVenusMars, FaFlag, FaFileContract, FaCalendarCheck,
+  FaMoneyBillWave, FaTools, FaGraduationCap, FaCertificate, FaToggleOn, FaGlobe
 } from 'react-icons/fa';
 import { IoMdClose } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
 
-// --- Reusable Helper Component for Displaying Details ---
-const DetailItemWithIcon = ({ icon, label, value }) => {
-  if (!value || value === "N/A") return null;
+const DetailItemWithIcon = ({ icon, label, value, isDate = false }) => {
+  let displayValue = value;
+  let valueClass = "text-gray-400 text-sm break-words"; 
+
+  if (!value || value === 'N/A' || value === '0000-00-00') {
+    displayValue = "N/A";
+    valueClass = "text-gray-500 text-sm italic";
+  } else if (isDate) {
+    try {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) throw new Error('Invalid Date'); 
+      displayValue = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch (e) {
+      displayValue = "N/A"; 
+      valueClass = "text-gray-500 text-sm italic";
+    }
+  }
+
   return (
     <div className="flex items-start gap-3">
       <span className="mt-1 text-purple-300 shrink-0">{icon}</span>
       <div>
         <p className="font-semibold text-md text-white leading-tight">{label}</p>
-        <p className="text-gray-400 text-sm break-words">{value}</p>
+        <p className={valueClass}>{displayValue}</p>
       </div>
     </div>
   );
 };
+
 
 const Profile = () => {
   const [managerData, setManagerData] = useState(null);
@@ -35,7 +57,6 @@ const Profile = () => {
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // --- Fetch Profile Data on Component Mount ---
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -43,21 +64,60 @@ const Profile = () => {
         const profile = response.data;
 
         setManagerData({
-          fullName: profile.fullName || "N/A",
+          // Core Info
+          fullName: profile.fullName || "Unnamed Manager",
           position: profile.position || profile.jobTitle || "Manager",
           email: profile.email || "N/A",
-          phone: profile.phone || "",
-          address: profile.address || "",
           managerId: profile.managerId || "N/A",
-          department: profile.department || "",
-          joiningDate: profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-CA') : 'N/A',
-          bloodGroup: profile.bloodGroup || "",
-          maritalStatus: profile.maritalStatus || "",
-          languages: profile.languages || "",
-          alternatePhone: profile.alternatePhone || "",
-          emergencyContactName: profile.emergencyContactName || "",
-          emergencyContactPhone: profile.emergencyContactPhone || "",
-          emergencyContactRelation: profile.emergencyContactRelation || "",
+          bio: profile.bio || null,
+          profileImage: profile.profileImage || null,
+          
+          // Contact
+          phone: profile.phone || null,
+          alternatePhone: profile.alternatePhone || null,
+          alternateEmail: profile.alternateEmail || null,
+          
+          // Address
+          address: profile.address || null,
+          city: profile.city || null,
+          state: profile.state || null,
+          country: profile.country || null,
+          zipCode: profile.zipCode || null,
+
+          // Professional
+          // role: profile.role || null,
+          department: profile.department || null,
+          // level: profile.level || null,
+          joiningDate: profile.joiningDate || profile.createdAt || null, // Use createdAt as fallback
+          // contractType: profile.contractType || null,
+          // workLocation: profile.workLocation || null,
+          // workSchedule: profile.workSchedule || null,
+          // probationEndDate: profile.probationEndDate || null,
+          // confirmationDate: profile.confirmationDate || null,
+          status: profile.status || null,
+          timezone: profile.timezone || null,
+
+          // Personal
+          dateOfBirth: profile.dateOfBirth || null,
+          gender: profile.gender || null,
+          maritalStatus: profile.maritalStatus || null,
+          nationality: profile.nationality || null,
+          bloodGroup: profile.bloodGroup || null,
+          languages: profile.languages || null,
+          
+          // Emergency Contact
+          emergencyContactName: profile.emergencyContactName || null,
+          emergencyContactPhone: profile.emergencyContactPhone || null,
+          emergencyContactRelation: profile.emergencyContactRelation || null,
+          
+          // Compensation
+          // baseSalary: profile.baseSalary || null,
+          // currency: profile.currency || null,
+          
+          // Qualifications
+          skills: profile.skills || null,
+          education: profile.education || null,
+          certifications: profile.certifications || null,
         });
 
         setProfileImage(profile.profileImage || "/default-profile.png");
@@ -108,7 +168,6 @@ const Profile = () => {
   const handleEditIconClick = () => fileInputRef.current.click();
 
   if (loading) {
-    // --- Skeleton Loader (Direct Reports section removed) ---
     return (
       <div className="text-white space-y-6 animate-pulse">
         <div className="h-10 bg-gray-700/50 rounded w-1/4" />
@@ -140,11 +199,7 @@ const Profile = () => {
     <>
       <div className="text-white space-y-6">
         <h2 className="text-4xl font-bold mb-4">Profile</h2>
-
-        {/* --- Top Profile Card --- */}
         <div className="relative bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20 flex flex-col md:flex-row items-center gap-6">
-
-          {/* START: CORRECTED IMAGE CONTAINER */}
           <div className="relative w-36 h-36 shrink-0 group">
             <img
               src={profileImage}
@@ -152,15 +207,11 @@ const Profile = () => {
               className={`w-full h-full rounded-full object-cover border-4 border-gray-500/50 transition-opacity duration-300 ${isUploadingImage ? 'opacity-50' : 'opacity-100'}`}
               onClick={() => !isUploadingImage && setIsImageModalOpen(true)}
             />
-
-            {/* Spinner Overlay */}
             {isUploadingImage && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent"></div>
               </div>
             )}
-
-            {/* Edit Button */}
             {!isUploadingImage && (
               <button
                 onClick={handleEditIconClick}
@@ -172,74 +223,131 @@ const Profile = () => {
             )}
             <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
           </div>
-
           <div className="text-center md:text-left w-full">
             <div className="mt-2 text-sm font-semibold md:absolute md:top-5 md:right-5 md:mt-0 md:text-base bg-gray-600/70 text-white inline-block px-3 py-1 rounded-lg">
               {managerData.managerId}
             </div>
             <h3 className="text-4xl font-bold">{managerData.fullName}</h3>
             <p className="text-purple-300 font-bold text-xl">{managerData.position}</p>
+            {/* --- MODIFIED: Using DetailItemWithIcon for consistency --- */}
             <div className="mt-4 space-y-2 text-sm text-gray-300">
-              <div className="flex items-center justify-center md:justify-start gap-3">
-                <MdEmail className="text-purple-300" size={18} />
-                <span>{managerData.email}</span>
-              </div>
-              {managerData.phone &&
-                <div className="flex items-center justify-center md:justify-start gap-3">
-                  <FaPhoneAlt className="text-purple-300" size={16} />
-                  <span>{managerData.phone}</span>
-                </div>
-              }
-              {managerData.address &&
-                <div className="flex items-start justify-center md:justify-start gap-3">
-                  <FaMapMarkerAlt className="text-purple-300 mt-1" size={16} />
-                  <span>{managerData.address}</span>
-                </div>
-              }
+              <DetailItemWithIcon icon={<MdEmail size={18} />} label="Email" value={managerData.email} />
+              <DetailItemWithIcon icon={<FaPhoneAlt size={16} />} label="Phone" value={managerData.phone} />
+              <DetailItemWithIcon icon={<FaMapMarkerAlt size={16} />} label="Address" value={managerData.address} />
             </div>
           </div>
         </div>
-
-        {/* --- Manager Details Section (Direct Reports removed) --- */}
         <div className="relative bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
           <button onClick={() => setIsEditModalOpen(true)} className="absolute top-4 right-4 bg-gray-500/50 cursor-pointer text-white p-2 rounded-full hover:bg-gray-500/80" aria-label="Edit manager details"><FaPencilAlt size={16} /></button>
           <div className="pb-4 mb-4 border-b border-white/20">
             <h3 className="text-3xl font-bold text-white">Manager Details</h3>
             <p className="text-sm md:text-base text-gray-400">Professional, personal, and emergency information.</p>
           </div>
-          <div className="space-y-6">
-            <div className="bg-black/10 p-4 rounded-lg">
-              <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaBriefcase /> Professional Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <DetailItemWithIcon icon={<FaSitemap />} label="Department" value={managerData.department} />
-                <DetailItemWithIcon icon={<FaCalendarAlt />} label="Joining Date" value={managerData.joiningDate} />
-                <DetailItemWithIcon icon={<FaPhoneAlt />} label="Alternate Phone" value={managerData.alternatePhone} />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+            
+           
+            <div className="space-y-6">
+              {/* Professional Info */}
+              <div className="bg-black/10 p-4 rounded-lg">
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaBriefcase /> Professional Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* <DetailItemWithIcon icon={<FaSitemap />} label="Role" value={managerData.role} /> */}
+                  <DetailItemWithIcon icon={<FaSitemap />} label="Department" value={managerData.department} />
+                  {/* <DetailItemWithIcon icon={<FaLayerGroup />} label="Level" value={managerData.level} /> */}
+                  {/* <DetailItemWithIcon icon={<FaFileContract />} label="Contract Type" value={managerData.contractType} /> */}
+                  <DetailItemWithIcon icon={<FaToggleOn />} label="Status" value={managerData.status} />
+                  <DetailItemWithIcon icon={<FaGlobe />} label="Timezone" value={managerData.timezone} />
+                  {/* <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Work Location" value={managerData.workLocation} />
+                  <DetailItemWithIcon icon={<FaClock />} label="Schedule" value={managerData.workSchedule} /> */}
+                  <DetailItemWithIcon icon={<FaCalendarAlt />} label="Joining Date" value={managerData.joiningDate} isDate={true} />
+                  {/* <DetailItemWithIcon icon={<FaCalendarCheck />} label="Probation End" value={managerData.probationEndDate} isDate={true} />
+                  <DetailItemWithIcon icon={<FaCalendarCheck />} label="Confirmation Date" value={managerData.confirmationDate} isDate={true} /> */}
+                </div>
               </div>
-            </div>
-            <div className="bg-black/10 p-4 rounded-lg">
-              <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaUser /> Personal Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                <DetailItemWithIcon icon={<FaTint />} label="Blood Group" value={managerData.bloodGroup} />
-                <DetailItemWithIcon icon={<FaRing />} label="Marital Status" value={managerData.maritalStatus} />
-                <DetailItemWithIcon icon={<FaLanguage />} label="Languages" value={managerData.languages} />
+              
+              {/* Personal Info */}
+              <div className="bg-black/10 p-4 rounded-lg">
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaUser /> Personal Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <DetailItemWithIcon icon={<FaBirthdayCake />} label="Date of Birth" value={managerData.dateOfBirth} isDate={true} />
+                  <DetailItemWithIcon icon={<FaVenusMars />} label="Gender" value={managerData.gender} />
+                  <DetailItemWithIcon icon={<FaTint />} label="Blood Group" value={managerData.bloodGroup} />
+                  <DetailItemWithIcon icon={<FaRing />} label="Marital Status" value={managerData.maritalStatus} />
+                  <DetailItemWithIcon icon={<FaFlag />} label="Nationality" value={managerData.nationality} />
+                  <DetailItemWithIcon icon={<FaLanguage />} label="Languages" value={managerData.languages} />
+                </div>
               </div>
+
+              {/* Qualifications */}
+              <div className="bg-black/10 p-4 rounded-lg">
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaGraduationCap /> Qualifications</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <DetailItemWithIcon icon={<FaTools />} label="Skills" value={managerData.skills} />
+                  <DetailItemWithIcon icon={<FaGraduationCap />} label="Education" value={managerData.education} />
+                  <DetailItemWithIcon icon={<FaCertificate />} label="Certifications" value={managerData.certifications} />
+                </div>
+              </div>
+
             </div>
-            <div className="bg-black/10 p-4 rounded-lg">
-              <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaHeartbeat /> Emergency Contact</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                <DetailItemWithIcon icon={<FaUser />} label="Contact Name" value={managerData.emergencyContactName} />
-                <DetailItemWithIcon icon={<FaPhoneAlt />} label="Contact Phone" value={managerData.emergencyContactPhone} />
-                <DetailItemWithIcon icon={<FaSitemap />} label="Relation" value={managerData.emergencyContactRelation} />
+            
+           
+            <div className="space-y-6">
+              {/* Contact & Address */}
+              <div className="bg-black/10 p-4 rounded-lg">
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaMapMarkerAlt /> Contact & Address</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <DetailItemWithIcon icon={<MdEmail />} label="Alternate Email" value={managerData.alternateEmail} />
+                  <DetailItemWithIcon icon={<FaPhoneAlt />} label="Alternate Phone" value={managerData.alternatePhone} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Address" value={managerData.address} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="City" value={managerData.city} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="State" value={managerData.state} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Country" value={managerData.country} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Zip Code" value={managerData.zipCode} />
+                </div>
+              </div>
+              
+              {/* Emergency Contact */}
+              <div className="bg-black/10 p-4 rounded-lg">
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaHeartbeat /> Emergency Contact</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <DetailItemWithIcon icon={<FaUser />} label="Contact Name" value={managerData.emergencyContactName} />
+                  <DetailItemWithIcon icon={<FaPhoneAlt />} label="Contact Phone" value={managerData.emergencyContactPhone} />
+                  <DetailItemWithIcon icon={<FaSitemap />} label="Relation" value={managerData.emergencyContactRelation} />
+                </div>
+              </div>
+              
+              {/* Compensation */}
+              {/* <div className="bg-black/10 p-4 rounded-lg">
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaMoneyBillWave /> Compensation</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <DetailItemWithIcon 
+                    icon={<FaMoneyBillWave />} 
+                    label="Base Salary" 
+                    value={managerData.baseSalary ? parseFloat(managerData.baseSalary).toLocaleString() : null} 
+                  />
+                  <DetailItemWithIcon icon={<FaMoneyBillWave />} label="Currency" value={managerData.currency} />
+                </div>
+              </div> */}
+
+              {/* Bio */}
+              <div className="bg-black/10 p-4 rounded-lg">
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaInfoCircle /> Bio</h4>
+                <p className={!managerData.bio ? "text-gray-500 text-sm italic" : "text-gray-400 text-sm border-l-2 border-purple-400 pl-3"}>
+                  {managerData.bio || "N/A"}
+                </p>
               </div>
             </div>
           </div>
+
         </div>
       </div>
-
-      {/* --- Modals and Toaster --- */}
       {isImageModalOpen && (<div className="fixed inset-0 bg-black/80 flex justify-center items-center z-50" onClick={() => setIsImageModalOpen(false)}><img src={profileImage} alt="Profile Preview" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" /><button className="absolute top-5 right-5 text-white text-3xl cursor-pointer hover:text-purple-300"><IoMdClose /></button></div>)}
       {isEditModalOpen && (<ManagerProfileEditModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} userData={managerData} onShowToast={setToast} onSave={handleProfileUpdate} />)}
-      {toast.show && (<Toaster message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />)}
+     
+      <div className="relative z-[9999]">
+        {toast.show && (<Toaster message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />)}
+      </div>
     </>
   );
 };

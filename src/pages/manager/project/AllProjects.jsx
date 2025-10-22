@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getAllProject } from '../../../api/manager/project';
 import Toaster from '../../../components/Toaster';
-import ProjectCard, { ProjectCardSkeleton } from '../../../components/manager/ProjectCard';
-import CreateProjectModal from '../../../components/modals/CreateProjectModal';
+import ProjectCard, { ProjectCardSkeleton } from '../../../components/manager/cards/ProjectCard';
+import CreateProjectModal from '../../../components/manager/modals/CreateProjectModal';
 import { FiPlus, FiFolderMinus } from 'react-icons/fi';
 
 const AllProjects = () => {

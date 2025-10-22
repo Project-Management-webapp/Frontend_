@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { RiSearchLine, RiTicket2Line } from "react-icons/ri";
 import { toast } from "react-hot-toast";
 import { getAllTickets } from "../../../api/manager/supportTicket";
-import TicketStatusBadge from "../../../components/support-tickets/TicketStatusBadge";
-import PriorityBadge from "../../../components/support-tickets/PriorityBadge";
+import TicketStatusBadge from "../../../components/atoms/TicketStatusBadge";
+import PriorityBadge from "../../../components/atoms/PriorityBadge";
 import TicketDetailsModalformanager from "../../../components/modals/TicketDetailsModalformanager";
 
 // --- Skeleton for Stat Cards ---

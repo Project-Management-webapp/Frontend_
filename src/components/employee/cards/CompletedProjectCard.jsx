@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiEye, FiCheckCircle, FiClock, FiStar } from 'react-icons/fi';
-import { formatDate } from '../../components/atoms/FormatedDate';
+import { formatDate } from '../../atoms/FormatedDate';
 
 // Status Tag Component
 const CompletionStatusTag = ({ status }) => {

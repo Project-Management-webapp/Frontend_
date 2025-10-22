@@ -10,16 +10,6 @@ export const getMyAssignments = async () => {
   }
 };
 
-// Get pending assignments (need to accept/reject)
-export const getPendingAssignments = async () => {
-  try {
-    const response = await api.get(`employee/project-assignments/pending`);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: "Failed to fetch pending assignments" };
-  }
-};
-
 // Get ongoing projects (currently working on)
 export const getOngoingProjects = async () => {
   try {
@@ -80,23 +70,8 @@ export const acceptAssignment = async (assignmentId) => {
   }
 };
 
-// Reject assignment
-export const rejectAssignment = async (assignmentId, reason) => {
-  try {
-    const payload = { rejectedReason: reason };
-    const response = await api.post(`employee/project-assignments/${assignmentId}/reject`, payload);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: "Failed to reject assignment" };
-  }
-};
 
 // Submit work
-export const submitWork = async (assignmentId, workDetails) => {
-  try {
-    const response = await api.post(`employee/project-assignments/${assignmentId}/submit-work`, workDetails);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: "Failed to submit work" };
-  }
+export const submitWork = async (assignmentId) => {
+  console.log("Submitting work for assignment:", assignmentId);
 };

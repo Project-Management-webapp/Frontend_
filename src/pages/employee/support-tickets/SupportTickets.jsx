@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { RiAddLine, RiSearchLine, RiTicket2Line } from "react-icons/ri";
 import { toast } from "react-hot-toast";
 import { getMyTickets } from "../../../api/employee/supportTicket";
-import TicketStatusBadge from "../../../components/support-tickets/TicketStatusBadge";
-import PriorityBadge from "../../../components/support-tickets/PriorityBadge";
+import TicketStatusBadge from "../../../components/atoms/TicketStatusBadge";
+import PriorityBadge from "../../../components/atoms/PriorityBadge";
 import SupportTicketDetailModal from "../../../components/modals/SupportTicketDetailModal"; 
 
 // --- Skeleton Component for Loading ---

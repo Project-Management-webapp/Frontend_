@@ -4,7 +4,7 @@ import { AiOutlineEyeInvisible, AiOutlineEye } from "react-icons/ai";
 import { FiUser, FiBriefcase } from "react-icons/fi";
 import { FaArrowLeft } from "react-icons/fa";
 import logo from "/login_logo.png";
-import { employeeLogin, employeeSignup, forgotPassword } from "../../api/employee/auth";
+import { employeeLogin, forgotPassword } from "../../api/employee/auth";
 import { managerLogin } from "../../api/manager/auth";
 import Toaster from "../../components/Toaster";
 import { useAuth } from '../../context/AuthContext';
@@ -18,8 +18,6 @@ const Login = () => {
 
   const [formData, setFormData] = useState({ email: "", password: "" });
 
-  const [signupFormData, setSignupFormData] = useState({ email: "", password: "" });
-
   const [forgotEmail, setForgotEmail] = useState("");
   const [toast, setToast] = useState({ show: false, message: "", type: "info", loading: false });
 
@@ -28,12 +26,7 @@ const Login = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSignupInputChange = (e) => {
-    const { name, value } = e.target;
-    setSignupFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
- const handleLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setToast({ show: true, message: "Logging in...", type: "info", loading: true });
     
@@ -62,25 +55,6 @@ const Login = () => {
 
     } catch (error) {
       setToast({ show: true, message: error.message || "Login failed. Check credentials.", type: "error", loading: false });
-      setFormData({ email: "", password: "" });
-    }
-  };
-
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setToast({ show: true, message: "Signing up...", type: "info", loading: true });
-    try {
-      const response = await employeeSignup(signupFormData);
-      setToast({ show: true, message: response.message || "Signup successful! Please log in.", type: "success", loading: false });
-
-      setSignupFormData({ email: "", password: "" });
-
-      setTimeout(() => {
-        setRole("employee");
-        setView("login");
-      }, 1500);
-    } catch (error) {
-      setToast({ show: true, message: error.message || "Signup failed. Please try again.", type: "error", loading: false });
       setFormData({ email: "", password: "" });
     }
   };
@@ -158,10 +132,6 @@ const Login = () => {
                 {toast.loading ? "Signing in..." : "Sign in"}
               </button>
             </form>
-            <p className="text-center text-gray-400 text-sm mt-6">
-              Don’t have an account?{" "}
-              <button onClick={() => setView("employee")} className="text-[#ac51fc] font-semibold hover:text-white">Sign up</button>
-            </p>
           </>
         );
       case "forgot":
@@ -191,47 +161,7 @@ const Login = () => {
             </button>
           </div>
         );
-      case "employee":
-        return (
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-center text-white">
-              Employee Signup
-            </h2>
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div>
-                <label className="block text-gray-200 text-sm font-bold mb-2">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={signupFormData.email}
-                  onChange={handleSignupInputChange}
-                  className="input"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-200 text-sm font-bold mb-2">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={signupFormData.password}
-                  onChange={handleSignupInputChange}
-                  className="input"
-                  placeholder="Create a strong password"
-                  required
-                  minLength={6}
-                />
-              </div>
-              <button type="submit" className="btn w-full" disabled={toast.loading}>
-                {toast.loading ? "Signing Up..." : "Sign Up"}
-              </button>
-            </form>
-            <button onClick={() => setView("role-select")} className="text-[#ac51fc] hover:text-white text-sm mt-4 block mx-auto">
-              ← Back to Role Selection
-            </button>
-          </div>
-        );
+      
       case "role-select":
         return (
           <>
@@ -244,12 +174,7 @@ const Login = () => {
                 <FiBriefcase className="text-xl" /> Continue as Manager
               </button>
             </div>
-            <div className="text-center text-sm text-gray-400 mt-6">
-              Don't have an account?{" "}
-              <button onClick={() => setView("employee")} className="text-[#ac51fc] font-semibold hover:text-white">
-                Sign up here
-              </button>
-            </div>
+            
           </>
         );
       default:
@@ -265,7 +190,7 @@ const Login = () => {
       <div className="absolute -bottom-1/4 left-20 w-96 h-96 bg-blue-300/50 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
 
       <div className="relative z-10 flex flex-col items-center w-full px-4">
-        <img src={logo} alt="Logo" className="w-64 mb-0" />
+        <img src={logo} alt="Logo" className="w-40 mb-10" />
         <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-xl w-full max-w-lg p-6 sm:p-10 lg:py-10 lg:px-14 lg:mb-9 border border-white/20">
           {renderContent()}
         </div>

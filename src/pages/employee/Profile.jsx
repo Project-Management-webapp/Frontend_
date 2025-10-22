@@ -1,33 +1,52 @@
 import React, { useState, useRef, useEffect } from "react";
-import EmployeeProfileEditModal from "../../components/modals/EmployeeProfileEditModal";
+import EmployeeProfileEditModal from "../../components/employee/modals/EmployeeProfileEditModal";
 import Toaster from "../../components/Toaster";
 import { getEmployeeProfile, updateEmployeeProfileImage } from "../../api/employee/auth";
 
-// --- Icon Imports ---
 import {
   FaPencilAlt, FaBriefcase, FaSitemap, FaCalendarAlt, FaClock, FaTint, FaRing,
-  FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt, FaInfoCircle
+  FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt, FaInfoCircle,
+  FaLayerGroup, FaBirthdayCake, FaVenusMars, FaFlag, FaFileContract, FaCalendarCheck,
+  FaMoneyBillWave, FaTools, FaGraduationCap, FaCertificate, FaToggleOn, FaGlobe
 } from 'react-icons/fa';
 import { IoMdClose } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
 
-// --- Reusable Helper Component for Displaying Details ---
-const DetailItemWithIcon = ({ icon, label, value }) => {
-  // Hide component if value is missing or an invalid date
-  if (!value || value === '0000-00-00') return null;
+const DetailItemWithIcon = ({ icon, label, value, isDate = false }) => {
+  let displayValue = value;
+  let valueClass = "text-gray-400 text-sm";
+
+  if (!value || value === '0000-00-00') {
+    displayValue = "N/A";
+    valueClass = "text-gray-500 text-sm italic";
+  } else if (isDate) {
+    try {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) throw new Error("Invalid Date");
+      displayValue = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (e) {
+      displayValue = "N/A";
+      valueClass = "text-gray-500 text-sm italic";
+    }
+  }
+
   return (
     <div className="flex items-start gap-3">
       <span className="mt-1 text-purple-300">{icon}</span>
       <div>
         {label && <p className="font-semibold text-md text-white leading-tight">{label}</p>}
-        <p className="text-gray-400 text-sm">{value}</p>
+        <p className={valueClass}>{displayValue}</p>
       </div>
     </div>
   );
 };
 
 const Profile = () => {
-  // --- State for Employee Data, Modals, and Loading ---
+
   const [employeeData, setEmployeeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -37,7 +56,7 @@ const Profile = () => {
   const fileInputRef = useRef(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // --- Fetch Data on Component Mount ---
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -45,26 +64,62 @@ const Profile = () => {
         const response = await getEmployeeProfile();
         const profile = response.data;
 
-        // ✅ Map all relevant API data to state with fallbacks
+
         setEmployeeData({
+          // Core Info
           fullName: profile.fullName || 'Unnamed Employee',
           position: profile.position || profile.jobTitle || 'Employee',
           email: profile.email || 'N/A',
-          phone: profile.phone || '',
-          address: profile.address || '',
           employeeId: profile.employeeId || 'N/A',
-          department: profile.department || '',
-          joiningDate: profile.joiningDate ? new Date(profile.joiningDate).toLocaleDateString('en-CA') : '',
-          workLocation: profile.workLocation || '',
-          workSchedule: profile.workSchedule || '',
-          bloodGroup: profile.bloodGroup || '',
-          maritalStatus: profile.maritalStatus || '',
-          languages: profile.languages || '',
-          bio: profile.bio || '',
-          alternatePhone: profile.alternatePhone || '',
-          emergencyContactName: profile.emergencyContactName || '',
-          emergencyContactPhone: profile.emergencyContactPhone || '',
-          emergencyContactRelation: profile.emergencyContactRelation || '',
+          bio: profile.bio || null,
+          profileImage: profile.profileImage || null,
+
+          // Contact
+          phone: profile.phone || null,
+          alternatePhone: profile.alternatePhone || null,
+          alternateEmail: profile.alternateEmail || null,
+
+          // Address
+          address: profile.address || null,
+          city: profile.city || null,
+          state: profile.state || null,
+          country: profile.country || null,
+          zipCode: profile.zipCode || null,
+
+          // Professional
+          // role: profile.role || null,
+          department: profile.department || null,
+          level: profile.level || null,
+          joiningDate: profile.joiningDate || null,
+          contractType: profile.contractType || null,
+          workLocation: profile.workLocation || null,
+          workSchedule: profile.workSchedule || null,
+          probationEndDate: profile.probationEndDate || null,
+          confirmationDate: profile.confirmationDate || null,
+          status: profile.status || null,
+          timezone: profile.timezone || null,
+
+          // Personal
+          dateOfBirth: profile.dateOfBirth || null,
+          gender: profile.gender || null,
+          maritalStatus: profile.maritalStatus || null,
+          nationality: profile.nationality || null,
+          bloodGroup: profile.bloodGroup || null,
+          languages: profile.languages || null,
+
+          // Emergency Contact
+          emergencyContactName: profile.emergencyContactName || null,
+          emergencyContactPhone: profile.emergencyContactPhone || null,
+          emergencyContactRelation: profile.emergencyContactRelation || null,
+
+          // Compensation (Handle with care)
+          baseSalary: profile.baseSalary || null,
+          currency: profile.currency || null,
+
+          // Qualifications
+          skills: profile.skills || null,
+          education: profile.education || null,
+          certifications: profile.certifications || null,
         });
 
         setProfileImage(profile.profileImage || "/default-profile.png");
@@ -78,7 +133,7 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  // --- Handlers ---
+
   const handleProfileUpdate = (updatedData) => {
     setEmployeeData(prev => ({ ...prev, ...updatedData }));
     if (updatedData.profileImage) {
@@ -90,16 +145,15 @@ const Profile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const oldImage = profileImage; // Store old image for revert on failure
+    const oldImage = profileImage;
     setIsUploadingImage(true);
-    setProfileImage(URL.createObjectURL(file)); // Instant preview
+    setProfileImage(URL.createObjectURL(file));
 
     try {
       const response = await updateEmployeeProfileImage(file);
       if (response && response.data) {
         const newImageUrl = response.data.profileImage;
         setProfileImage(newImageUrl);
-        // ✅ **FIX**: Correctly update employeeData state
         setEmployeeData(prev => ({ ...prev, profileImage: newImageUrl }));
         setToast({ show: true, message: "Image updated successfully!", type: "success" });
       } else {
@@ -108,7 +162,7 @@ const Profile = () => {
     } catch (error) {
       console.error("Image upload failed:", error);
       setToast({ show: true, message: error.message || "Image upload failed.", type: "error" });
-      setProfileImage(oldImage); // Revert to old image on failure
+      setProfileImage(oldImage);
     } finally {
       setIsUploadingImage(false);
     }
@@ -116,15 +170,36 @@ const Profile = () => {
 
   const handleEditIconClick = () => fileInputRef.current.click();
 
-  // --- Loading State ---
+
   if (loading) {
+
+    const SkeletonItem = () => (
+      <div className="flex items-start gap-3">
+        <div className="w-5 h-5 bg-gray-600/50 rounded animate-pulse mt-1 shrink-0" />
+        <div className="w-full">
+          <div className="w-24 h-4 bg-gray-600/50 rounded animate-pulse" />
+          <div className="w-20 h-3 bg-gray-600/50 rounded animate-pulse mt-2" />
+        </div>
+      </div>
+    );
+
+
+    const SkeletonSection = ({ titleWidth = "w-48", items = 2, cols = 2 }) => (
+      <div>
+        <div className={`${titleWidth} h-6 bg-gray-600/50 rounded animate-pulse mb-4`} />
+        <div className={`grid grid-cols-1 md:grid-cols-${cols} gap-x-6 gap-y-4`}>
+          {[...Array(items)].map((_, i) => <SkeletonItem key={i} />)}
+        </div>
+      </div>
+    );
+
     return (
       <div className="text-white space-y-6">
         <h2 className="text-4xl font-bold mb-4">Profile</h2>
 
-        {/* Profile Card Skeleton */}
+
         <div className="relative bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20 flex flex-col md:flex-row items-center gap-6">
-          <div className="relative">
+          <div className="relative shrink-0">
             <div className="w-36 h-36 rounded-full bg-gray-600/50 animate-pulse" />
             <div className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-gray-600/50 animate-pulse" />
           </div>
@@ -145,74 +220,35 @@ const Profile = () => {
 
 
         <div className="relative bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
-
           <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-600/50 animate-pulse" />
-
-          {/* Section Header Skeleton */}
           <div className="pb-4 mb-4 border-b border-white/20">
             <div className="w-48 h-8 bg-gray-600/50 rounded animate-pulse" />
             <div className="w-72 h-4 bg-gray-600/50 rounded animate-pulse mt-2" />
           </div>
 
-          {/* Details Grid Skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              {/* Professional Info Skeleton */}
-              <div>
-                <div className="w-48 h-6 bg-gray-600/50 rounded animate-pulse mb-4" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[1, 2, 3, 4, 5].map((item) => (
-                    <div key={item} className="flex items-start gap-3">
-                      <div className="w-5 h-5 bg-gray-600/50 rounded animate-pulse mt-1" />
-                      <div>
-                        <div className="w-24 h-4 bg-gray-600/50 rounded animate-pulse" />
-                        <div className="w-20 h-3 bg-gray-600/50 rounded animate-pulse mt-1" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Personal Info Skeleton */}
-              <div>
-                <div className="w-48 h-6 bg-gray-600/50 rounded animate-pulse mb-4" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[1, 2, 3].map((item) => (
-                    <div key={item} className="flex items-start gap-3">
-                      <div className="w-5 h-5 bg-gray-600/50 rounded animate-pulse mt-1" />
-                      <div>
-                        <div className="w-24 h-4 bg-gray-600/50 rounded animate-pulse" />
-                        <div className="w-20 h-3 bg-gray-600/50 rounded animate-pulse mt-1" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+
+            <div className="space-y-6">
+              <SkeletonSection titleWidth="w-56" items={11} cols={2} /> 
+              <SkeletonSection titleWidth="w-48" items={6} cols={2} />  
+              <SkeletonSection titleWidth="w-40" items={3} cols={2} /> 
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              {/* Emergency Contact Skeleton */}
-              <div>
-                <div className="w-48 h-6 bg-gray-600/50 rounded animate-pulse mb-4" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[1, 2, 3].map((item) => (
-                    <div key={item} className="flex items-start gap-3">
-                      <div className="w-5 h-5 bg-gray-600/50 rounded animate-pulse mt-1" />
-                      <div>
-                        <div className="w-24 h-4 bg-gray-600/50 rounded animate-pulse" />
-                        <div className="w-20 h-3 bg-gray-600/50 rounded animate-pulse mt-1" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Bio Section Skeleton */}
+            <div className="space-y-6">
+              <SkeletonSection titleWidth="w-32" items={6} cols={2} /> 
+              <SkeletonSection titleWidth="w-56" items={3} cols={2} /> 
+              <SkeletonSection titleWidth="w-44" items={2} cols={2} />
+
+
               <div>
-                <div className="w-24 h-5 bg-gray-600/50 rounded animate-pulse mb-2" />
-                <div className="h-20 bg-gray-600/50 rounded animate-pulse" />
+                <div className="w-20 h-5 bg-gray-600/50 rounded animate-pulse mb-2" />
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-600/50 rounded w-full" />
+                  <div className="h-3 bg-gray-600/50 rounded w-full" />
+                  <div className="h-3 bg-gray-600/50 rounded w-3/4" />
+                </div>
               </div>
             </div>
           </div>
@@ -221,7 +257,6 @@ const Profile = () => {
     );
   }
 
-  // --- Error/Empty State ---
   if (!employeeData) {
     return <div className="p-6 text-red-400">Could not load employee profile.</div>;
   }
@@ -232,7 +267,6 @@ const Profile = () => {
         <h2 className="text-4xl font-bold mb-4">Profile</h2>
 
         {/* --- Top Profile Card --- */}
-
         <div className="relative bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20 flex flex-col md:flex-row items-center gap-6">
           <div className="relative w-36 h-36 shrink-0 group">
             <img
@@ -246,8 +280,6 @@ const Profile = () => {
                 <div className="animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent"></div>
               </div>
             )}
-
-       
             {!isUploadingImage && (
               <button
                 onClick={handleEditIconClick}
@@ -259,7 +291,6 @@ const Profile = () => {
             )}
             <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
           </div>
-          {/* END: CORRECTED IMAGE CONTAINER */}
 
           <div className="text-center md:text-left w-full">
             <div className="mt-2 text-sm font-semibold md:absolute md:top-5 md:right-5 md:mt-0 md:text-base bg-gray-600/70 text-white inline-block px-3 py-1 rounded-lg">
@@ -268,9 +299,9 @@ const Profile = () => {
             <h3 className="text-4xl font-bold">{employeeData.fullName}</h3>
             <p className="text-purple-300 font-bold text-xl">{employeeData.position}</p>
             <div className="mt-4 space-y-2 text-sm text-gray-300">
-              <DetailItemWithIcon icon={<MdEmail size={18} />} value={employeeData.email} />
-              <DetailItemWithIcon icon={<FaPhoneAlt size={16} />} value={employeeData.phone} />
-              <DetailItemWithIcon icon={<FaMapMarkerAlt mt={1} size={16} />} value={employeeData.address} />
+              <DetailItemWithIcon icon={<MdEmail size={18} />} label="Email" value={employeeData.email} />
+              <DetailItemWithIcon icon={<MdEmail size={18} />} label="Alternate Email" value={employeeData.alternateEmail} />
+              <DetailItemWithIcon icon={<FaPhoneAlt size={16} />} label="Phone" value={employeeData.phone} />
             </div>
           </div>
         </div>
@@ -285,28 +316,66 @@ const Profile = () => {
             <p className="text-sm md:text-base text-gray-400">A comprehensive overview of your information.</p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+
+            {/* --- LEFT COLUMN --- */}
             <div className="space-y-6">
+              {/* Professional Info */}
               <div>
                 <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-3"><FaBriefcase /> Professional Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                  {/* <DetailItemWithIcon icon={<FaSitemap />} label="Role" value={employeeData.role} /> */}
                   <DetailItemWithIcon icon={<FaSitemap />} label="Department" value={employeeData.department} />
-                  <DetailItemWithIcon icon={<FaCalendarAlt />} label="Joining Date" value={employeeData.joiningDate} />
+                  <DetailItemWithIcon icon={<FaLayerGroup />} label="Level" value={employeeData.level} />
+                  <DetailItemWithIcon icon={<FaFileContract />} label="Contract Type" value={employeeData.contractType} />
+                  <DetailItemWithIcon icon={<FaToggleOn />} label="Status" value={employeeData.status} />
+                  <DetailItemWithIcon icon={<FaGlobe />} label="Timezone" value={employeeData.timezone} />
                   <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Work Location" value={employeeData.workLocation} />
                   <DetailItemWithIcon icon={<FaClock />} label="Schedule" value={employeeData.workSchedule} />
-                  {/* ✅ Alternate Phone Added */}
-                  <DetailItemWithIcon icon={<FaPhoneAlt />} label="Alternate Phone" value={employeeData.alternatePhone} />
+                  <DetailItemWithIcon icon={<FaCalendarAlt />} label="Joining Date" value={employeeData.joiningDate} isDate={true} />
+                  <DetailItemWithIcon icon={<FaCalendarCheck />} label="Probation End" value={employeeData.probationEndDate} isDate={true} />
+                  <DetailItemWithIcon icon={<FaCalendarCheck />} label="Confirmation Date" value={employeeData.confirmationDate} isDate={true} />
                 </div>
               </div>
+
               <div>
                 <h4 className="flex text-lg items-center gap-2 text-purple-300 font-semibold mb-3"><FaUser /> Personal Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                  <DetailItemWithIcon icon={<FaBirthdayCake />} label="Date of Birth" value={employeeData.dateOfBirth} isDate={true} />
+                  <DetailItemWithIcon icon={<FaVenusMars />} label="Gender" value={employeeData.gender} />
                   <DetailItemWithIcon icon={<FaTint />} label="Blood Group" value={employeeData.bloodGroup} />
                   <DetailItemWithIcon icon={<FaRing />} label="Marital Status" value={employeeData.maritalStatus} />
+                  <DetailItemWithIcon icon={<FaFlag />} label="Nationality" value={employeeData.nationality} />
                   <DetailItemWithIcon icon={<FaLanguage />} label="Languages" value={employeeData.languages} />
                 </div>
               </div>
+
+              {/* Qualifications */}
+              <div>
+                <h4 className="flex text-lg items-center gap-2 text-purple-300 font-semibold mb-3"><FaGraduationCap /> Qualifications</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                  <DetailItemWithIcon icon={<FaTools />} label="Skills" value={employeeData.skills} />
+                  <DetailItemWithIcon icon={<FaGraduationCap />} label="Education" value={employeeData.education} />
+                  <DetailItemWithIcon icon={<FaCertificate />} label="Certifications" value={employeeData.certifications} />
+                </div>
+              </div>
             </div>
+
+            {/* --- RIGHT COLUMN --- */}
             <div className="space-y-6">
+              {/* Address */}
+              <div>
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-3"><FaMapMarkerAlt /> Address</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Address" value={employeeData.address} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="City" value={employeeData.city} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="State" value={employeeData.state} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Country" value={employeeData.country} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Zip Code" value={employeeData.zipCode} />
+                  <DetailItemWithIcon icon={<FaPhoneAlt />} label="Alternate Phone" value={employeeData.alternatePhone} />
+                </div>
+              </div>
+
+              {/* Emergency Contact */}
               <div>
                 <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-3"><FaHeartbeat /> Emergency Contact</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
@@ -315,18 +384,34 @@ const Profile = () => {
                   <DetailItemWithIcon icon={<FaSitemap />} label="Relation" value={employeeData.emergencyContactRelation} />
                 </div>
               </div>
-              {employeeData.bio && (
-                <div>
-                  <p className="font-semibold text-md text-white mb-1 flex items-center gap-2"><FaInfoCircle /> Bio</p>
-                  <p className="text-gray-400 text-sm border-l-2 border-purple-400 pl-3">{employeeData.bio}</p>
+
+              {/* Compensation */}
+              <div>
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-3"><FaMoneyBillWave /> Compensation</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                  <DetailItemWithIcon
+                    icon={<FaMoneyBillWave />}
+                    label="Base Salary"
+                    value={employeeData.baseSalary ? parseFloat(employeeData.baseSalary).toLocaleString() : null}
+                  />
+                  <DetailItemWithIcon icon={<FaMoneyBillWave />} label="Currency" value={employeeData.currency} />
                 </div>
-              )}
+              </div>
+
+              {/* Bio */}
+              <div className="col-span-1 md:col-span-2">
+                <p className="font-semibold text-md text-white mb-1 flex items-center gap-2"><FaInfoCircle /> Bio</p>
+
+                <p className={!employeeData.bio ? "text-gray-500 text-sm italic" : "text-gray-400 text-sm border-l-2 border-purple-400 pl-3"}>
+                  {employeeData.bio || "N/A"}
+                </p>
+              </div>
+
             </div>
           </div>
         </div>
       </div>
 
-      {/* --- Modals and Toaster --- */}
       {isImageModalOpen && (
         <div className="fixed inset-0 bg-black/80 flex justify-center items-center z-50" onClick={() => setIsImageModalOpen(false)}>
           <img src={profileImage} alt="Profile Preview" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" />

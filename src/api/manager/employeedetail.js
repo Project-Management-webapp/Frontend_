@@ -9,6 +9,15 @@ export const getAllEmployees = async () => {
   }
 };
 
+export const addEmployee = async (formData) => {
+  try {
+    const response = await api.post('/auth/employee/signup', formData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Something went wrong' };
+  }
+};
+
 // export const getEmployeeDetails = async (employeeId) => {
 //   try {
 //     const response = await api.get(`/user/manager/employees/${employeeId}`);

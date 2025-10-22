@@ -8,9 +8,7 @@ import Dashboard from "./Dashboard";
 import Profile from "./Profile";
 import Notification from "./Notification";
 import OngoingProjects from "./projects/OngoingProjects";
-import ProjectRequests from "./projects/ProjectRequests";
 import CompletedProjects from "./projects/CompletedProjects";
-import RejectedProjects from "./projects/RejectedProjects";
 import SupportTickets from "./support-tickets/SupportTickets";
 import CreateTicket from "./support-tickets/CreateTicket";
 import Payments from "./payments/Payments";
@@ -33,12 +31,8 @@ const EmployeeLayout = () => {
         return <Notification />;
       case "ongoingProjects":
         return <OngoingProjects />;
-      case "requestProjects":
-        return <ProjectRequests />;
       case "completedProjects":
         return <CompletedProjects />;
-      case "rejectedProjects":
-        return <RejectedProjects />;
       case "supportTickets":
         return <SupportTickets setActiveView={setActiveView} />;
       case "createTicket":
@@ -79,7 +73,7 @@ const EmployeeLayout = () => {
             >
               <FiMenu className="text-2xl" />
             </button>
-            <img src={logo} alt="Logo" className="w-38" />
+            <img src={logo} alt="Logo" className="w-26" />
           </header>
 
           <main className="flex-1 p-6 overflow-y-auto">

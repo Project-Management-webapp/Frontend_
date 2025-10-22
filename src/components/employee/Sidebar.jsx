@@ -38,21 +38,20 @@ const Sidebar = ({
 
   return (
     <div
-      className={`h-screen bg-white/10 backdrop-blur-md text-white flex flex-col border-r border-white/20 transition-all duration-300 ${
-        isCollapsed ? "w-20" : "w-64"
-      }`}
+      className={`h-screen bg-white/10 backdrop-blur-md text-white flex flex-col border-r border-white/20 transition-all duration-300 ${isCollapsed ? "w-20" : "w-64"
+        }`}
     >
       {/* Sidebar Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/20 shrink-0">
-        <div className="flex items-center overflow-hidden">
+        <div className="flex items-center ml-10 justify-center overflow-hidden">
           <img
             src={logo}
             alt="Logo"
-            className={`transition-all duration-300 ease-in-out ${
-              isCollapsed ? "w-8" : "w-36"
-            }`}
+            className={`transition-all duration-300 ease-in-out ${isCollapsed ? "w-8" : "w-28"
+              }`}
           />
         </div>
+
         {!isMobile && (
           <button
             onClick={onCollapse}
@@ -95,31 +94,11 @@ const Sidebar = ({
           onSubItemClick={handleSubItemClick}
           items={[
             { text: "Ongoing Projects", view: "ongoingProjects" },
-            { text: "Requested Projects", view: "requestProjects" },
             { text: "Completed Projects", view: "completedProjects" },
-            { text: "Rejected Projects", view: "rejectedProjects" },
           ]}
         />
 
-        {/* <SidebarItem
-          icon={<FiCheckSquare size={20} />}
-          text="My Tasks"
-          collapsed={isCollapsed}
-          active={activeView === "my-tasks"}
-          onClick={() => handleItemClick("my-tasks")}
-        /> */}
 
-        {/* <SidebarGroup
-          icon={<FiUsers size={20} />}
-          text="Team"
-          collapsed={isCollapsed}
-          activeView={activeView}
-          onSubItemClick={handleSubItemClick}
-          items={[
-            { text: "View Teammates", view: "teamView" },
-            { text: "Roles & Responsibilities", view: "teamRoles" },
-          ]}
-        /> */}
 
         <SidebarGroup
           icon={<RiCustomerService2Line size={20} />}
@@ -145,19 +124,6 @@ const Sidebar = ({
           ]}
         />
 
-        {/* <SidebarGroup
-          icon={<FiBarChart2 size={20} />}
-          text="My Earnings"
-          collapsed={isCollapsed}
-          activeView={activeView}
-          onSubItemClick={handleSubItemClick}
-          items={[
-            { text: "Project Earnings", view: "earnings" },
-            { text: "Payment History", view: "earningsHistory" },
-          ]}
-        /> */}
-
-     
 
         <SidebarItem
           icon={<IoMdNotificationsOutline size={20} />}
@@ -192,11 +158,10 @@ const SidebarItem = ({ icon, text, collapsed, active, onClick }) => (
   <div className="relative group">
     <button
       onClick={onClick}
-      className={`w-full flex items-center p-3 rounded-lg transition-colors ${
-        active
-          ? "bg-white/20 text-white"
-          : "text-gray-300 hover:bg-white/10 hover:text-white"
-      }`}
+      className={`w-full flex items-center p-3 rounded-lg transition-colors ${active
+        ? "bg-white/20 text-white"
+        : "text-gray-300 hover:bg-white/10 hover:text-white"
+        }`}
     >
       <span className="shrink-0">{icon}</span>
       {!collapsed && <span className="ml-3 text-sm font-medium">{text}</span>}
@@ -233,22 +198,19 @@ const SidebarGroup = ({
         <div className="flex items-center overflow-hidden">
           <div className="shrink-0">{icon}</div>
           <span
-            className={`ml-3 text-sm font-medium overflow-hidden whitespace-nowrap transition-all duration-300 ${
-              collapsed ? "w-0 opacity-0" : "w-full opacity-100"
-            }`}
+            className={`ml-3 text-sm font-medium overflow-hidden whitespace-nowrap transition-all duration-300 ${collapsed ? "w-0 opacity-0" : "w-full opacity-100"
+              }`}
           >
             {text}
           </span>
         </div>
         <div
-          className={`transition-opacity duration-300 ${
-            collapsed ? "opacity-0" : "opacity-100"
-          }`}
+          className={`transition-opacity duration-300 ${collapsed ? "opacity-0" : "opacity-100"
+            }`}
         >
           <FiChevronRight
-            className={`transform transition-transform duration-200 ${
-              open ? "rotate-90" : ""
-            }`}
+            className={`transform transition-transform duration-200 ${open ? "rotate-90" : ""
+              }`}
           />
         </div>
       </button>
@@ -259,11 +221,10 @@ const SidebarGroup = ({
             <button
               key={item.view}
               onClick={() => onSubItemClick(item.view)}
-              className={`w-full text-left p-2 rounded-lg text-sm transition-colors truncate ${
-                activeView === item.view
-                  ? "bg-white/20 text-white"
-                  : "text-gray-300 hover:bg-white/10 hover:text-white"
-              }`}
+              className={`w-full text-left p-2 rounded-lg text-sm transition-colors truncate ${activeView === item.view
+                ? "bg-white/20 text-white"
+                : "text-gray-300 hover:bg-white/10 hover:text-white"
+                }`}
             >
               {item.text}
             </button>

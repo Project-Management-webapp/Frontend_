@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { createProject } from '../../api/manager/project';
-import Toaster from '../Toaster';
+import { createProject } from '../../../api/manager/project';
+import Toaster from '../../Toaster';
 import { IoMdClose } from 'react-icons/io';
-import { FormInput, FormSelect, FormTextarea } from '../atoms/FormFields';
+import { FormInput, FormSelect, FormTextarea } from '../../atoms/FormFields';
 import { FiTrash2 } from 'react-icons/fi';
 const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({

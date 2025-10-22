@@ -8,7 +8,6 @@ import {
   IoCheckmarkDoneCircleOutline,
 } from 'react-icons/io5';
 import { formatDate } from '../../../components/atoms/FormatedDate';
-import SubmitWorkModal from '../../../components/modals/SubmitWorkModal'; 
 
 const DetailRow = ({ label, value, isTag = false, isDate = false }) => {
   if (!value && typeof value !== 'number') return null;
@@ -58,8 +57,13 @@ const DetailSection = ({ title, icon, children }) => (
   </div>
 );
 
-// --- New Detail Page Component ---
-const ProjectAssignmentDetail = ({ assignment, onBack, onOpenChatModal, onOpenSubmitModal }) => {
+// --- Modified Detail Page Component ---
+const ProjectAssignmentDetail = ({ 
+  assignment, 
+  onBack, 
+  onOpenChatModal, 
+  onFinishWork // Changed from onOpenSubmitModal
+}) => {
   const { project, assigner, role, allocatedAmount, paymentSchedule, paymentTerms, responsibilities, deliverables, workStatus } = assignment;
 
   const parseJsonArray = (str) => {
@@ -67,7 +71,7 @@ const ProjectAssignmentDetail = ({ assignment, onBack, onOpenChatModal, onOpenSu
       const parsed = JSON.parse(str);
       return Array.isArray(parsed) ? parsed : [];
     } catch {
-      return []; // Return empty array on error
+      return []; 
     }
   };
   
@@ -94,12 +98,12 @@ const ProjectAssignmentDetail = ({ assignment, onBack, onOpenChatModal, onOpenSu
             <span>Chat</span>
           </button>
           <button
-            onClick={onOpenSubmitModal}
+            onClick={onFinishWork} // Changed from onOpenSubmitModal
             disabled={isWorkSubmitted}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:opacity-50"
           >
             <IoCheckmarkDoneCircleOutline />
-            <span>{isWorkSubmitted ? 'Work Submitted' : 'Submit Work'}</span>
+            <span>{isWorkSubmitted ? 'Finished' : 'Finish Work'}</span>
           </button>
         </div>
       </div>
@@ -135,7 +139,7 @@ const ProjectAssignmentDetail = ({ assignment, onBack, onOpenChatModal, onOpenSu
           <DetailRow label="Work Started" value={assignment.workStartedAt} isDate />
         </DetailSection>
 
-        {/* Responsibilities & Deliverables */}
+        
         <DetailSection title="Scope" icon={<IoDocumentTextOutline size={20} />}>
           <DetailRow label="Responsibilities" value={parseJsonArray(responsibilities)} />
           <DetailRow label="Deliverables" value={deliverables || []} />

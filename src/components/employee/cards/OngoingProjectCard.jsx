@@ -1,8 +1,7 @@
 import React from 'react';
 import { FiEye, FiClock } from 'react-icons/fi';
-import { formatDate } from '../../components/atoms/FormatedDate';
+import { formatDate } from '../../atoms/FormatedDate';
 
-// Helper component for styling the status
 const WorkStatusTag = ({ status }) => {
   let bgColor, textColor;
   switch (status) {

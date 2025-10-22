@@ -1,22 +1,15 @@
 import React, { useState } from 'react';
 import { FiEdit, FiTrash2, FiUsers, FiEye } from 'react-icons/fi';
 import EditProjectModal from '../modals/EditProjectModal';
-import AssignTeamModal from '../modals/AssignTeamModal';
+import AssignTeamModal from '../../modals/AssignTeamModal';
 import ProjectDetailsModal from '../modals/ProjectDetailModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 
-// This is the component that needs the main updates
 const ProjectCard = ({ project, onDataChange, setToast }) => {
   const [isDetailsOpen, setDetailsOpen] = useState(false);
   const [isEditOpen, setEditOpen] = useState(false);
   const [isAssignOpen, setAssignOpen] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
-
-  // --- OPTIMIZATION ---
-  // Create generic handlers that contain all success logic:
-  // 1. Close the modal
-  // 2. Refresh the project list
-  // 3. Show a success toast
   
   const handleEditSuccess = () => {
     setEditOpen(false);
@@ -86,8 +79,7 @@ const ProjectCard = ({ project, onDataChange, setToast }) => {
         </div>
       </div>
 
-      {/* --- MODAL PROPS --- */}
-      {/* Pass the correct props to each modal */}
+
       
       {isDetailsOpen && <ProjectDetailsModal project={project} onClose={() => setDetailsOpen(false)} />}
       

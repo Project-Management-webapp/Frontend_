@@ -11,8 +11,8 @@ import {
 } from "react-icons/ri";
 import { toast } from "react-hot-toast";
 import { getTicketById, addTicketResponse, updateTicketStatus } from "../../../api/manager/supportTicket";
-import TicketStatusBadge from "../../../components/support-tickets/TicketStatusBadge";
-import PriorityBadge from "../../../components/support-tickets/PriorityBadge";
+import TicketStatusBadge from "../../../components/atoms/TicketStatusBadge";
+import PriorityBadge from "../../../components/atoms/PriorityBadge";
 
 const TicketDetails = () => {
   const { id } = useParams();

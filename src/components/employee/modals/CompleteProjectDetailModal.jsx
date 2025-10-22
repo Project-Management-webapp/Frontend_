@@ -1,17 +1,15 @@
 import React from 'react';
 import {
   IoClose,
-  IoBusinessOutline,
-  IoCalendarOutline,
-  IoWalletOutline,
+ 
   IoPersonOutline,
   IoDocumentTextOutline,
   IoCheckmarkDoneCircleOutline,
   IoStarOutline,
-  IoChatbubbleEllipsesOutline,
+ 
   IoCodeSlashOutline,
 } from 'react-icons/io5';
-import { formatDate } from '../atoms/FormatedDate'; // Assuming path
+import { formatDate } from '../../atoms/FormatedDate'; // Assuming path
 import { FiUserCheck } from 'react-icons/fi';
 
 // --- Re-usable DetailRow ---

@@ -8,7 +8,7 @@ import LogoutModal from "../../components/modals/LogoutModal";
 import Notification from "./Notification";
 import Toaster from "../../components/Toaster";
 import AllEmployee from "./AllEmployee";
-import Approvals from "./Approvals";
+
 import AllProjects from "./project/AllProjects";
 import SupportTickets from "./support-tickets/SupportTickets";
 import TicketDetails from "./support-tickets/TicketDetails";
@@ -33,8 +33,6 @@ const ManagerLayout = () => {
         return <Profile />;
       case "notifications":
         return <Notification />;
-      case "approvals":
-        return <Approvals />;
       case "employees-all":
         return <AllEmployee />;
       case "employees-assign":
@@ -84,7 +82,7 @@ const ManagerLayout = () => {
             >
               <FiMenu className="text-2xl" />
             </button>
-            <img src={logo} alt="Logo" className="w-38" />
+            <img src={logo} alt="Logo" className="w-28" />
           </header>
 
           <main className="flex-1 p-6 overflow-y-auto">

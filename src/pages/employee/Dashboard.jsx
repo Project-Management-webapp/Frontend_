@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   RiProjectorFill,
   RiCheckboxCircleFill,
-  RiTimeFill,
   RiHandCoinFill,
   RiTrophyFill,
   RiHourglassFill,
@@ -19,9 +18,9 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import DashboardCard from "../../components/manager/DashboardCard";
-import { getOngoingProjects, getPendingAssignments } from "../../api/employee/assignProject";
-import { completedProject } from "../../api/employee/project"; // Keep this if you still need completed project count
+import DashboardCard from "../../components/manager/cards/DashboardCard";
+import { getOngoingProjects } from "../../api/employee/assignProject";
+import { completedProject } from "../../api/employee/project";
 import { getMyPayments } from "../../api/employee/payment";
 import Toaster from "../../components/Toaster";
 
@@ -36,11 +35,10 @@ ChartJS.register(
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
-    pendingCount: 0,
     ongoingCount: 0,
-    completedCount: 0, // This is completed PROJECT count, not payments
-    totalEarned: 0, // Will be calculated from completed payments
-    averageEarning: 0, // Will be calculated from completed payments
+    completedCount: 0,
+    totalEarned: 0,
+    averageEarning: 0,
     pendingPaymentsAmount: 0,
   });
   const [recentProjects, setRecentProjects] = useState([]);
@@ -53,54 +51,56 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
+  // ✅ MODIFIED: Standardized date comparison logic
+  const getDaysUntil = (dateString) => {
+    if (!dateString) return null;
+    
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Set to start of today
+
+    const deadline = new Date(dateString);
+    deadline.setHours(0, 0, 0, 0); // Set to start of the deadline day
+    
+    const diffTime = deadline - now;
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return days;
+  };
+
   const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      // Fetch all data in parallel
-      const [pendingRes, ongoingRes, completedProjectData, paymentsRes] = await Promise.all([
-        getPendingAssignments(),
+      
+      const [ongoingRes, completedProjectData, paymentsRes] = await Promise.all([
         getOngoingProjects(),
-        completedProject(), // Fetch completed project data (for count)
-        getMyPayments(), // Fetch payments
+        completedProject(),
+        getMyPayments(),
       ]);
 
-      // Extract data
-      const pending = pendingRes.assignments || [];
       const ongoing = ongoingRes.projects || [];
-      const completedProjectsSummary = completedProjectData.summary || {}; // For project count
+      const completedProjectsSummary = completedProjectData.summary || {};
       const payments = paymentsRes.data?.payments || [];
-
-      // --- Calculation Updates ---
-      // 1. Filter for completed payments
       const completedPayments = payments.filter(p => p.status === 'completed');
 
-      // 2. Calculate total earned from completed payments
       const totalEarnedCompleted = completedPayments.reduce(
         (acc, payment) => acc + parseFloat(payment.amount || 0),
         0
       );
 
-      // 3. Calculate average earning from completed payments
       const averageEarningCompleted = completedPayments.length > 0
         ? totalEarnedCompleted / completedPayments.length
         : 0;
 
-      // Process pending payments amount (remains the same)
       const pendingPaymentsAmount = payments
         .filter(p => p.status === 'pending')
         .reduce((acc, payment) => acc + parseFloat(payment.amount || 0), 0);
 
-      // 4. Update stats state with the new calculations
       setStats({
-        pendingCount: pending.length,
         ongoingCount: ongoing.length,
-        completedCount: completedProjectsSummary.totalCompleted || 0, // Keep using project count here
-        totalEarned: totalEarnedCompleted, // Use calculated completed amount
-        averageEarning: averageEarningCompleted, // Use calculated completed average
+        completedCount: completedProjectsSummary.totalCompleted || 0,
+        totalEarned: totalEarnedCompleted,
+        averageEarning: averageEarningCompleted,
         pendingPaymentsAmount: pendingPaymentsAmount,
       });
-
-      // Process data for the earnings chart (remains the same, uses completedPayments)
       const projectNames = completedPayments.map(p => p.project?.name || 'Unknown Project');
       const projectAmounts = completedPayments.map(p => parseFloat(p.amount || 0));
 
@@ -118,19 +118,26 @@ const Dashboard = () => {
         ],
       });
 
-      // Recent projects (logic remains the same)
-      // Note: `completedProjectData.projects` might be needed here if it exists
       const completedProjectsList = completedProjectData.projects || [];
       const recent = [...ongoing, ...completedProjectsList]
         .sort((a, b) => new Date(b.updatedAt || b.completedAt) - new Date(a.updatedAt || a.completedAt))
         .slice(0, 5);
       setRecentProjects(recent);
 
-      // Upcoming deadlines (logic remains the same)
-      const deadlines = [...pending, ...ongoing]
-        .filter(p => p.project?.deadline)
+      // ✅ MODIFIED: Filter logic for deadlines
+      const now = new Date();
+      now.setHours(0, 0, 0, 0); // Get the start of today
+
+      const deadlines = [...ongoing]
+        .filter(p => {
+          if (!p.project?.deadline) return false; // Ensure deadline exists
+          const deadlineDate = new Date(p.project.deadline);
+          deadlineDate.setHours(0, 0, 0, 0); // Get the start of the deadline day
+          return deadlineDate >= now; // Keep only if deadline is today or in the future
+        })
         .sort((a, b) => new Date(a.project.deadline) - new Date(b.project.deadline))
         .slice(0, 5);
+        
       setUpcomingDeadlines(deadlines);
 
     } catch (error) {
@@ -140,7 +147,6 @@ const Dashboard = () => {
     }
   };
 
-  // --- summaryCardData now correctly uses the calculated stats ---
   const summaryCardData = [
     {
       title: "Ongoing Projects",
@@ -150,19 +156,13 @@ const Dashboard = () => {
       iconColor: isLoading ? "text-gray-300" : "text-blue-400",
     },
     {
-      title: "Completed Projects", // This title refers to project count
+      title: "Completed Projects",
       value: isLoading ? <Skeleton className="h-7 w-12" /> : stats.completedCount.toString(),
       subtitle: isLoading ? <Skeleton className="h-4 w-28" /> : "Successfully finished",
       IconComponent: RiCheckboxCircleFill,
       iconColor: isLoading ? "text-gray-300" : "text-green-400",
     },
-    {
-      title: "Pending Requests",
-      value: isLoading ? <Skeleton className="h-7 w-12" /> : stats.pendingCount.toString(),
-      subtitle: isLoading ? <Skeleton className="h-4 w-28" /> : "Awaiting your response",
-      IconComponent: RiTimeFill,
-      iconColor: isLoading ? "text-gray-300" : "text-yellow-400",
-    },
+    
     {
       title: "Pending Payments",
       value: isLoading ? <Skeleton className="h-7 w-20" /> : `$${stats.pendingPaymentsAmount.toLocaleString()}`,
@@ -171,16 +171,16 @@ const Dashboard = () => {
       iconColor: isLoading ? "text-gray-300" : "text-purple-400",
     },
     {
-      title: "Total Earning", // Uses calculated stats.totalEarned
+      title: "Total Earning",
       value: isLoading ? <Skeleton className="h-7 w-20" /> : `$${stats.totalEarned.toLocaleString()}`,
-      subtitle: isLoading ? <Skeleton className="h-4 w-24" /> : "From completed payments", // Subtitle updated for clarity
+      subtitle: isLoading ? <Skeleton className="h-4 w-24" /> : "From completed payments",
       IconComponent: RiHandCoinFill,
       iconColor: isLoading ? "text-gray-300" : "text-cyan-400",
     },
     {
-      title: "Average Earning", // Uses calculated stats.averageEarning
-      value: isLoading ? <Skeleton className="h-7 w-20" /> : `$${stats.averageEarning.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, // Ensure 2 decimal places
-      subtitle: isLoading ? <Skeleton className="h-4 w-24" /> : "Per completed payment", // Subtitle updated for clarity
+      title: "Average Earning",
+      value: isLoading ? <Skeleton className="h-7 w-20" /> : `$${stats.averageEarning.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      subtitle: isLoading ? <Skeleton className="h-4 w-24" /> : "Per completed payment",
       IconComponent: RiTrophyFill,
       iconColor: isLoading ? "text-gray-300" : "text-orange-400",
     },
@@ -207,8 +207,8 @@ const Dashboard = () => {
     switch (status?.toLowerCase()) {
       case 'completed': case 'verified': return 'text-green-400';
       case 'ongoing': case 'in_progress': return 'text-blue-400';
-      case 'pending': return 'text-yellow-400';
-      case 'rejected': return 'text-red-400';
+      // case 'pending': return 'text-yellow-400'; 
+      // case 'rejected': return 'text-red-400';
       default: return 'text-gray-400';
     }
   };
@@ -219,13 +219,7 @@ const Dashboard = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const getDaysUntil = (dateString) => {
-    if (!dateString) return null;
-    const now = new Date();
-    const deadline = new Date(dateString);
-    const days = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
-    return days;
-  };
+  // const getDaysUntil = (dateString) => { ... } // Moved to top of component
 
   return (
     <>
@@ -242,14 +236,13 @@ const Dashboard = () => {
         <p className="text-gray-400">Welcome back! Here's your project overview</p>
       </div>
 
-      {/* --- SUMMARY CARDS --- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
         {summaryCardData.map((card, index) => (
           <DashboardCard key={index} {...card} />
         ))}
       </div>
 
-      {/* --- EARNINGS CHART --- */}
+    
       <div className="mb-6 bg-gray-800/50 backdrop-blur-md rounded-lg p-6 border border-gray-700">
         <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
           <RiBarChartFill className="text-blue-400" />
@@ -332,7 +325,7 @@ const Dashboard = () => {
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, idx) => (
-                <div key={idx} className="bg-gray-700/50 rounded-lg p-3 animate-pulse">
+                <div key={idx} className="bg-gray-700/5g-gray-700/50 rounded-lg p-3 animate-pulse">
                   <div className="h-4 bg-gray-600 rounded w-full mb-2"></div>
                   <div className="h-3 bg-gray-600 rounded w-2/3"></div>
                 </div>
@@ -356,6 +349,7 @@ const Dashboard = () => {
                       <span className="text-xs text-gray-400">{formatDate(assignment.project?.deadline)}</span>
                       {daysLeft !== null && (
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isUrgent ? 'bg-red-500/20 text-red-300' : 'bg-blue-500/20 text-blue-300'}`}>
+                          {/* The 'Overdue' case will no longer be hit, but this logic remains correct */}
                           {daysLeft > 0 ? `${daysLeft}d left` : daysLeft === 0 ? 'Today!' : 'Overdue'}
                         </span>
                       )}

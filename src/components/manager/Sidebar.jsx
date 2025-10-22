@@ -3,10 +3,7 @@ import {
   FiHome,
   FiFolder,
   FiUsers,
-  FiCheckSquare,
   FiBarChart2,
-  FiFileText,
-  FiMessageSquare,
   FiChevronLeft,
   FiChevronRight,
   FiX,
@@ -47,11 +44,11 @@ const Sidebar = ({
     >
       {/* Sidebar Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/20 shrink-0">
-        <div className="flex items-center overflow-hidden">
+        <div className="flex items-center ml-10 overflow-hidden">
           <img
             src={isCollapsed ? logo : logo}
             alt="Logo"
-            className={`transition-all duration-300 ease-in-out ${isCollapsed ? "w-0" : "w-36"}`}
+            className={`transition-all text-center duration-300 ease-in-out ${isCollapsed ? "w-0" : "w-28"}`}
           />
         </div>
         {!isMobile && (
@@ -87,34 +84,14 @@ const Sidebar = ({
           active={activeView === 'projects'}
           onClick={() => handleItemClick('projects')}
         />
-        {/* <SidebarGroup
-          icon={<FiFolder size={20} />}
-          text="Projects"
-          collapsed={isCollapsed}
-          onSubItemClick={handleItemClick}
-          items={[
-            { text: "All Projects", view: "projects" },
-            { text: "Completed Projects", view: "completedProject" },
-          ]}
-        /> */}
-        <SidebarGroup
+
+        <SidebarItem
           icon={<FiUsers size={20} />}
           text="Employees"
           collapsed={isCollapsed}
-          onSubItemClick={handleItemClick}
-          items={[
-
-            { text: "All Employees", view: "employees-all" },
-             {text:"Pending Apporvals",view:"approvals"}
-          ]}
+          active={activeView === 'employees-all'}
+          onClick={() => handleItemClick('employees-all')}
         />
-        {/* <SidebarItem
-          icon={<FiCheckSquare size={20} />}
-          text="Tasks"
-          collapsed={isCollapsed}
-          active={activeView === 'tasks'}
-          onClick={() => handleItemClick('tasks')}
-        /> */}
         <SidebarGroup
           icon={<FiBarChart2 size={20} />}
           text="Finance"

@@ -1,27 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getOngoingProjects } from "../../../api/employee/assignProject";
-import OngoingProjectCard, { OngoingProjectCardSkeleton } from '../../../components/employee/OngoingProjectCard';
+import { getOngoingProjects, submitWork } from "../../../api/employee/assignProject"; // Added submitWork
+import OngoingProjectCard, { OngoingProjectCardSkeleton } from '../../../components/employee/cards/OngoingProjectCard';
 import ChatModal from '../../../components/modals/ChatModal';
 import Toaster from '../../../components/Toaster';
 import { FiInbox, FiActivity } from 'react-icons/fi';
 import ProjectAssignmentDetail from './ProjectAssignmentDetail';
 
-// --- NEW IMPORT ---
-// Import the modal you want to use
-import SubmitWorkModal from '../../../components/modals/SubmitWorkModal'; 
-
 const OngoingProjects = () => {
   const [assignments, setAssignments] = useState([]);
   const [summary, setSummary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success', loading: false }); // Added loading to toast state
+  const [selectedAssignment, setSelectedAssignment] = useState(null); 
+  const [isChatOpen, setIsChatOpen] = useState(false); 
 
-  // --- MODAL AND VIEW STATE ---
-  const [selectedAssignment, setSelectedAssignment] = useState(null); // For Details PAGE
-  const [submittingAssignment, setSubmittingAssignment] = useState(null); // For Submit Work MODAL
-  const [isChatOpen, setIsChatOpen] = useState(false); // For Chat MODAL
-
-  // --- Data Fetching ---
   const fetchOngoingProjects = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -30,10 +22,10 @@ const OngoingProjects = () => {
         setAssignments(response.projects || []);
         setSummary(response.summary || null);
       } else {
-        setToast({ show: true, message: 'Failed to load projects', type: 'error' });
+        setToast({ show: true, message: 'Failed to load projects', type: 'error', loading: false });
       }
     } catch (error) {
-      setToast({ show: true, message: error.message || 'Error fetching data', type: 'error' });
+      setToast({ show: true, message: error.message || 'Error fetching data', type: 'error', loading: false });
     } finally {
       setIsLoading(false);
     }
@@ -43,31 +35,41 @@ const OngoingProjects = () => {
     fetchOngoingProjects();
   }, [fetchOngoingProjects]);
 
-  // --- Handlers ---
   const handleViewDetails = (assignment) => {
-    setSelectedAssignment(assignment); // This now triggers the detail page
+    setSelectedAssignment(assignment);
   };
 
-  const handleOpenSubmitModal = (assignment) => {
-    setSubmittingAssignment(assignment);
-  };
-  
+  // Removed handleOpenSubmitModal
+
   const handleOpenChatModal = () => {
     setIsChatOpen(true);
-  };
-
-  const handleSubmitWorkSuccess = () => {
-    setToast({ show: true, message: 'Work submitted successfully!', type: 'success' });
-    setSubmittingAssignment(null);
-    fetchOngoingProjects(); // Refresh the list
-    setSelectedAssignment(null); // Go back to the list
   };
   
   const handleBackToList = () => {
     setSelectedAssignment(null);
   };
 
-  // --- Render List Content ---
+  // --- New Handler for Finishing Work ---
+  const handleFinishWork = async (assignmentId) => {
+    // Show loading toast
+    setToast({ show: true, message: 'Submitting your work...', type: 'loading', loading: true });
+    try {
+      const response = await submitWork(assignmentId);
+      
+      if (response.success) {
+        setToast({ show: true, message: 'Work submitted successfully!', type: 'success', loading: false });
+        fetchOngoingProjects(); 
+        handleBackToList();     
+      } else {
+        
+        throw new Error(response.message || 'Failed to submit work.');
+      }
+    } catch (error) {
+     
+      setToast({ show: true, message: error.message || 'An error occurred.', type: 'error', loading: false });
+    }
+  };
+
   const renderContent = () => {
     if (isLoading) {
       return (
@@ -108,21 +110,20 @@ const OngoingProjects = () => {
         <Toaster
           message={toast.message}
           type={toast.type}
+          loading={toast.loading} 
           onClose={() => setToast({ ...toast, show: false })}
         />
       )}
 
-      {/* --- CONDITIONAL VIEW RENDER --- */}
       {selectedAssignment ? (
-        // --- 1. DETAIL VIEW ---
         <ProjectAssignmentDetail 
           assignment={selectedAssignment}
           onBack={handleBackToList}
           onOpenChatModal={handleOpenChatModal}
-          onOpenSubmitModal={() => handleOpenSubmitModal(selectedAssignment)}
+          onFinishWork={() => handleFinishWork(selectedAssignment.id)} 
         />
       ) : (
-        // --- 2. LIST VIEW ---
+      
         <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <h1 className="text-3xl font-bold text-white">Ongoing Projects</h1>
@@ -139,7 +140,6 @@ const OngoingProjects = () => {
       )}
 
 
-      {/* --- MODALS (Controlled by this page) --- */}
       {selectedAssignment && isChatOpen && (
         <ChatModal
           isOpen={isChatOpen}
@@ -148,18 +148,7 @@ const OngoingProjects = () => {
         />
       )}
 
-      {/* --- ADDED THIS RENDER BLOCK --- */}
-      {submittingAssignment && (
-        <SubmitWorkModal
-          isOpen={!!submittingAssignment}
-          // Pass the full assignment object
-          assignment={submittingAssignment} 
-          onClose={() => setSubmittingAssignment(null)}
-          onSuccess={handleSubmitWorkSuccess}
-          // Pass setToast for error handling inside the modal
-          setToast={setToast} 
-        />
-      )}
+     
     </div>
   );
 };
