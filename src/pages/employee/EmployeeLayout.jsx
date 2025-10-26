@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiMenu } from "react-icons/fi";
 import Sidebar from "../../components/employee/Sidebar"; // Assuming the path is correct
 import LogoutModal from "../../components/modals/LogoutModal";
@@ -15,7 +15,15 @@ import Payments from "./payments/Payments";
 import RequestPayment from "./payments/RequestPayment";
 
 const EmployeeLayout = () => {
-  const [activeView, setActiveView] = useState("dashboard");
+  // Initialize activeView from localStorage or default to "dashboard"
+  const [activeView, setActiveView] = useState(() => {
+    return localStorage.getItem("employeeActiveView") || "dashboard";
+  });
+
+  // Persist activeView to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("employeeActiveView", activeView);
+  }, [activeView]);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);

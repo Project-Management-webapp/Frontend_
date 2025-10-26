@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineEyeInvisible, AiOutlineEye } from "react-icons/ai";
 import { FiUser, FiBriefcase } from "react-icons/fi";
@@ -12,6 +12,20 @@ import { useAuth } from '../../context/AuthContext';
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userRole = localStorage.getItem("userRole");
+    
+    if (token && userRole) {
+      if (userRole === "manager") {
+        navigate("/manager", { replace: true });
+      } else if (userRole === "employee") {
+        navigate("/employee", { replace: true });
+      }
+    }
+  }, [navigate]);
   const [view, setView] = useState("role-select");
   const [role, setRole] = useState(null);
   const [showPassword, setShowPassword] = useState(false);

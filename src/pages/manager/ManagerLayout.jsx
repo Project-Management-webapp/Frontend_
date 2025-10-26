@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiMenu } from "react-icons/fi";
 import Sidebar from "../../components/manager/Sidebar";
 import Dashboard from "./Dashboard";
@@ -19,7 +19,15 @@ const Workload = () => <div className="text-white text-2xl">Workload & Tasks Pag
 const Performance = () => <div className="text-white text-2xl">Performance Reviews Page</div>;
 
 const ManagerLayout = () => {
-  const [activeView, setActiveView] = useState("dashboard");
+  // Initialize activeView from localStorage or default to "dashboard"
+  const [activeView, setActiveView] = useState(() => {
+    return localStorage.getItem("managerActiveView") || "dashboard";
+  });
+
+  // Persist activeView to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("managerActiveView", activeView);
+  }, [activeView]);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);

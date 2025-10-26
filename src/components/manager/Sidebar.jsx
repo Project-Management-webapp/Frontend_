@@ -54,7 +54,7 @@ const Sidebar = ({
         {!isMobile && (
           <button
             onClick={onCollapse}
-            className="text-gray-400 hover:text-white p-2 transition-colors rounded-lg"
+            className="text-gray-400 hover:text-white py-5 transition-colors rounded-lg"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? <FiChevronRight size={20} /> : <FiChevronLeft size={20} />}
@@ -110,13 +110,7 @@ const Sidebar = ({
           active={activeView === 'supportTickets'}
           onClick={() => handleItemClick('supportTickets')}
         />
-        {/* <SidebarItem
-          icon={<FiDollarSign size={20} />}
-          text="Payments"
-          collapsed={isCollapsed}
-          active={activeView === 'payments'}
-          onClick={() => handleItemClick('payments')}
-        /> */}
+        
 
         <SidebarGroup
           icon={<FiDollarSign size={20} />}
@@ -128,24 +122,7 @@ const Sidebar = ({
             { text: "Pending pements", view: "completedProject" },
           ]}
         />
-        {/* <SidebarGroup
-          icon={<FiFileText size={20} />}
-          text="Reports"
-          collapsed={isCollapsed}
-          onSubItemClick={handleSubItemClick}
-          items={[
-            { text: "Project Progress", path: "/reports/projects" },
-            { text: "Task Reports", path: "/reports/tasks" },
-            { text: "Financial Reports", path: "/reports/finance" },
-          ]}
-        /> */}
-        {/* <SidebarItem
-          icon={<FiMessageSquare size={20} />}
-          text="Messages"
-          collapsed={isCollapsed}
-          active={activeView === 'messages'}
-          onClick={() => handleItemClick('messages')}
-        /> */}
+       
         <SidebarItem
           icon={<IoMdNotificationsOutline size={20} />}
           text="Notifications"

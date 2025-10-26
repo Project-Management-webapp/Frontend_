@@ -21,6 +21,10 @@ const LogoutModal = ({ isOpen, onClose, role, onShowToast }) => {
       console.log('Employee logged out');
     }
 
+    // Clear persisted view states
+    localStorage.removeItem('managerActiveView');
+    localStorage.removeItem('employeeActiveView');
+    
     // localStorage.removeItem('token');
     // localStorage.removeItem('userRole');
     // localStorage.removeItem('userId');

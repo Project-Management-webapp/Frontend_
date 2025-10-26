@@ -42,12 +42,12 @@ const Sidebar = ({
         }`}
     >
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/20 shrink-0">
+      <div className="flex items-center justify-between py-5 border-b border-white/20 shrink-0">
         <div className="flex items-center ml-10 justify-center overflow-hidden">
           <img
             src={logo}
             alt="Logo"
-            className={`transition-all duration-300 ease-in-out ${isCollapsed ? "w-8" : "w-28"
+            className={`transition-all duration-300 ease-in-out ${isCollapsed ? "w-0" : "w-28"
               }`}
           />
         </div>
