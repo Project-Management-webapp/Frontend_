@@ -8,7 +8,7 @@ import CompleteProjectDetailModal from '../../../components/employee/modals/Comp
 const CompletedProjects = () => {
   const [assignments, setAssignments] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [completionsByMonth, setCompletionsByMonth] = useState(null);
+  const [totalEarned, setTotalEarned] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [selectedAssignment, setSelectedAssignment] = useState(null);
@@ -21,7 +21,7 @@ const CompletedProjects = () => {
       if (response.success) {
         setAssignments(response.projects || []);
         setSummary(response.summary || null);
-        setCompletionsByMonth(response.completionsByMonth || null);
+        setTotalEarned(response.totalEarned || null);
       } else {
         setToast({ show: true, message: 'Failed to load completed projects', type: 'error' });
       }
@@ -70,7 +70,7 @@ const CompletedProjects = () => {
           </div>
 
           {/* Summary Section */}
-          {summary && completionsByMonth && (
+          {summary && (
             <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 mt-4">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
                 <div>
@@ -86,11 +86,10 @@ const CompletedProjects = () => {
                   <p className="text-xs text-gray-400 mt-1">Avg Earning</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-purple-400">
-
-                    {completionsByMonth?.[0]?.count || 0}
+                  <p className="text-2xl font-bold text-green-400">
+                    {`$${summary.totalEarned || 0}`}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">This Month</p>
+                  <p className="text-xs text-gray-400 mt-1">Total Earning</p>
                 </div>
               </div>
             </div>

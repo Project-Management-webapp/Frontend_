@@ -92,17 +92,20 @@ const Sidebar = ({
           active={activeView === 'employees-all'}
           onClick={() => handleItemClick('employees-all')}
         />
+        
         <SidebarGroup
           icon={<FiBarChart2 size={20} />}
           text="Finance"
           collapsed={isCollapsed}
-          onSubItemClick={handleSubItemClick}
+          onSubItemClick={handleItemClick}
           items={[
-            { text: "Project Budgets", path: "/finance/budgets" },
-            { text: "Profit & Loss", path: "/finance/pnl" },
-            { text: "Income Summary", path: "/finance/summary" },
+            { text: "Overview", view: "finance-overview" },
+            { text: "Profit & Loss", view: "finance-profit-loss" },
+            { text: "Income Summary", view: "finance-income" },
+            { text: "Employee Allocations", view: "finance-allocations" },
           ]}
         />
+        
         <SidebarItem
           icon={<RiCustomerService2Line size={20} />}
           text="Support Tickets"
@@ -118,8 +121,8 @@ const Sidebar = ({
           collapsed={isCollapsed}
           onSubItemClick={handleItemClick}
           items={[
-            { text: "Payments", view: "payments" },
-            { text: "Pending pements", view: "completedProject" },
+            { text: "All Payments", view: "payments" },
+            { text: "Pending Requests", view: "pending-payments" },
           ]}
         />
        

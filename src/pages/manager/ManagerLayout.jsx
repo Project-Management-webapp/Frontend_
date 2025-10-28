@@ -11,8 +11,12 @@ import AllEmployee from "./AllEmployee";
 
 import AllProjects from "./project/AllProjects";
 import SupportTickets from "./support-tickets/SupportTickets";
-// import TicketDetails from "./support-tickets/TicketDetails";
 import Payments from "./payments/Payments";
+
+import FinanceOverview from "./finance/FinanceOverview";
+import ProfitLoss from "./finance/ProfitLoss";
+import IncomeSummary from "./finance/IncomeSummary";
+import EmployeeAllocations from "./finance/EmployeeAllocations";
 
 const AssignEmployee = () => <div className="text-white text-2xl">Assign Employee Page</div>;
 const Workload = () => <div className="text-white text-2xl">Workload & Tasks Page</div>;
@@ -24,7 +28,6 @@ const ManagerLayout = () => {
     return localStorage.getItem("managerActiveView") || "dashboard";
   });
 
-  // Persist activeView to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("managerActiveView", activeView);
   }, [activeView]);
@@ -53,10 +56,16 @@ const ManagerLayout = () => {
         return <AllProjects />;
       case "supportTickets":
         return <SupportTickets setActiveView={setActiveView} />;
-      // case "ticketDetails":
-        // return <TicketDetails setActiveView={setActiveView} />;
       case "payments":
         return <Payments />;
+      case "finance-overview":
+        return <FinanceOverview />;
+      case "finance-profit-loss":
+        return <ProfitLoss />;
+      case "finance-income":
+        return <IncomeSummary />;
+      case "finance-allocations":
+        return <EmployeeAllocations />;
       default:
         return <Dashboard />;
     }

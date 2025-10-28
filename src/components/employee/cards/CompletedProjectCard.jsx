@@ -15,7 +15,7 @@ const CompletionStatusTag = ({ status }) => {
     case 'submitted':
       bgColor = 'bg-yellow-600/20';
       textColor = 'text-yellow-300';
-      label = 'Under Review';
+      label = 'Submitted';
       break;
     default:
       bgColor = 'bg-gray-600/20';
@@ -49,18 +49,23 @@ const CompletedProjectCard = ({ assignment, onViewDetails }) => {
   return (
     <div className="bg-gray-800 rounded-lg shadow-lg border border-gray-700 hover:border-green-500/50 transition-all duration-300 flex flex-col">
       
-      {/* Card Header */}
       <div className="p-5 border-b border-gray-700">
-        <div className="flex justify-between items-center mb-2">
-          <h3 
-            className="text-xl font-bold text-white truncate cursor-pointer hover:underline flex items-center gap-2"
-            onClick={() => onViewDetails(assignment)}
-          >
-            <FiCheckCircle className="text-green-400" size={20} />
-            {project?.name || 'Unnamed Project'}
-          </h3>
+        <div className="mb-3">
           <CompletionStatusTag status={workStatus} />
         </div>
+        
+        {/* Title with Icon */}
+        <div className="mb-3">
+          <h3 
+            className="text-xl font-bold text-white cursor-pointer hover:text-green-400 flex items-center gap-2 transition-colors"
+            onClick={() => onViewDetails(assignment)}
+          >
+            <FiCheckCircle className="text-green-400 flex-shrink-0" size={22} />
+            <span className="line-clamp-2">{project?.name || 'Unnamed Project'}</span>
+          </h3>
+        </div>
+        
+        {/* Role and Rating */}
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-purple-300 bg-purple-600/20 px-2 py-0.5 rounded-full">
             {role}
@@ -122,11 +127,25 @@ export const CompletedProjectCardSkeleton = () => {
   return (
     <div className="bg-gray-800 rounded-lg shadow-lg border border-gray-700 animate-pulse flex flex-col">
       <div className="p-5 border-b border-gray-700">
-        <div className="flex justify-between items-center mb-2">
-          <div className="h-6 bg-gray-700 rounded w-2/3"></div>
-          <div className="h-5 bg-gray-700 rounded w-16"></div>
+        {/* Status Tag */}
+        <div className="mb-3">
+          <div className="h-5 bg-gray-700 rounded-full w-24"></div>
         </div>
-        <div className="h-5 bg-gray-700 rounded w-24 mt-2"></div>
+        {/* Title */}
+        <div className="mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 bg-gray-700 rounded-full flex-shrink-0"></div>
+            <div className="flex-1 space-y-2">
+              <div className="h-5 bg-gray-700 rounded w-full"></div>
+              <div className="h-5 bg-gray-700 rounded w-3/4"></div>
+            </div>
+          </div>
+        </div>
+        {/* Role and Rating */}
+        <div className="flex items-center justify-between">
+          <div className="h-5 bg-gray-700 rounded-full w-28"></div>
+          <div className="h-4 bg-gray-700 rounded w-12"></div>
+        </div>
       </div>
       <div className="p-5 space-y-3 flex-grow">
         <div className="h-4 bg-gray-700 rounded w-1/2"></div>

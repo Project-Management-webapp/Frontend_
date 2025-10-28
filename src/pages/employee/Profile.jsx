@@ -2,12 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 import EmployeeProfileEditModal from "../../components/employee/modals/EmployeeProfileEditModal";
 import Toaster from "../../components/Toaster";
 import { getEmployeeProfile, updateEmployeeProfileImage } from "../../api/employee/auth";
-
+import { formatDate } from "../../components/atoms/FormatedDate";
 import {
   FaPencilAlt, FaBriefcase, FaSitemap, FaCalendarAlt, FaClock, FaTint, FaRing,
   FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt, FaInfoCircle,
   FaLayerGroup, FaBirthdayCake, FaVenusMars, FaFlag, FaFileContract, FaCalendarCheck,
-  FaMoneyBillWave, FaTools, FaGraduationCap, FaCertificate, FaToggleOn, FaGlobe
+  FaMoneyBillWave, FaTools, FaGraduationCap, FaCertificate, FaToggleOn, FaGlobe,
+  FaChartLine, FaStar, FaUmbrellaBeach, FaIdCard, FaTachometerAlt, FaAward
 } from 'react-icons/fa';
 import { IoMdClose } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
@@ -87,24 +88,19 @@ const Profile = () => {
           zipCode: profile.zipCode || null,
 
           // Professional
-          // role: profile.role || null,
           department: profile.department || null,
-          level: profile.level || null,
+          jobTitle: profile.jobTitle || null,
           joiningDate: profile.joiningDate || null,
           contractType: profile.contractType || null,
           workLocation: profile.workLocation || null,
           workSchedule: profile.workSchedule || null,
-          probationEndDate: profile.probationEndDate || null,
-          confirmationDate: profile.confirmationDate || null,
           status: profile.status || null,
           timezone: profile.timezone || null,
+          rate: profile.rate || null,
 
           // Personal
           dateOfBirth: profile.dateOfBirth || null,
           gender: profile.gender || null,
-          maritalStatus: profile.maritalStatus || null,
-          nationality: profile.nationality || null,
-          bloodGroup: profile.bloodGroup || null,
           languages: profile.languages || null,
 
           // Emergency Contact
@@ -112,14 +108,8 @@ const Profile = () => {
           emergencyContactPhone: profile.emergencyContactPhone || null,
           emergencyContactRelation: profile.emergencyContactRelation || null,
 
-          // Compensation (Handle with care)
-          baseSalary: profile.baseSalary || null,
-          currency: profile.currency || null,
-
           // Qualifications
           skills: profile.skills || null,
-          education: profile.education || null,
-          certifications: profile.certifications || null,
         });
 
         setProfileImage(profile.profileImage || "/default-profile.png");
@@ -230,15 +220,15 @@ const Profile = () => {
 
 
             <div className="space-y-6">
-              <SkeletonSection titleWidth="w-56" items={11} cols={2} /> 
-              <SkeletonSection titleWidth="w-48" items={6} cols={2} />  
-              <SkeletonSection titleWidth="w-40" items={3} cols={2} /> 
+              <SkeletonSection titleWidth="w-56" items={11} cols={2} />
+              <SkeletonSection titleWidth="w-48" items={6} cols={2} />
+              <SkeletonSection titleWidth="w-40" items={3} cols={2} />
             </div>
 
 
             <div className="space-y-6">
-              <SkeletonSection titleWidth="w-32" items={6} cols={2} /> 
-              <SkeletonSection titleWidth="w-56" items={3} cols={2} /> 
+              <SkeletonSection titleWidth="w-32" items={6} cols={2} />
+              <SkeletonSection titleWidth="w-56" items={3} cols={2} />
               <SkeletonSection titleWidth="w-44" items={2} cols={2} />
 
 
@@ -323,17 +313,25 @@ const Profile = () => {
               <div>
                 <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-3"><FaBriefcase /> Professional Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                  {/* <DetailItemWithIcon icon={<FaSitemap />} label="Role" value={employeeData.role} /> */}
+
                   <DetailItemWithIcon icon={<FaSitemap />} label="Department" value={employeeData.department} />
-                  <DetailItemWithIcon icon={<FaLayerGroup />} label="Level" value={employeeData.level} />
+                  <DetailItemWithIcon icon={<FaIdCard />} label="Job Title" value={employeeData.jobTitle} />
                   <DetailItemWithIcon icon={<FaFileContract />} label="Contract Type" value={employeeData.contractType} />
                   <DetailItemWithIcon icon={<FaToggleOn />} label="Status" value={employeeData.status} />
                   <DetailItemWithIcon icon={<FaGlobe />} label="Timezone" value={employeeData.timezone} />
                   <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Work Location" value={employeeData.workLocation} />
                   <DetailItemWithIcon icon={<FaClock />} label="Schedule" value={employeeData.workSchedule} />
-                  <DetailItemWithIcon icon={<FaCalendarAlt />} label="Joining Date" value={employeeData.joiningDate} isDate={true} />
-                  <DetailItemWithIcon icon={<FaCalendarCheck />} label="Probation End" value={employeeData.probationEndDate} isDate={true} />
-                  <DetailItemWithIcon icon={<FaCalendarCheck />} label="Confirmation Date" value={employeeData.confirmationDate} isDate={true} />
+                 <DetailItemWithIcon 
+  icon={<FaCalendarAlt />} 
+  label="Joining Date" 
+  value={formatDate(employeeData.createdAt)} 
+/>
+                  <DetailItemWithIcon
+                    icon={<FaTachometerAlt />}
+                    label="Rate"
+                    value={`$${employeeData.rate} USD per hour`}
+                  />
+
                 </div>
               </div>
 
@@ -342,9 +340,6 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                   <DetailItemWithIcon icon={<FaBirthdayCake />} label="Date of Birth" value={employeeData.dateOfBirth} isDate={true} />
                   <DetailItemWithIcon icon={<FaVenusMars />} label="Gender" value={employeeData.gender} />
-                  <DetailItemWithIcon icon={<FaTint />} label="Blood Group" value={employeeData.bloodGroup} />
-                  <DetailItemWithIcon icon={<FaRing />} label="Marital Status" value={employeeData.maritalStatus} />
-                  <DetailItemWithIcon icon={<FaFlag />} label="Nationality" value={employeeData.nationality} />
                   <DetailItemWithIcon icon={<FaLanguage />} label="Languages" value={employeeData.languages} />
                 </div>
               </div>
@@ -352,10 +347,8 @@ const Profile = () => {
               {/* Qualifications */}
               <div>
                 <h4 className="flex text-lg items-center gap-2 text-purple-300 font-semibold mb-3"><FaGraduationCap /> Qualifications</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                <div className="space-y-4 text-sm">
                   <DetailItemWithIcon icon={<FaTools />} label="Skills" value={employeeData.skills} />
-                  <DetailItemWithIcon icon={<FaGraduationCap />} label="Education" value={employeeData.education} />
-                  <DetailItemWithIcon icon={<FaCertificate />} label="Certifications" value={employeeData.certifications} />
                 </div>
               </div>
             </div>
@@ -384,20 +377,6 @@ const Profile = () => {
                   <DetailItemWithIcon icon={<FaSitemap />} label="Relation" value={employeeData.emergencyContactRelation} />
                 </div>
               </div>
-
-              {/* Compensation */}
-              <div>
-                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-3"><FaMoneyBillWave /> Compensation</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                  <DetailItemWithIcon
-                    icon={<FaMoneyBillWave />}
-                    label="Base Salary"
-                    value={employeeData.baseSalary ? parseFloat(employeeData.baseSalary).toLocaleString() : null}
-                  />
-                  <DetailItemWithIcon icon={<FaMoneyBillWave />} label="Currency" value={employeeData.currency} />
-                </div>
-              </div>
-
               {/* Bio */}
               <div className="col-span-1 md:col-span-2">
                 <p className="font-semibold text-md text-white mb-1 flex items-center gap-2"><FaInfoCircle /> Bio</p>

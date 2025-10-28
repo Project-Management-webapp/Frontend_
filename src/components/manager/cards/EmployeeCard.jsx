@@ -8,11 +8,8 @@ const EmployeeCard = ({ employee }) => {
   const position = employee.position || employee.jobTitle || 'No Position';
   const department = employee.department || 'No Department';
   const profileImage = employee.profileImage || '/default-profile.png';
+  const rate = employee.rate || 'N/A';
 
-  // const handleSendInvite = (e) => {
-  //   e.stopPropagation();
-  //   console.log(`Sending invitation to ${employee.email}`);
-  // };
 
   return (
     <>
@@ -36,18 +33,12 @@ const EmployeeCard = ({ employee }) => {
             <div className="text-xs text-gray-300 space-y-1 mt-2">
               <div className="flex items-center gap-2">
                 <FaMoneyBillWave className="text-purple-300" />
-                <span className="truncate font-semibold">Base Rate: $12/hr</span>
+                <span className="truncate font-semibold">Base Rate: ${rate}/hr</span>
               </div>
             </div>
           </div>
         </div>
         <div className="flex justify-end">
-        {/* <button 
-          onClick={handleSendInvite}
-          className="btn text-sm" 
-        >
-          Send Invitation
-        </button> */}
       </div>
       </div>
 

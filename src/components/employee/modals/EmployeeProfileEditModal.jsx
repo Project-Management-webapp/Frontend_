@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
-import { updateEmployeeProfile } from "../../../api/employee/auth"; 
-import {FormInput,FormSelect,FormTextarea} from '../../atoms/FormFields';
+import { updateEmployeeProfile } from "../../../api/employee/auth";
+import { FormInput, FormSelect, FormTextarea } from '../../atoms/FormFields';
 
 const EmployeeProfileEditModal = ({ isOpen, onClose, userData, onSave, onShowToast }) => {
   const [formData, setFormData] = useState(userData);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-  
+
     const formattedData = {
       ...userData,
       joiningDate: userData.joiningDate ? new Date(userData.joiningDate).toLocaleDateString('en-CA') : '',
@@ -43,35 +43,29 @@ const EmployeeProfileEditModal = ({ isOpen, onClose, userData, onSave, onShowToa
       country: formData.country,
       zipCode: formData.zipCode,
       department: formData.department,
-      level: formData.level,
+      jobTitle: formData.jobTitle,
       joiningDate: formData.joiningDate,
       contractType: formData.contractType,
       workLocation: formData.workLocation,
       workSchedule: formData.workSchedule,
-      probationEndDate: formData.probationEndDate,
-      confirmationDate: formData.confirmationDate,
       status: formData.status,
       timezone: formData.timezone,
       dateOfBirth: formData.dateOfBirth,
       gender: formData.gender,
-      maritalStatus: formData.maritalStatus,
-      nationality: formData.nationality,
-      bloodGroup: formData.bloodGroup,
       languages: formData.languages,
       emergencyContactName: formData.emergencyContactName,
       emergencyContactPhone: formData.emergencyContactPhone,
       emergencyContactRelation: formData.emergencyContactRelation,
       baseSalary: formData.baseSalary,
       currency: formData.currency,
+      rate: formData.rate,
       skills: formData.skills,
-      education: formData.education,
-      certifications: formData.certifications,
     };
 
     try {
       const apiResponse = await updateEmployeeProfile(profileUpdatePayload);
       if (apiResponse && apiResponse.data) {
-        onSave(apiResponse.data); 
+        onSave(apiResponse.data);
         onShowToast({ show: true, message: 'Profile updated successfully!', type: 'success' });
         onClose();
       } else {
@@ -108,7 +102,7 @@ const EmployeeProfileEditModal = ({ isOpen, onClose, userData, onSave, onShowToa
         </div>
 
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-6 space-y-6">
-          
+
           {/* --- Section 1: Core Info --- */}
           <h3 className="text-lg font-semibold text-purple-300">Core Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -138,14 +132,20 @@ const EmployeeProfileEditModal = ({ isOpen, onClose, userData, onSave, onShowToa
           <h3 className="text-lg font-semibold text-purple-300">Professional Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <FormInput id="department" label="Department" value={formData.department} onChange={handleChange} />
-            <FormInput id="level" label="Level" value={formData.level} onChange={handleChange} />
-            <FormInput id="joiningDate" label="Joining Date" value={formData.joiningDate} onChange={handleChange} type="date" />
+            <FormInput id="jobTitle" label="Job Title" value={formData.jobTitle} onChange={handleChange} />
             <FormInput id="contractType" label="Contract Type" value={formData.contractType} onChange={handleChange} />
             <FormInput id="workLocation" label="Work Location" value={formData.workLocation} onChange={handleChange} />
             <FormInput id="workSchedule" label="Work Schedule" value={formData.workSchedule} onChange={handleChange} />
-            <FormInput id="probationEndDate" label="Probation End Date" value={formData.probationEndDate} onChange={handleChange} type="date" />
-            <FormInput id="confirmationDate" label="Confirmation Date" value={formData.confirmationDate} onChange={handleChange} type="date" />
-             <FormSelect id="status" label="Status" value={formData.status} onChange={handleChange}>
+            <FormInput
+              id="rate"
+              label="Rate (In USD Per Hour)"
+              value={formData.rate}
+              onChange={handleChange}
+              placeholder="e.g., 50"
+              type="number"
+              min="0"
+            />
+            <FormSelect id="status" label="Status" value={formData.status} onChange={handleChange}>
               <option value="">Select...</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -165,34 +165,14 @@ const EmployeeProfileEditModal = ({ isOpen, onClose, userData, onSave, onShowToa
               <option value="other">Other</option>
               <option value="prefer_not_to_say">Prefer not to say</option>
             </FormSelect>
-            <FormSelect id="maritalStatus" label="Marital Status" value={formData.maritalStatus} onChange={handleChange}>
-              <option value="">Select...</option>
-              <option value="single">Single</option>
-              <option value="married">Married</option>
-              <option value="divorced">Divorced</option>
-              <option value="widowed">Widowed</option>
-            </FormSelect>
-            <FormSelect id="bloodGroup" label="Blood Group" value={formData.bloodGroup} onChange={handleChange}>
-              <option value="">Select...</option>
-              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-              <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
-            </FormSelect>
-            <FormInput id="nationality" label="Nationality" value={formData.nationality} onChange={handleChange} />
             <FormInput id="languages" label="Languages (comma-separated)" value={formData.languages} onChange={handleChange} />
           </div>
 
-          {/* --- Section 6: Compensation --- */}
-          <h3 className="text-lg font-semibold text-purple-300">Compensation</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormInput id="baseSalary" label="Base Salary" value={formData.baseSalary} onChange={handleChange} type="number" step="0.01" />
-            <FormInput id="currency" label="Currency (e.g., USD)" value={formData.currency} onChange={handleChange} />
-          </div>
 
           {/* --- Section 7: Qualifications --- */}
           <h3 className="text-lg font-semibold text-purple-300">Qualifications</h3>
           <FormTextarea id="skills" label="Skills (comma-separated)" value={formData.skills} onChange={handleChange} rows={2} />
-          <FormTextarea id="education" label="Education" value={formData.education} onChange={handleChange} rows={2} />
-          <FormTextarea id="certifications" label="Certifications (comma-separated)" value={formData.certifications} onChange={handleChange} rows={2} />
+
 
           {/* --- Section 8: Emergency Contact --- */}
           <h3 className="text-lg font-semibold text-purple-300">Emergency Contact</h3>

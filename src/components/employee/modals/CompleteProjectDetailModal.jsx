@@ -81,7 +81,6 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
     allocatedAmount,
     workStatus,
     workSubmittedAt,
-    workSubmissionNotes,
     workVerifiedAt,
     verificationNotes,
     performanceFeedback,
@@ -146,23 +145,6 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
                 label="Manager's Verification Notes" 
                 value={verificationNotes} 
                 isCode 
-              />
-            </div>
-          </DetailSection>
-          
-          <DetailSection title="Your Submission" icon={<IoDocumentTextOutline size={22} />}>
-            <div className="md:col-span-2">
-              <DetailRow 
-                label="Your Submission Notes" 
-                value={workSubmissionNotes}
-                isCode
-              />
-            </div>
-            <div className="md:col-span-2">
-              <DetailRow 
-                label="Your Deliverables" 
-                value={actualDeliverables}
-                isCode
               />
             </div>
           </DetailSection>

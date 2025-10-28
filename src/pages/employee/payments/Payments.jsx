@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { RiAddLine, RiSearchLine, RiMoneyDollarCircleLine, RiCheckLine, RiHourglassFill } from "react-icons/ri"; // Added RiHourglassFill
 import { toast } from "react-hot-toast";
 import { getMyPayments } from "../../../api/employee/payment";
@@ -38,7 +37,7 @@ const PaymentItemSkeleton = () => (
 // --- End Skeleton Loaders ---
 
 
-const Payments = () => {
+const Payments = ({ setActiveView }) => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -118,14 +117,13 @@ const Payments = () => {
     <div className="min-h-screen">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">My Payments</h2>
-        {/* Link to request payment page (assuming route exists) */}
-        {/* <Link
-          to="/employee/payments/request"
-          className="flex items-center gap-2 px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+        <button
+          onClick={() => setActiveView('requestPayment')}
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-semibold"
         >
           <RiAddLine size={20} />
           Request Payment
-        </Link> */}
+        </button>
       </div>
 
       {/* Stats - Updated */}
@@ -188,13 +186,13 @@ const Payments = () => {
               ? "Try adjusting your search or filter"
               : "Request your first payment to get started"}
           </p>
-          <Link
-            to="/employee/payments/request"
+          <button
+            onClick={() => setActiveView('requestPayment')}
             className="inline-flex items-center gap-2 px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
           >
             <RiAddLine size={20} />
             Request Payment
-          </Link>
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">

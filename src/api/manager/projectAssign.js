@@ -20,6 +20,16 @@ export const getProjectAssignments = async (projectId) => {
   }
 };
 
+// Get all assignments for a project
+export const getAllProjectAssignments = async () => {
+  try {
+    const response = await api.get(`/manager/project-assignments/project`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to get all assign project' };
+  }
+};
+
 // Update employee role on project
 export const updateAssignmentRole = async (assignmentId, roleData) => {
   try {

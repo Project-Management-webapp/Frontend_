@@ -23,9 +23,18 @@ export const getProjectProfitLoss = async (projectId) => {
 };
 
 // Get income summary
-export const getIncomeSummary = async () => {
+export const getIncomeSummary = async (filters = {}) => {
   try {
-    const response = await api.get("/manager/finance/income-summary");
+    const params = new URLSearchParams();
+    if (filters.startDate) params.append('startDate', filters.startDate);
+    if (filters.endDate) params.append('endDate', filters.endDate);
+    if (filters.projectType) params.append('projectType', filters.projectType);
+    if (filters.status) params.append('status', filters.status);
+    
+    const queryString = params.toString();
+    const url = `/manager/finance/income-summary${queryString ? `?${queryString}` : ''}`;
+    
+    const response = await api.get(url);
     return response.data;
   } catch (error) {
     console.error("Error fetching income summary:", error);

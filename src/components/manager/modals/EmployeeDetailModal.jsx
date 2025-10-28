@@ -4,7 +4,7 @@ import { IoMdClose } from 'react-icons/io';
 import {
   FaBriefcase, FaSitemap, FaCalendarAlt, FaClock, FaTint, FaRing,
   FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt, FaInfoCircle,
-  FaMoneyBillWave, FaPaperPlane, FaFileContract, FaBirthdayCake, FaVenusMars, FaFlag, FaToggleOn 
+  FaMoneyBillWave, FaPaperPlane, FaFileContract, FaBirthdayCake, FaVenusMars, FaFlag, FaToggleOn
 } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
 
@@ -20,7 +20,7 @@ const DetailItemWithIcon = ({ icon, label, value, isDate = false }) => {
         day: 'numeric',
       });
     } catch (e) {
-      displayValue = value; 
+      displayValue = value;
     }
   }
 
@@ -38,14 +38,15 @@ const DetailItemWithIcon = ({ icon, label, value, isDate = false }) => {
 const EmployeeDetailModal = ({ isOpen, onClose, employeeData }) => {
   if (!isOpen) return null;
 
-  const hasProfessionalInfo = 
+  const hasProfessionalInfo =
     employeeData.department ||
     employeeData.joiningDate ||
     employeeData.workLocation ||
     employeeData.workSchedule ||
     employeeData.alternatePhone ||
     employeeData.contractType ||
-    employeeData.status;
+    employeeData.status ||
+    employeeData.rate;
 
   const hasPersonalInfo =
     employeeData.bloodGroup ||
@@ -54,7 +55,7 @@ const EmployeeDetailModal = ({ isOpen, onClose, employeeData }) => {
     employeeData.dateOfBirth ||
     employeeData.gender ||
     employeeData.nationality;
-  
+
   const hasEmergencyInfo =
     employeeData.emergencyContactName ||
     employeeData.emergencyContactPhone ||
@@ -65,7 +66,7 @@ const EmployeeDetailModal = ({ isOpen, onClose, employeeData }) => {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg w-full max-w-3xl flex flex-col max-h-[90vh] text-white">
-        
+
         <div className="relative p-6 border-b border-gray-700 flex justify-between items-center shrink-0">
           <h2 className="text-2xl font-bold">Employee Details</h2>
           <button
@@ -76,44 +77,64 @@ const EmployeeDetailModal = ({ isOpen, onClose, employeeData }) => {
           </button>
         </div>
 
-        
+
         <div className="overflow-y-auto flex-1 p-6">
-         
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
-            <img
-              src={employeeData.profileImage || "/default-profile.png"}
-              alt={employeeData.fullName || "Employee"}
-              className="w-32 h-32 rounded-full object-cover border-4 border-gray-700"
-            />
-            <div className="text-center md:text-left flex-1">
-              <div className="bg-gray-700/50 text-sm px-3 py-1 rounded inline-block mb-2">
-                {employeeData.employeeId}
-              </div>
-              <h3 className="text-3xl font-bold mb-1">{employeeData.fullName || "Unnamed Employee"}</h3>
-              <p className="text-purple-300 font-bold text-xl mb-4">{employeeData.position || employeeData.jobTitle || "No Position"}</p>
-              <div className="space-y-2">
-                <DetailItemWithIcon icon={<MdEmail size={18} />} label="Email" value={employeeData.email} />
-                <DetailItemWithIcon icon={<MdEmail size={18} />} label="Alternate Email" value={employeeData.alternateEmail} />
-                <DetailItemWithIcon icon={<FaPhoneAlt size={16} />} label="Phone" value={employeeData.phone} />
-                <DetailItemWithIcon icon={<FaMapMarkerAlt size={16} />} label="Address" value={employeeData.address} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Left: Profile Image and Basic Info */}
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <img
+                src={employeeData.profileImage || "/default-profile.png"}
+                alt={employeeData.fullName || "Employee"}
+                className="w-32 h-32 rounded-full object-cover border-4 border-gray-700"
+              />
+              <div className="text-center md:text-left flex-1">
+                <div className="bg-gray-700/50 text-sm px-3 py-1 rounded inline-block mb-2">
+                  {employeeData.employeeId}
+                </div>
+                <h3 className="text-3xl font-bold mb-1">{employeeData.fullName || "Unnamed Employee"}</h3>
+                <p className="text-purple-300 font-bold text-xl mb-4">{employeeData.position || employeeData.jobTitle || "No Position"}</p>
+                <div className="space-y-2">
+                  <DetailItemWithIcon icon={<MdEmail size={18} />} label="Email" value={employeeData.email} />
+                  <DetailItemWithIcon icon={<MdEmail size={18} />} label="Alternate Email" value={employeeData.alternateEmail} />
+                  <DetailItemWithIcon icon={<FaPhoneAlt size={16} />} label="Phone" value={employeeData.phone} />
+                  <DetailItemWithIcon icon={<FaMapMarkerAlt size={16} />} label="Address" value={employeeData.address} />
+                </div>
               </div>
             </div>
+
+            {/* Right: Personal Information */}
+            {hasPersonalInfo && (
+              <div>
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-3">
+                  <FaUser /> Personal Information
+                </h4>
+                <div className="space-y-3">
+                  <DetailItemWithIcon icon={<FaBirthdayCake />} label="Date of Birth" value={employeeData.dateOfBirth} isDate={true} />
+                  <DetailItemWithIcon icon={<FaVenusMars />} label="Gender" value={employeeData.gender} />
+                  <DetailItemWithIcon icon={<FaTint />} label="Blood Group" value={employeeData.bloodGroup} />
+                  <DetailItemWithIcon icon={<FaRing />} label="Marital Status" value={employeeData.maritalStatus} />
+                  <DetailItemWithIcon icon={<FaFlag />} label="Nationality" value={employeeData.nationality} />
+                  <DetailItemWithIcon icon={<FaLanguage />} label="Languages" value={employeeData.languages} />
+                </div>
+              </div>
+            )}
           </div>
 
-         
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-           
+
             <div className="space-y-6">
-              
-              
+
+
               {hasProfessionalInfo && (
                 <div>
                   <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-3">
                     <FaBriefcase /> Professional Information
                   </h4>
                   <div className="space-y-3">
-                    
-                    <DetailItemWithIcon icon={<FaMoneyBillWave />} label="Base Rate" value="$12/hr" />
+
+                    <DetailItemWithIcon icon={<FaMoneyBillWave />} label="Base Rate" value={`$${employeeData.rate}/hr`} />
                     <DetailItemWithIcon icon={<FaSitemap />} label="Department" value={employeeData.department} />
                     <DetailItemWithIcon icon={<FaCalendarAlt />} label="Joining Date" value={employeeData.joiningDate} isDate={true} />
                     <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Work Location" value={employeeData.workLocation} />
@@ -124,26 +145,9 @@ const EmployeeDetailModal = ({ isOpen, onClose, employeeData }) => {
                   </div>
                 </div>
               )}
-
-              {/* --- Personal Information (Conditional) --- */}
-              {hasPersonalInfo && (
-                <div>
-                  <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-3">
-                    <FaUser /> Personal Information
-                  </h4>
-                  <div className="space-y-3">
-                    <DetailItemWithIcon icon={<FaBirthdayCake />} label="Date of Birth" value={employeeData.dateOfBirth} isDate={true} />
-                    <DetailItemWithIcon icon={<FaVenusMars />} label="Gender" value={employeeData.gender} />
-                    <DetailItemWithIcon icon={<FaTint />} label="Blood Group" value={employeeData.bloodGroup} />
-                    <DetailItemWithIcon icon={<FaRing />} label="Marital Status" value={employeeData.maritalStatus} />
-                    <DetailItemWithIcon icon={<FaFlag />} label="Nationality" value={employeeData.nationality} />
-                    <DetailItemWithIcon icon={<FaLanguage />} label="Languages" value={employeeData.languages} />
-                  </div>
-                </div>
-              )}
             </div>
 
-          {/* Right Column */}
+            {/* Right Column */}
             <div className="space-y-6">
               {/* --- Emergency Contact (Conditional) --- */}
               {hasEmergencyInfo && (
@@ -173,7 +177,7 @@ const EmployeeDetailModal = ({ isOpen, onClose, employeeData }) => {
           </div>
         </div>
 
-        
+
       </div>
     </div>
   );
@@ -193,6 +197,7 @@ EmployeeDetailModal.propTypes = {
     department: PropTypes.string,
     jobTitle: PropTypes.string,
     phone: PropTypes.string,
+    rate: PropTypes.string,
     alternatePhone: PropTypes.string,
     emergencyContactName: PropTypes.string,
     emergencyContactPhone: PropTypes.string,
@@ -218,7 +223,7 @@ DetailItemWithIcon.propTypes = {
   icon: PropTypes.node.isRequired,
   label: PropTypes.string,
   value: PropTypes.string,
-  isDate: PropTypes.bool, 
+  isDate: PropTypes.bool,
 };
 
 export default EmployeeDetailModal;
