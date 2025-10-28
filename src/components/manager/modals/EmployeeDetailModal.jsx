@@ -60,10 +60,7 @@ const EmployeeDetailModal = ({ isOpen, onClose, employeeData }) => {
     employeeData.emergencyContactPhone ||
     employeeData.emergencyContactRelation;
 
-  const handleSendInvite = () => {
-    console.log(`Sending invitation to ${employeeData.email}`);
-    onClose(); 
-  };
+
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4">
@@ -176,23 +173,7 @@ const EmployeeDetailModal = ({ isOpen, onClose, employeeData }) => {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-6 border-t border-gray-700 flex flex-col sm:flex-row justify-end gap-3 bg-gray-800/95 backdrop-blur-sm shrink-0">
-          <button
-            onClick={onClose}
-            className="cancel-btn" 
-          >
-            Close
-          </button>
-         
-          <button
-            onClick={handleSendInvite}
-            className="btn flex items-center justify-center gap-2"
-          >
-            <FaPaperPlane />
-            Send Invitation
-          </button>
-        </div>
+        
       </div>
     </div>
   );

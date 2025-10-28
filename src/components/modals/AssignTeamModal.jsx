@@ -61,7 +61,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
       paymentTerms,
       responsibilities: responsibilitiesArray,
       deliverables: deliverablesArray,       
-      responseDeadline,
+      // responseDeadline,
     };
   
     setIsLoading(true);

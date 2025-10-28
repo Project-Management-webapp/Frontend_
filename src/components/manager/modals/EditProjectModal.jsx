@@ -112,9 +112,9 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
               <FormInput id="name" label="Project Name" value={formData.name} onChange={handleChange} required />
               <FormSelect id="projectType" label="Project Type" value={formData.projectType} onChange={handleChange}>
                 <option value="">Select Type</option>
-                <option value="web_development">Web Development</option>
-                <option value="mobile_app">Mobile App</option>
-                <option value="data_science">Data Science</option>
+                <option value="quoted">Quoted</option>
+                <option value="time and materials">Time & Material</option>
+                <option value="other">Other</option>
               </FormSelect>
             </div>
             <FormTextarea id="description" label="Description" value={formData.description} onChange={handleChange} rows={3} />
@@ -141,37 +141,26 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
             </div>
           </section>
 
-          {/* --- Client Info --- */}
+          {/* --- Company  Info --- */}
           <section>
-            <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1">Client Information</h3>
+            <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1">Company Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormInput id="clientName" label="Client Name" value={formData.clientName} onChange={handleChange} />
-              <FormInput id="clientEmail" label="Client Email" type="email" value={formData.clientEmail} onChange={handleChange} />
-              <FormInput id="clientPhone" label="Client Phone" value={formData.clientPhone} onChange={handleChange} />
-              <FormInput id="clientCompany" label="Client Company" value={formData.clientCompany} onChange={handleChange} />
+              <FormInput id="companyName" label="Company Name" value={formData.companyName} onChange={handleChange} />
+              <FormInput id="companyEmail" label="Company Email" type="email" value={formData.companyEmail} onChange={handleChange} />
+              <FormInput id="companyPhone" label="Company Phone" value={formData.companyPhone} onChange={handleChange} />
+              
             </div>
           </section>
 
-          {/* --- Technical Details --- */}
-          <section>
-            <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1">Technical Stack</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormInput id="technologies" label="Technologies" value={formData.technologies} onChange={handleChange} />
-              <FormInput id="frameworks" label="Frameworks" value={formData.frameworks} onChange={handleChange} />
-              <FormInput id="programmingLanguages" label="Languages" value={formData.programmingLanguages} onChange={handleChange} />
-              <FormInput id="database" label="Database" value={formData.database} onChange={handleChange} />
-              <FormInput id="cloudProvider" label="Cloud Provider" value={formData.cloudProvider} onChange={handleChange} />
-              <FormInput id="architecture" label="Architecture" value={formData.architecture} onChange={handleChange} />
-            </div>
-          </section>
+         
 
           {/* --- Financial Details --- */}
           <section>
             <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1">Financial Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormInput id="budget" label="Budget" type="number" value={formData.budget} onChange={handleChange} />
-              <FormInput id="allocatedAmount" label="Allocated Amount" type="number" value={formData.allocatedAmount} onChange={handleChange} />
-              <FormInput id="spentAmount" label="Spent Amount" type="number" value={formData.spentAmount} onChange={handleChange} />
+              <FormInput id="budget" label="Budget (USD)" type="number" value={formData.budget} onChange={handleChange} />
+              <FormInput id="allocatedAmount" label="Allocated Amount (USD)" type="number" value={formData.allocatedAmount} onChange={handleChange} />
+              <FormInput id="spentAmount" label="Spent Amount (USD)" type="number" value={formData.spentAmount} onChange={handleChange} />
               <FormSelect id="billingType" label="Billing Type" value={formData.billingType} onChange={handleChange}>
                 <option value="fixed_price">Fixed Price</option>
                 <option value="hourly">Hourly</option>

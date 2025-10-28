@@ -9,10 +9,10 @@ const EmployeeCard = ({ employee }) => {
   const department = employee.department || 'No Department';
   const profileImage = employee.profileImage || '/default-profile.png';
 
-  const handleSendInvite = (e) => {
-    e.stopPropagation();
-    console.log(`Sending invitation to ${employee.email}`);
-  };
+  // const handleSendInvite = (e) => {
+  //   e.stopPropagation();
+  //   console.log(`Sending invitation to ${employee.email}`);
+  // };
 
   return (
     <>
@@ -42,12 +42,12 @@ const EmployeeCard = ({ employee }) => {
           </div>
         </div>
         <div className="flex justify-end">
-        <button 
+        {/* <button 
           onClick={handleSendInvite}
           className="btn text-sm" 
         >
           Send Invitation
-        </button>
+        </button> */}
       </div>
       </div>
 

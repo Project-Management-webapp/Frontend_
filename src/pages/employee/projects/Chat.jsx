@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { IoSend, IoAttach, IoClose, IoCheckmarkDone } from "react-icons/io5";
+import { IoSend, IoAttach, IoClose, IoCheckmarkDone, IoDocumentText } from "react-icons/io5";
 import {
   FaProjectDiagram,
   FaBars,
@@ -8,6 +8,13 @@ import {
   FaEdit,
   FaTrash,
   FaEllipsisV,
+  FaReply,
+  FaFilePdf,
+  FaFileWord,
+  FaFileExcel,
+  FaFileImage,
+  FaFileAlt,
+  FaCheck,
 } from "react-icons/fa";
 import logo from "/login_logo.png";
 
@@ -22,8 +29,10 @@ import { getOngoingProjects } from "../../../api/employee/assignProject";
 const Chat = () => {
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
   const messageListRef = useRef(null);
+  const editTextareaRef = useRef(null);
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [currentMessages, setCurrentMessages] = useState([]);
@@ -35,6 +44,8 @@ const Chat = () => {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
   const [showOptionsForMessage, setShowOptionsForMessage] = useState(null);
+  const [error, setError] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null);
 
   useEffect(() => {
     fetchAssignedProjects();
@@ -79,14 +90,26 @@ const Chat = () => {
   const fetchAssignedProjects = async () => {
     try {
       setLoading(true);
+      setError(null); // Clear previous errors
       const response = await getOngoingProjects();
 
+      console.log("Full API Response:", response); // Debug log
+      console.log("Response.projects:", response.projects); // Debug log
+
       if (response.success && response.projects) {
+        console.log("Total projects received:", response.projects.length); // Debug log
+        
+        // Log all work statuses to see what we're getting
+        response.projects.forEach((assignment, index) => {
+          console.log(`Project ${index + 1} workStatus:`, assignment.workStatus);
+        });
+
         const acceptedProjects = response.projects.filter(
           (assignment) =>
-            assignment.assignmentStatus === "accepted" ||
-            assignment.assignmentStatus === "in_progress"
+            assignment.workStatus === "in_progress"
         );
+
+        console.log("Filtered in_progress projects:", acceptedProjects.length); // Debug log
 
         const formattedProjects = acceptedProjects.map((assignment) => ({
           id: assignment.project.id,
@@ -95,13 +118,20 @@ const Chat = () => {
           assignmentId: assignment.id,
         }));
 
+        console.log("Formatted projects:", formattedProjects); // Debug log
+
         setProjects(formattedProjects);
         if (formattedProjects.length > 0 && !selectedProjectId) {
           setSelectedProjectId(formattedProjects[0].id);
         }
+      } else {
+        console.error("Invalid response structure or no success flag:", response);
+        setError("Failed to load projects. Invalid response from server.");
       }
     } catch (error) {
-      console.error("Error fetching projects:", error.message || "Failed to fetch assigned projects");
+      console.error("Error fetching projects:", error);
+      console.error("Error details:", error.response || error.message);
+      setError(error.response?.data?.message || error.message || "Failed to fetch assigned projects");
     } finally {
       setLoading(false);
     }
@@ -137,19 +167,46 @@ const Chat = () => {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      setSelectedFiles(prev => [...prev, ...filesArray]);
       e.target.value = null;
+    }
+  };
+
+  const removeFile = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const getFileIcon = (fileName) => {
+    const extension = fileName.split('.').pop().toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return <FaFilePdf className="text-red-400" />;
+      case 'doc':
+      case 'docx':
+        return <FaFileWord className="text-blue-400" />;
+      case 'xls':
+      case 'xlsx':
+        return <FaFileExcel className="text-green-400" />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return <FaFileImage className="text-purple-400" />;
+      default:
+        return <FaFileAlt className="text-gray-400" />;
     }
   };
 
 const handleSendMessage = async (e) => {
     e.preventDefault();
-    // Allow sending if EITHER message OR file exists (and project is selected)
-    if ((!message.trim() && !selectedFile) || !selectedProjectId) return;
+    // Allow sending if EITHER message OR files exist (and project is selected)
+    if ((!message.trim() && selectedFiles.length === 0) || !selectedProjectId) return;
 
     const messageToSend = message;
-    const fileToSend = selectedFile;
+    const filesToSend = [...selectedFiles];
+    const replyToMessage = replyingTo;
 
     const tempId = Date.now();
     const newMessageOptimistic = {
@@ -159,49 +216,55 @@ const handleSendMessage = async (e) => {
       senderName: "You",
       senderImage: null,
       position: null,
-      attachments: fileToSend ? [{ name: fileToSend.name, size: fileToSend.size, url: URL.createObjectURL(fileToSend), temp: true }] : null,
+      attachments: filesToSend.map(file => ({ 
+        name: file.name, 
+        size: file.size, 
+        url: URL.createObjectURL(file), 
+        temp: true 
+      })),
       isEdited: false,
       createdAt: new Date().toISOString(),
       replyCount: 0,
       sending: true,
+      replyTo: replyToMessage ? {
+        id: replyToMessage.id,
+        content: replyToMessage.content,
+        senderName: replyToMessage.senderName
+      } : null,
     };
 
     setCurrentMessages(prevMessages => [...prevMessages, newMessageOptimistic]);
     setMessage("");
-    setSelectedFile(null);
+    setSelectedFiles([]);
+    setReplyingTo(null);
     if (fileInputRef.current) {
         fileInputRef.current.value = "";
     }
-
 
     try {
       setSendingMessage(true);
       const formData = new FormData();
 
-      // --- MODIFICATION START ---
-      // Only append content if it's not just whitespace OR if there's no file
-      if (messageToSend.trim() || !fileToSend) {
+      // Append content if it exists
+      if (messageToSend.trim()) {
          formData.append("content", messageToSend);
-      } else {
-         // If content is empty/whitespace BUT a file exists,
-         // you might choose to append an empty string if your backend requires the field,
-         // or omit it entirely if the backend handles its absence.
-         // Let's try omitting it first based on the error.
-         // If the backend STILL requires 'content', uncomment the next line:
-         // formData.append("content", "");
-         console.log("Sending attachment without text content.");
       }
-      // --- MODIFICATION END ---
-
+      
       formData.append("projectId", selectedProjectId);
 
-      if (fileToSend) {
-        formData.append("attachments", fileToSend);
+      // Append reply information if replying
+      if (replyToMessage) {
+        formData.append("replyToMessageId", replyToMessage.id);
       }
 
-      // --- Add console log to check FormData ---
+      // Append multiple files
+      if (filesToSend.length > 0) {
+        filesToSend.forEach((file) => {
+          formData.append("attachments", file);
+        });
+      }
+
       console.log('FormData entries:', [...formData.entries()]);
-      // --- End console log ---
 
       const response = await sendmessage(formData);
 
@@ -218,6 +281,7 @@ const handleSendMessage = async (e) => {
           isEdited: sentMessage.isEdited,
           createdAt: sentMessage.createdAt,
           replyCount: sentMessage.replyCount || 0,
+          replyTo: sentMessage.replyTo,
         };
         setCurrentMessages(prevMessages =>
           prevMessages.map(msg =>
@@ -230,7 +294,8 @@ const handleSendMessage = async (e) => {
         );
         console.error("Failed to send message:", response.message || "Unknown error");
         setMessage(messageToSend);
-        setSelectedFile(fileToSend);
+        setSelectedFiles(filesToSend);
+        setReplyingTo(replyToMessage);
       }
     } catch (error) {
       setCurrentMessages(prevMessages =>
@@ -238,7 +303,8 @@ const handleSendMessage = async (e) => {
       );
       console.error("Error sending message:", error.message || "Failed to send message");
       setMessage(messageToSend);
-      setSelectedFile(fileToSend);
+      setSelectedFiles(filesToSend);
+      setReplyingTo(replyToMessage);
     } finally {
       setSendingMessage(false);
     }
@@ -252,6 +318,20 @@ const handleSendMessage = async (e) => {
   const handleEditMessage = (msg) => {
     setEditingMessageId(msg.id);
     setEditingContent(msg.content);
+    setShowOptionsForMessage(null);
+    setTimeout(() => {
+      if (editTextareaRef.current) {
+        editTextareaRef.current.focus();
+        editTextareaRef.current.setSelectionRange(
+          editTextareaRef.current.value.length,
+          editTextareaRef.current.value.length
+        );
+      }
+    }, 0);
+  };
+
+  const handleReplyMessage = (msg) => {
+    setReplyingTo(msg);
     setShowOptionsForMessage(null);
   };
 
@@ -410,6 +490,18 @@ const handleSendMessage = async (e) => {
         </div>
 
         <div className="flex-grow overflow-y-auto">
+          {error && (
+            <div className="p-4 m-2 bg-red-900/50 border border-red-500 rounded text-red-200 text-sm">
+              <p className="font-semibold">Error loading projects:</p>
+              <p>{error}</p>
+              <button
+                onClick={fetchAssignedProjects}
+                className="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
+              >
+                Retry
+              </button>
+            </div>
+          )}
           {loading && projects.length === 0 ? (
             <>
               <ProjectSkeleton />
@@ -420,6 +512,9 @@ const handleSendMessage = async (e) => {
             <div className="p-4 text-center text-gray-400">
               <FaProjectDiagram className="mx-auto mb-2 text-4xl" />
               <p>No projects assigned</p>
+              <p className="text-xs mt-2 text-gray-500">
+                Projects with "in_progress" status will appear here
+              </p>
             </div>
           ) : (
             projects.map((project) => (
@@ -514,7 +609,7 @@ const handleSendMessage = async (e) => {
                       </div>
                     )}
 
-                    <div className="relative group flex items-start">
+                    <div className="relative group flex items-start w-full">
                       {isMyMessage && !isEditing && (
                         <div className="relative message-options-menu">
                           <button
@@ -528,10 +623,16 @@ const handleSendMessage = async (e) => {
                             <FaEllipsisV size={14} />
                           </button>
                           {showOptionsForMessage === msg.id && (
-                            <div className="absolute right-0 -mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 min-w-[120px]">
+                            <div className="absolute right-0 -mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 min-w-[140px]">
+                              <button
+                                onClick={() => handleReplyMessage(msg)}
+                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 flex items-center gap-2 text-green-400 rounded-t-lg"
+                              >
+                                <FaReply /> Reply
+                              </button>
                               <button
                                 onClick={() => handleEditMessage(msg)}
-                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 flex items-center gap-2 text-blue-400 rounded-t-lg"
+                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 flex items-center gap-2 text-blue-400"
                               >
                                 <FaEdit /> Edit
                               </button>
@@ -546,59 +647,109 @@ const handleSendMessage = async (e) => {
                         </div>
                       )}
 
+                      {!isMyMessage && !isEditing && (
+                        <div className="relative message-options-menu">
+                          <button
+                            onClick={() =>
+                              setShowOptionsForMessage(
+                                showOptionsForMessage === msg.id ? null : msg.id
+                              )
+                            }
+                            className="p-2 ml-1 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <FaEllipsisV size={14} />
+                          </button>
+                          {showOptionsForMessage === msg.id && (
+                            <div className="absolute left-0 -mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 min-w-[140px]">
+                              <button
+                                onClick={() => handleReplyMessage(msg)}
+                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 flex items-center gap-2 text-green-400 rounded-lg"
+                              >
+                                <FaReply /> Reply
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div
-                        className={`relative p-3 rounded-lg text-sm md:text-base break-words shadow-lg ${isMyMessage
-                          ? "bg-purple-600 text-white rounded-tr-none"
-                          : "bg-gray-700 text-gray-200 rounded-tl-none"
+                        className={`relative flex-1 rounded-lg text-sm md:text-base break-words shadow-lg ${isMyMessage
+                          ? "bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-tr-none"
+                          : "bg-gradient-to-br from-gray-700 to-gray-800 text-gray-100 rounded-tl-none"
                           }`}
                       >
                         {isEditing ? (
-                          <div className="space-y-2">
+                          <div className="p-4 space-y-3 bg-gray-900/30 rounded-lg backdrop-blur-sm">
+                            <div className="flex items-center gap-2 text-blue-400 mb-2">
+                              <FaEdit />
+                              <span className="text-xs font-semibold">Editing message</span>
+                            </div>
                             <textarea
+                              ref={editTextareaRef}
                               value={editingContent}
                               onChange={(e) =>
                                 setEditingContent(e.target.value)
                               }
-                              className="w-full bg-gray-800 text-white border border-gray-600 rounded p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[60px]"
-                              autoFocus
+                              className="w-full bg-gray-800 text-white border-2 border-purple-500/50 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[80px] resize-none"
+                              placeholder="Type your message..."
                             />
                             <div className="flex gap-2 justify-end">
                               <button
                                 onClick={handleCancelEdit}
-                                className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs"
+                                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                               >
-                                Cancel
+                                <IoClose /> Cancel
                               </button>
                               <button
                                 onClick={() => handleSaveEdit(msg.id)}
-                                className="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-xs"
+                                className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                               >
-                                Save
+                                <FaCheck /> Save Changes
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <>
-                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                          <div className="p-3">
+                            {/* Reply Preview */}
+                            {msg.replyTo && (
+                              <div className={`mb-2 pl-3 py-2 border-l-2 rounded text-xs opacity-80 ${
+                                isMyMessage ? 'border-purple-300 bg-black/20' : 'border-gray-500 bg-black/20'
+                              }`}>
+                                <div className="font-semibold mb-1">
+                                  <FaReply className="inline mr-1" />
+                                  Replying to {msg.replyTo.senderName}
+                                </div>
+                                <div className="truncate">{msg.replyTo.content}</div>
+                              </div>
+                            )}
+
+                            <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
 
                             {msg.attachments && msg.attachments.length > 0 && (
-                              <div className="mt-2 space-y-1">
+                              <div className="mt-3 space-y-2">
                                 {msg.attachments.map((file, index) => (
                                   <div
                                     key={index}
-                                    className="p-2 bg-black/20 rounded-md text-sm break-all"
+                                    className={`p-3 rounded-lg text-sm ${
+                                      isMyMessage ? 'bg-purple-800/40' : 'bg-gray-600/40'
+                                    }`}
                                   >
                                     <a
                                       href={file.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="hover:underline flex items-center gap-2"
+                                      className="hover:underline flex items-center gap-2 group"
                                     >
-                                      <IoAttach />
-                                      <span>
-                                        {file.name} (
-                                        {(file.size / 1024).toFixed(1)} KB)
-                                      </span>
+                                      <span className="text-lg">{getFileIcon(file.name)}</span>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="truncate font-medium group-hover:text-purple-300 transition-colors">
+                                          {file.name}
+                                        </div>
+                                        <div className="text-xs opacity-70">
+                                          {(file.size / 1024).toFixed(1)} KB
+                                        </div>
+                                      </div>
+                                      <IoAttach className="text-lg opacity-50" />
                                     </a>
                                   </div>
                                 ))}
@@ -606,7 +757,7 @@ const handleSendMessage = async (e) => {
                             )}
 
                             <div
-                              className={`flex items-center gap-1 mt-1 text-xs ${isMyMessage
+                              className={`flex items-center gap-1 mt-2 text-xs ${isMyMessage
                                 ? "justify-end text-purple-200"
                                 : "text-gray-400"
                                 }`}
@@ -629,7 +780,7 @@ const handleSendMessage = async (e) => {
                                 {msg.replyCount === 1 ? "reply" : "replies"}
                               </div>
                             )}
-                          </>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -663,62 +814,129 @@ const handleSendMessage = async (e) => {
         {selectedProjectId && (
           <form
             onSubmit={handleSendMessage}
-            className="p-4 border-t border-gray-700 flex-shrink-0 bg-gray-800"
+            className="border-t border-gray-700 flex-shrink-0 bg-gray-800"
           >
-            {selectedFile && (
-              <div className="mb-2 px-3 py-2 bg-gray-700 rounded-md text-sm flex justify-between items-center break-all">
-                <span>
-                  {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)}{" "}
-                  KB)
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedFile(null);
-                    if (fileInputRef.current) fileInputRef.current.value = "";
-                  }}
-                  className="text-gray-400 hover:text-white ml-2 shrink-0"
-                >
-                  <IoClose />
-                </button>
+            {/* Reply Preview */}
+            {replyingTo && (
+              <div className="px-4 pt-3 pb-2 bg-gray-700/50 border-b border-gray-600">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 text-xs text-purple-400 font-semibold mb-1">
+                      <FaReply />
+                      <span>Replying to {replyingTo.senderName}</span>
+                    </div>
+                    <p className="text-sm text-gray-300 truncate pl-5">
+                      {replyingTo.content}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setReplyingTo(null)}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <IoClose size={20} />
+                  </button>
+                </div>
               </div>
             )}
-            <div className="flex items-center md:gap-2 gap-0.5">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current.click()}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full"
-                aria-label="Attach file"
-                disabled={sendingMessage}
-              >
-                <IoAttach size={22} />
-              </button>
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1 bg-gray-900 border border-gray-700 rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                disabled={sendingMessage}
-              />
-              <button
-                type="submit"
-                className="p-2 bg-purple-600 hover:bg-purple-700 rounded-full text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Send message"
-                disabled={(!message.trim() && !selectedFile) || sendingMessage}
-              >
-                {sendingMessage ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                ) : (
-                  <IoSend size={20} />
-                )}
-              </button>
+
+            {/* Multiple Files Preview */}
+            {selectedFiles.length > 0 && (
+              <div className="px-4 pt-3 pb-2 space-y-2 bg-gray-700/30 border-b border-gray-600">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-gray-400 font-semibold">
+                    {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} attached
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFiles([])}
+                    className="text-xs text-red-400 hover:text-red-300"
+                  >
+                    Clear all
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg text-sm group hover:bg-gray-600 transition-colors"
+                    >
+                      <span className="text-lg">{getFileIcon(file.name)}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-medium text-gray-200">
+                          {file.name}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {(file.size / 1024).toFixed(1)} KB
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="text-gray-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <IoClose size={18} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Input Section */}
+            <div className="p-4">
+              <div className="flex items-center md:gap-2 gap-0.5">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  multiple
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current.click()}
+                  className={`p-2 hover:bg-gray-700 rounded-full transition-colors ${
+                    selectedFiles.length > 0 ? 'text-purple-400' : 'text-gray-400 hover:text-white'
+                  }`}
+                  aria-label="Attach files"
+                  disabled={sendingMessage}
+                  title="Attach files"
+                >
+                  <IoAttach size={22} />
+                </button>
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder={replyingTo ? "Type your reply..." : "Type your message..."}
+                  className="flex-1 bg-gray-900 border border-gray-700 rounded-full py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
+                  disabled={sendingMessage}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage(e);
+                    }
+                  }}
+                />
+                <button
+                  type="submit"
+                  className="p-2.5 bg-purple-600 hover:bg-purple-700 rounded-full text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg hover:shadow-purple-500/50"
+                  aria-label="Send message"
+                  disabled={(!message.trim() && selectedFiles.length === 0) || sendingMessage}
+                >
+                  {sendingMessage ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    <IoSend size={20} />
+                  )}
+                </button>
+              </div>
+              {(message.trim() || selectedFiles.length > 0) && (
+                <div className="text-xs text-gray-500 mt-2 px-2">
+                  Press Enter to send • Shift + Enter for new line
+                </div>
+              )}
             </div>
           </form>
         )}
