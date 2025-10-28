@@ -46,14 +46,9 @@ const ManagerProfileEditModal = ({ isOpen, onClose, userData, onSave, onShowToas
       
       dateOfBirth: formData.dateOfBirth,
       gender: formData.gender,
-      maritalStatus: formData.maritalStatus,
-      bloodGroup: formData.bloodGroup,
-      nationality: formData.nationality,
       languages: formData.languages,
 
       skills: formData.skills,
-      education: formData.education,
-      certifications: formData.certifications,
 
       emergencyContactName: formData.emergencyContactName,
       emergencyContactPhone: formData.emergencyContactPhone,
@@ -154,27 +149,13 @@ const ManagerProfileEditModal = ({ isOpen, onClose, userData, onSave, onShowToas
               <option value="other">Other</option>
               <option value="prefer_not_to_say">Prefer not to say</option>
             </FormSelect>
-            <FormSelect id="maritalStatus" label="Marital Status" value={formData.maritalStatus} onChange={handleChange}>
-              <option value="">Select...</option>
-              <option value="single">Single</option>
-              <option value="married">Married</option>
-              <option value="divorced">Divorced</option>
-              <option value="widowed">Widowed</option>
-            </FormSelect>
-            <FormSelect id="bloodGroup" label="Blood Group" value={formData.bloodGroup} onChange={handleChange}>
-              <option value="">Select...</option>
-              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-              <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
-            </FormSelect>
-            <FormInput id="nationality" label="Nationality" value={formData.nationality} onChange={handleChange} />
+           
             <FormInput id="languages" label="Languages (comma-separated)" value={formData.languages} onChange={handleChange} />
           </div>
 
           {/* --- Section 6: Qualifications --- */}
           <h3 className="text-lg font-semibold text-purple-300">Qualifications</h3>
           <FormTextarea id="skills" label="Skills (comma-separated)" value={formData.skills} onChange={handleChange} rows={2} />
-          <FormTextarea id="education" label="Education" value={formData.education} onChange={handleChange} rows={2} />
-          <FormTextarea id="certifications" label="Certifications (comma-separated)" value={formData.certifications} onChange={handleChange} rows={2} />
 
           {/* --- Section 7: Emergency Contact --- */}
           <h3 className="text-lg font-semibold text-purple-300">Emergency Contact</h3>

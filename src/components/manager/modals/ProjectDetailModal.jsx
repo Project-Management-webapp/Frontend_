@@ -12,7 +12,7 @@ import {
 import { formatDate } from '../../atoms/FormatedDate';
 
 const DetailRow = ({ label, value, isTag = false, isDate = false }) => {
-  if (!value && typeof value !== 'number') return null; 
+  if (!value && typeof value !== 'number') return null;
 
   let displayValue;
 
@@ -124,7 +124,7 @@ const ProjectDetailsModal = ({ project, onClose }) => {
 
         {/* Body (Refactored with Sections) */}
         <div className="flex-grow overflow-y-auto p-6 space-y-4">
-          
+
           <DetailSection title="General Info" icon={<IoInformationCircleOutline size={22} />}>
             <DetailRow label="Status" value={project.status} isTag />
             <DetailRow label="Priority" value={project.priority} isTag />
@@ -150,13 +150,13 @@ const ProjectDetailsModal = ({ project, onClose }) => {
             <DetailRow label="Spent Amount" value={`$${spentAmount.toLocaleString()}`} />
             <DetailRow label="Currency" value={project.currency} />
           </DetailSection>
-
-          <DetailSection title="Client Info" icon={<IoBusinessOutline size={22} />}>
-            <DetailRow label="Client Name" value={project.clientName} />
-            <DetailRow label="Client Company" value={project.clientCompany} />
-            <DetailRow label="Client Email" value={project.clientEmail} />
-            <DetailRow label="Client Phone" value={project.clientPhone} />
+          {/* company details */}
+          <DetailSection title="Company Info" icon={<IoBusinessOutline size={22} />}>
+            <DetailRow label="Company Name" value={project.companyName} />
+            <DetailRow label="Company Email" value={project.companyEmail} />
+            <DetailRow label="Company Phone" value={project.companyPhone} />
           </DetailSection>
+          
 
           {/* Milestones (List) */}
           {project.milestones?.length > 0 && (
@@ -179,7 +179,7 @@ const ProjectDetailsModal = ({ project, onClose }) => {
                 <DetailRow label="Team Size" value={project.teamSize} />
                 <DetailRow label="Team Lead" value={project.teamLead} />
               </div>
-              
+
               {/* List for individual assignments */}
               <div className="mt-4 space-y-4">
                 {project.assignments.map((a, idx) => (
@@ -191,9 +191,9 @@ const ProjectDetailsModal = ({ project, onClose }) => {
                     <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-x-6">
                       <DetailRow label="Work Status" value={a.workStatus} isTag />
                       <DetailRow label="Assigned Date" value={a.assignedDate} isDate />
-                      <DetailRow 
-                        label="Allocated Amount" 
-                        value={`$${(parseFloat(a.allocatedAmount) || 0).toLocaleString()}`} 
+                      <DetailRow
+                        label="Allocated Amount"
+                        value={`$${(parseFloat(a.allocatedAmount) || 0).toLocaleString()}`}
                       />
                       <DetailRow label="Payment Schedule" value={a.paymentSchedule} isTag />
                       <DetailRow label="Payment Terms" value={a.paymentTerms} />

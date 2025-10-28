@@ -7,7 +7,7 @@ import EmployeeLayout from "./pages/employee/EmployeeLayout";
 import ManagerLayout from "./pages/manager/ManagerLayout";
 import ResetPassword from "./pages/auth/ResetPassword";
 import ProtectedRoute from "./ProtectedRoute";
-import Chat from "./pages/employee/projects/Chat";
+import Chat from "./pages/employee/projects/chat/index";
 const Unauthorized = () => <div style={{ color: 'white', padding: '2rem' }}><h1>403 - Unauthorized</h1><p>You do not have permission to access this page.</p></div>;
 
 function App() {

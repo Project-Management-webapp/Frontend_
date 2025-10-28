@@ -58,7 +58,6 @@ const Dashboard = () => {
         employees = employeesRes.data.employees.rows;
       }
 
-      // --- Calculate Stats ---
       const activeCount = allProjects.filter(p =>
         ['in_progress', 'planning', 'review'].includes(p.status?.toLowerCase())
       ).length;
@@ -271,13 +270,10 @@ const Dashboard = () => {
   </h3>
   {isLoading ? (
     <div className="h-80 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+       <Skeleton className="h-full w-full" />
     </div>
   ) : (
     <ResponsiveContainer width="100%" height={350}>
-      {/* FIX: Added margin to the chart. 
-        'left: 30' provides space for the Y-axis labels.
-      */}
       <BarChart 
         data={projectFinancials} 
         margin={{ top: 5, right: 20, bottom: 50, left: 30 }}
@@ -305,7 +301,7 @@ const Dashboard = () => {
     </ResponsiveContainer>
   )}
 </div>
-      {/* --- End of New Chart --- */}
+      
 
 
       {/* Chart & Activity Row */}
@@ -318,7 +314,7 @@ const Dashboard = () => {
           </h3>
           {isLoading ? (
             <div className="h-80 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+              <Skeleton className="h-full w-full" />
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={300}>

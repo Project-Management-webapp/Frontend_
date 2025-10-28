@@ -2,20 +2,18 @@ import React, { useState, useRef, useEffect } from "react";
 import ManagerProfileEditModal from "../../components/manager/modals/ManagerProfileEditModal";
 import Toaster from "../../components/Toaster";
 import { getManagerProfile, updateManagerProfileImage } from "../../api/manager/auth";
-
+import { FaRegSadTear } from 'react-icons/fa';
 import {
-  FaClock ,
-  FaPencilAlt, FaBriefcase, FaSitemap, FaCalendarAlt, FaTint, FaRing,
-  FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt, FaInfoCircle,
-  FaLayerGroup, FaBirthdayCake, FaVenusMars, FaFlag, FaFileContract, FaCalendarCheck,
-  FaMoneyBillWave, FaTools, FaGraduationCap, FaCertificate, FaToggleOn, FaGlobe
+  FaPencilAlt, FaBriefcase, FaSitemap, FaCalendarAlt,
+  FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt, FaInfoCircle, FaBirthdayCake, FaVenusMars,
+   FaTools, FaGraduationCap,  FaToggleOn, FaGlobe
 } from 'react-icons/fa';
 import { IoMdClose } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
 
 const DetailItemWithIcon = ({ icon, label, value, isDate = false }) => {
   let displayValue = value;
-  let valueClass = "text-gray-400 text-sm break-words"; 
+  let valueClass = "text-gray-400 text-sm break-words";
 
   if (!value || value === 'N/A' || value === '0000-00-00') {
     displayValue = "N/A";
@@ -23,14 +21,14 @@ const DetailItemWithIcon = ({ icon, label, value, isDate = false }) => {
   } else if (isDate) {
     try {
       const date = new Date(value);
-      if (isNaN(date.getTime())) throw new Error('Invalid Date'); 
-      displayValue = date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      if (isNaN(date.getTime())) throw new Error('Invalid Date');
+      displayValue = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
     } catch (e) {
-      displayValue = "N/A"; 
+      displayValue = "N/A";
       valueClass = "text-gray-500 text-sm italic";
     }
   }
@@ -71,12 +69,12 @@ const Profile = () => {
           managerId: profile.managerId || "N/A",
           bio: profile.bio || null,
           profileImage: profile.profileImage || null,
-          
+
           // Contact
           phone: profile.phone || null,
           alternatePhone: profile.alternatePhone || null,
           alternateEmail: profile.alternateEmail || null,
-          
+
           // Address
           address: profile.address || null,
           city: profile.city || null,
@@ -85,31 +83,23 @@ const Profile = () => {
           zipCode: profile.zipCode || null,
 
           department: profile.department || null,
-          joiningDate: profile.joiningDate || profile.createdAt || null, 
+          joiningDate: profile.joiningDate || profile.createdAt || null,
           status: profile.status || null,
           timezone: profile.timezone || null,
 
           // Personal
           dateOfBirth: profile.dateOfBirth || null,
           gender: profile.gender || null,
-          maritalStatus: profile.maritalStatus || null,
-          // nationality: profile.nationality || null,
-          // bloodGroup: profile.bloodGroup || null,
           languages: profile.languages || null,
-          
+
           // Emergency Contact
           emergencyContactName: profile.emergencyContactName || null,
           emergencyContactPhone: profile.emergencyContactPhone || null,
           emergencyContactRelation: profile.emergencyContactRelation || null,
-          
-          // Compensation
-          // baseSalary: profile.baseSalary || null,
-          // currency: profile.currency || null,
-          
+
           // Qualifications
           skills: profile.skills || null,
-          education: profile.education || null,
-          certifications: profile.certifications || null,
+
         });
 
         setProfileImage(profile.profileImage || "/default-profile.png");
@@ -185,7 +175,22 @@ const Profile = () => {
     );
   }
 
-  if (!managerData) return <div className="text-white p-6">Profile not found.</div>;
+  if (!managerData) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-900 p-6 text-white">
+        <div className="text-center">
+          <FaRegSadTear className="mx-auto h-28 w-28 text-blue-500" />
+          <h2 className="mt-8 text-4xl font-extrabold">
+            Oops! Profile Not Found.
+          </h2>
+
+          <p className="mt-4 text-lg text-gray-300">
+            The profile you are trying to access does not exist or has been moved.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -221,7 +226,6 @@ const Profile = () => {
             </div>
             <h3 className="text-4xl font-bold">{managerData.fullName}</h3>
             <p className="text-purple-300 font-bold text-xl">{managerData.position}</p>
-            {/* --- MODIFIED: Using DetailItemWithIcon for consistency --- */}
             <div className="mt-4 space-y-2 text-sm text-gray-300">
               <DetailItemWithIcon icon={<MdEmail size={18} />} label="Email" value={managerData.email} />
               <DetailItemWithIcon icon={<FaPhoneAlt size={16} />} label="Phone" value={managerData.phone} />
@@ -235,38 +239,29 @@ const Profile = () => {
             <h3 className="text-3xl font-bold text-white">Manager Details</h3>
             <p className="text-sm md:text-base text-gray-400">Professional, personal, and emergency information.</p>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
-            
-           
+
+
             <div className="space-y-6">
               {/* Professional Info */}
               <div className="bg-black/10 p-4 rounded-lg">
                 <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaBriefcase /> Professional Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* <DetailItemWithIcon icon={<FaSitemap />} label="Role" value={managerData.role} /> */}
+
                   <DetailItemWithIcon icon={<FaSitemap />} label="Department" value={managerData.department} />
-                  {/* <DetailItemWithIcon icon={<FaLayerGroup />} label="Level" value={managerData.level} /> */}
-                  {/* <DetailItemWithIcon icon={<FaFileContract />} label="Contract Type" value={managerData.contractType} /> */}
                   <DetailItemWithIcon icon={<FaToggleOn />} label="Status" value={managerData.status} />
                   <DetailItemWithIcon icon={<FaGlobe />} label="Timezone" value={managerData.timezone} />
-                  {/* <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Work Location" value={managerData.workLocation} />
-                  <DetailItemWithIcon icon={<FaClock />} label="Schedule" value={managerData.workSchedule} /> */}
                   <DetailItemWithIcon icon={<FaCalendarAlt />} label="Joining Date" value={managerData.joiningDate} isDate={true} />
-                  {/* <DetailItemWithIcon icon={<FaCalendarCheck />} label="Probation End" value={managerData.probationEndDate} isDate={true} />
-                  <DetailItemWithIcon icon={<FaCalendarCheck />} label="Confirmation Date" value={managerData.confirmationDate} isDate={true} /> */}
                 </div>
               </div>
-              
+
               {/* Personal Info */}
               <div className="bg-black/10 p-4 rounded-lg">
                 <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaUser /> Personal Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <DetailItemWithIcon icon={<FaBirthdayCake />} label="Date of Birth" value={managerData.dateOfBirth} isDate={true} />
                   <DetailItemWithIcon icon={<FaVenusMars />} label="Gender" value={managerData.gender} />
-                 
-                  <DetailItemWithIcon icon={<FaRing />} label="Marital Status" value={managerData.maritalStatus} />
-                  <DetailItemWithIcon icon={<FaFlag />} label="Nationality" value={managerData.nationality} />
                   <DetailItemWithIcon icon={<FaLanguage />} label="Languages" value={managerData.languages} />
                 </div>
               </div>
@@ -276,14 +271,20 @@ const Profile = () => {
                 <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaGraduationCap /> Qualifications</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <DetailItemWithIcon icon={<FaTools />} label="Skills" value={managerData.skills} />
-                  <DetailItemWithIcon icon={<FaGraduationCap />} label="Education" value={managerData.education} />
-                  <DetailItemWithIcon icon={<FaCertificate />} label="Certifications" value={managerData.certifications} />
                 </div>
               </div>
 
+              {/* Bio */}
+              <div className="bg-black/10 p-4 rounded-lg">
+                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaInfoCircle /> Bio</h4>
+                <p className={!managerData.bio ? "text-gray-500 text-sm italic" : "text-gray-400 text-sm border-l-2 border-purple-400 pl-3"}>
+                  {managerData.bio || "N/A"}
+                </p>
+              </div>
+
             </div>
-            
-           
+
+
             <div className="space-y-6">
               {/* Contact & Address */}
               <div className="bg-black/10 p-4 rounded-lg">
@@ -298,7 +299,7 @@ const Profile = () => {
                   <DetailItemWithIcon icon={<FaMapMarkerAlt />} label="Zip Code" value={managerData.zipCode} />
                 </div>
               </div>
-              
+
               {/* Emergency Contact */}
               <div className="bg-black/10 p-4 rounded-lg">
                 <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaHeartbeat /> Emergency Contact</h4>
@@ -308,27 +309,10 @@ const Profile = () => {
                   <DetailItemWithIcon icon={<FaSitemap />} label="Relation" value={managerData.emergencyContactRelation} />
                 </div>
               </div>
-              
-              {/* Compensation */}
-              {/* <div className="bg-black/10 p-4 rounded-lg">
-                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaMoneyBillWave /> Compensation</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <DetailItemWithIcon 
-                    icon={<FaMoneyBillWave />} 
-                    label="Base Salary" 
-                    value={managerData.baseSalary ? parseFloat(managerData.baseSalary).toLocaleString() : null} 
-                  />
-                  <DetailItemWithIcon icon={<FaMoneyBillWave />} label="Currency" value={managerData.currency} />
-                </div>
-              </div> */}
 
-              {/* Bio */}
-              <div className="bg-black/10 p-4 rounded-lg">
-                <h4 className="flex items-center text-lg gap-2 text-purple-300 font-semibold mb-4"><FaInfoCircle /> Bio</h4>
-                <p className={!managerData.bio ? "text-gray-500 text-sm italic" : "text-gray-400 text-sm border-l-2 border-purple-400 pl-3"}>
-                  {managerData.bio || "N/A"}
-                </p>
-              </div>
+
+
+
             </div>
           </div>
 
@@ -336,7 +320,7 @@ const Profile = () => {
       </div>
       {isImageModalOpen && (<div className="fixed inset-0 bg-black/80 flex justify-center items-center z-50" onClick={() => setIsImageModalOpen(false)}><img src={profileImage} alt="Profile Preview" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" /><button className="absolute top-5 right-5 text-white text-3xl cursor-pointer hover:text-purple-300"><IoMdClose /></button></div>)}
       {isEditModalOpen && (<ManagerProfileEditModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} userData={managerData} onShowToast={setToast} onSave={handleProfileUpdate} />)}
-     
+
       <div className="relative z-[9999]">
         {toast.show && (<Toaster message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />)}
       </div>

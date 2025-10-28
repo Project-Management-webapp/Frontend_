@@ -99,6 +99,32 @@ const Notification = () => {
         setExpandedId(currentId => (currentId === id ? null : id));
     };
 
+    // Skeleton Loading Component
+    const NotificationSkeleton = () => (
+        <div className="flex gap-4 p-4 rounded-lg bg-black/20 animate-pulse">
+            {/* Icon Skeleton */}
+            <div className="w-10 h-10 rounded-full bg-gray-700/50 shrink-0"></div>
+            
+            {/* Content Skeleton */}
+            <div className="flex-1 space-y-2">
+                {/* Title and Time */}
+                <div className="flex justify-between items-start gap-2">
+                    <div className="h-5 bg-gray-700/50 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-700/50 rounded w-16 shrink-0"></div>
+                </div>
+                
+                {/* Message Lines */}
+                <div className="space-y-1.5">
+                    <div className="h-4 bg-gray-700/50 rounded w-full"></div>
+                    <div className="h-4 bg-gray-700/50 rounded w-5/6"></div>
+                </div>
+                
+                {/* Type Badge */}
+                <div className="h-5 bg-gray-700/50 rounded-full w-24"></div>
+            </div>
+        </div>
+    );
+
     const filteredNotifications = filterType === 'all' 
         ? notifications 
         : notifications.filter(n => n.type === filterType);
@@ -133,8 +159,12 @@ const Notification = () => {
 
             <div className="bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-4">
                 {loading ? (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400"></div>
+                    <div className="space-y-4">
+                        <NotificationSkeleton />
+                        <NotificationSkeleton />
+                        <NotificationSkeleton />
+                        <NotificationSkeleton />
+                        <NotificationSkeleton />
                     </div>
                 ) : (
                     <div className="space-y-4">
