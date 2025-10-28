@@ -84,16 +84,8 @@ const Profile = () => {
           country: profile.country || null,
           zipCode: profile.zipCode || null,
 
-          // Professional
-          // role: profile.role || null,
           department: profile.department || null,
-          // level: profile.level || null,
-          joiningDate: profile.joiningDate || profile.createdAt || null, // Use createdAt as fallback
-          // contractType: profile.contractType || null,
-          // workLocation: profile.workLocation || null,
-          // workSchedule: profile.workSchedule || null,
-          // probationEndDate: profile.probationEndDate || null,
-          // confirmationDate: profile.confirmationDate || null,
+          joiningDate: profile.joiningDate || profile.createdAt || null, 
           status: profile.status || null,
           timezone: profile.timezone || null,
 
@@ -101,8 +93,8 @@ const Profile = () => {
           dateOfBirth: profile.dateOfBirth || null,
           gender: profile.gender || null,
           maritalStatus: profile.maritalStatus || null,
-          nationality: profile.nationality || null,
-          bloodGroup: profile.bloodGroup || null,
+          // nationality: profile.nationality || null,
+          // bloodGroup: profile.bloodGroup || null,
           languages: profile.languages || null,
           
           // Emergency Contact
@@ -272,7 +264,7 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <DetailItemWithIcon icon={<FaBirthdayCake />} label="Date of Birth" value={managerData.dateOfBirth} isDate={true} />
                   <DetailItemWithIcon icon={<FaVenusMars />} label="Gender" value={managerData.gender} />
-                  <DetailItemWithIcon icon={<FaTint />} label="Blood Group" value={managerData.bloodGroup} />
+                 
                   <DetailItemWithIcon icon={<FaRing />} label="Marital Status" value={managerData.maritalStatus} />
                   <DetailItemWithIcon icon={<FaFlag />} label="Nationality" value={managerData.nationality} />
                   <DetailItemWithIcon icon={<FaLanguage />} label="Languages" value={managerData.languages} />

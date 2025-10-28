@@ -33,13 +33,3 @@ export const requestPayment = async (paymentData) => {
   }
 };
 
-// Confirm payment received
-export const confirmPaymentReceived = async (paymentId) => {
-  try {
-    const response = await api.post(`/employee/payments/${paymentId}/confirm`);
-    return response.data;
-  } catch (error) {
-    console.error("Error confirming payment:", error);
-    throw error.response?.data || error;
-  }
-};

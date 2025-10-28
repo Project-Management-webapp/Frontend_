@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { IoMdClose } from "react-icons/io";
 import { toast } from "react-hot-toast";
-import { getMyAssignments } from "../../../api/employee/assignProject"; 
+import { getCompletedProjects } from "../../../api/employee/assignProject"; 
 import { requestPayment } from "../../../api/employee/payment";
 import { FiInbox, FiClock, FiDollarSign } from "react-icons/fi";
 import { formatDate } from "../../../components/atoms/FormatedDate";
@@ -186,8 +186,7 @@ const RequestPayment = () => {
   const fetchVerfiedProjects = useCallback(async () => {
     setIsLoading(true);
     try {
-      // --- FIX 4: Call the correct API ---
-      const response = await getMyAssignments(); 
+      const response = await getCompletedProjects(); 
       if (response.success) {
         setAllAssignments(response.projects || []);
       } else {

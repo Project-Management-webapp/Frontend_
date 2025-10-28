@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { RiAddLine, RiSearchLine, RiMoneyDollarCircleLine, RiCheckLine, RiHourglassFill } from "react-icons/ri"; // Added RiHourglassFill
 import { toast } from "react-hot-toast";
-import { getMyPayments, confirmPaymentReceived } from "../../../api/employee/payment"; // Assuming confirmPaymentReceived API exists
+import { getMyPayments } from "../../../api/employee/payment";
 import PaymentStatusBadge from "../../../components/payments/PaymentStatusBadge"; // Assuming this component exists
 
 // --- Skeleton Loaders ---
@@ -43,7 +43,6 @@ const Payments = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [confirmingId, setConfirmingId] = useState(null);
   
   // State for calculated stats
   const [stats, setStats] = useState({ totalEarned: 0, pendingAmount: 0, approvedCount: 0 });
@@ -93,26 +92,6 @@ const Payments = () => {
       .filter(p => p.status === "approved").length; // Count approved payments
 
     setStats({ totalEarned, pendingAmount, approvedCount });
-  };
-
-
-  const handleConfirmPayment = async (paymentId) => {
-    // Basic confirmation dialog
-    if (!window.confirm("Are you sure you want to confirm receipt of this payment?")) {
-      return;
-    }
-
-    try {
-      setConfirmingId(paymentId);
-      await confirmPaymentReceived(paymentId); // Call your API function
-      toast.success("Payment confirmed successfully!");
-      fetchPayments(); // Re-fetch payments to update the list and stats
-    } catch (error) {
-      console.error("Error confirming payment:", error);
-      toast.error(error.message || "Failed to confirm payment");
-    } finally {
-      setConfirmingId(null);
-    }
   };
 
   // Updated filter logic
@@ -240,19 +219,6 @@ const Payments = () => {
                       Notes: {payment.requestNotes || 'No notes provided'}
                    </p>
                 </div>
-
-                {/* Right Side: Confirm Button */}
-                {/* Show button only if approved AND not yet confirmed by employee */}
-                {payment.status === "approved" && !payment.employeeConfirmation && (
-                  <button
-                    onClick={() => handleConfirmPayment(payment.id)}
-                    disabled={confirmingId === payment.id}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                  >
-                    <RiCheckLine size={18} />
-                    {confirmingId === payment.id ? "Confirming..." : "Confirm Received"}
-                  </button>
-                )}
               </div>
 
               {/* Bottom Section: Dates and Details */}

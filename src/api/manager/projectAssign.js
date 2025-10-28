@@ -39,33 +39,3 @@ export const removeEmployeeFromProject = async (assignmentId) => {
     throw error.response?.data || { message: 'Failed to remove employee from project' };
   }
 };
-
-// Verify submitted work
-export const verifyWork = async (assignmentId, verificationData) => {
-  try {
-    const response = await api.post(`/manager/project-assignments/${assignmentId}/verify-work`, verificationData);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: 'Failed to verify work' };
-  }
-};
-
-// Reject submitted work
-export const rejectWork = async (assignmentId, rejectionData) => {
-  try {
-    const response = await api.post(`/manager/project-assignments/${assignmentId}/reject-work`, rejectionData);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: 'Failed to reject work' };
-  }
-};
-
-// Request revision
-export const requestRevision = async (assignmentId, revisionData) => {
-  try {
-    const response = await api.post(`/manager/project-assignments/${assignmentId}/request-revision`, revisionData);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: 'Failed to request revision' };
-  }
-};

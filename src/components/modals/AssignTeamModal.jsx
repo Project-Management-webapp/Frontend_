@@ -14,7 +14,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
   const [paymentTerms, setPaymentTerms] = useState('');
   const [responsibilities, setResponsibilities] = useState('');
   const [deliverables, setDeliverables] = useState('');
-  const [responseDeadline, setResponseDeadline] = useState('');
+  // const [responseDeadline, setResponseDeadline] = useState('');
   const [userList, setUserList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -193,15 +193,8 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               id="deliverables"
               label="Deliverables"
               value={deliverables}
-              onChange={(e) => setDeliverables(e.g.target.value)}
+              onChange={(e) => setDeliverables(e.target.value)}
               placeholder="Enter deliverables (one per line)"
-            />
-            <FormInput
-              id="responseDeadline"
-              label="Response Deadline"
-              type="datetime-local"
-              value={responseDeadline}
-              onChange={(e) => setResponseDeadline(e.target.value)}
             />
           </form>
 

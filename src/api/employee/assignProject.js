@@ -1,15 +1,5 @@
 import api from "../index";
 
-// Get all my assignments (with optional filters)
-export const getMyAssignments = async () => {
-  try {
-    const response = await api.get(`employee/project-assignments/my-assignments`);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: "Failed to get assignments" };
-  }
-};
-
 // Get ongoing projects (currently working on)
 export const getOngoingProjects = async () => {
   try {
@@ -27,16 +17,6 @@ export const getCompletedProjects = async () => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Failed to fetch completed projects" };
-  }
-};
-
-// Get all accepted projects (both ongoing and completed)
-export const getAcceptedProjects = async () => {
-  try {
-    const response = await api.get(`employee/project-assignments/accepted`);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: "Failed to fetch accepted projects" };
   }
 };
 
@@ -60,18 +40,13 @@ export const getProjectTeammates = async (projectId) => {
   }
 };
 
-// Accept assignment
-export const acceptAssignment = async (assignmentId) => {
+// Submit work
+export const submitWork = async (assignmentId) => {
   try {
-    const response = await api.post(`employee/project-assignments/${assignmentId}/accept`);
+    const response = await api.post(`employee/project-assignments/${assignmentId}/submit-work`);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: "Failed to accept assignment" };
+    throw error.response?.data || { message: "Failed to submit work" };
   }
 };
 
-
-// Submit work
-export const submitWork = async (assignmentId) => {
-  console.log("Submitting work for assignment:", assignmentId);
-};
