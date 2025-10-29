@@ -30,8 +30,6 @@ export const createTicket = async (ticketData) => {
     formData.append("description", ticketData.description);
     formData.append("priority", ticketData.priority);
     formData.append("category", ticketData.category);
-
-    // Add attachments if any
     if (ticketData.attachments && ticketData.attachments.length > 0) {
       ticketData.attachments.forEach((file) => {
         formData.append("attachments", file);

@@ -83,15 +83,3 @@ export const updateManagerProfileImage = async (imageFile) => {
     throw error.response?.data || { message: 'Image upload failed' };
   }
 };
-
-// export const managerChangePassword = async (oldPassword, newPassword) => {
-//   try {
-//     const response = await api.post('/manager/change-password', {
-//       oldPassword,
-//       newPassword
-//     });
-//     return response.data;
-//   } catch (error) {
-//     throw error.response?.data || { message: 'Failed to change password' };
-//   }
-// };

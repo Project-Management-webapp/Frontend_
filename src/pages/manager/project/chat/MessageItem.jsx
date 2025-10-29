@@ -41,31 +41,35 @@ const MessageItem = ({
     setLoadedImages(prev => ({ ...prev, [index]: true }));
   };
 
-  // Highlight @mentions in message content
+  // Highlight @mentions in message content - WhatsApp style
   const renderContentWithMentions = (content) => {
     if (!content) return null;
     
-    const mentionRegex = /@([A-Za-z]+(?:\s+[A-Za-z]+)*)/g;
+    // Match @username or @email patterns
+    const mentionRegex = /@([A-Za-z0-9._-]+(?:@[A-Za-z0-9.-]+\.[A-Za-z]{2,})?|\w+(?:\s+\w+)*)/g;
     const parts = [];
     let lastIndex = 0;
     let match;
     let keyIndex = 0;
 
     while ((match = mentionRegex.exec(content)) !== null) {
-      // Add text before mention
+      // Add text before mention (normal text)
       if (match.index > lastIndex) {
         parts.push(
-          <React.Fragment key={`text-${keyIndex++}`}>
+          <span key={`text-${keyIndex++}`} className="font-normal">
             {content.substring(lastIndex, match.index)}
-          </React.Fragment>
+          </span>
         );
       }
-      
-      // Add highlighted mention (only the @name part)
+      // Add the mention with special styling
       parts.push(
         <span
           key={`mention-${keyIndex++}`}
-          className="bg-purple-500/20 text-purple-300 font-semibold px-1 rounded"
+          className={`font-bold ${
+            isMyMessage 
+              ? "text-green-400 bg-purple-700/40" 
+              : "text-green-400 bg-blue-900/20"
+          } px-0.5 rounded`}
         >
           {match[0]}
         </span>
@@ -74,16 +78,16 @@ const MessageItem = ({
       lastIndex = match.index + match[0].length;
     }
 
-    // Add remaining text
+    // Add remaining text (normal text)
     if (lastIndex < content.length) {
       parts.push(
-        <React.Fragment key={`text-${keyIndex++}`}>
+        <span key={`text-${keyIndex++}`} className="font-normal">
           {content.substring(lastIndex)}
-        </React.Fragment>
+        </span>
       );
     }
 
-    return parts.length > 0 ? parts : content;
+    return parts.length > 0 ? parts : <span className="font-normal">{content}</span>;
   };
 
   return (

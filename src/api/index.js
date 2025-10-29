@@ -8,7 +8,6 @@ const api = axios.create({
 // Add request interceptor to set Content-Type dynamically
 api.interceptors.request.use(
   (config) => {
-    // If the data is FormData, let the browser set the Content-Type with boundary
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     } else {

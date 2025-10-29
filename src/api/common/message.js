@@ -1,13 +1,11 @@
 import api from "../index";
 
-// Send message with attachments
 export const sendMessage = async (messageData) => {
   try {
     const formData = new FormData();
     formData.append("projectId", messageData.projectId);
     formData.append("content", messageData.content);
 
-    // Add attachments if any
     if (messageData.attachments && messageData.attachments.length > 0) {
       messageData.attachments.forEach((file) => {
         formData.append("attachments", file);
@@ -64,8 +62,6 @@ export const replyToMessage = async (messageId, replyData) => {
   try {
     const formData = new FormData();
     formData.append("content", replyData.content);
-
-    // Add attachments if any
     if (replyData.attachments && replyData.attachments.length > 0) {
       replyData.attachments.forEach((file) => {
         formData.append("attachments", file);
