@@ -14,6 +14,7 @@ export const useSocket = () => {
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [userStatuses, setUserStatuses] = useState({}); // Track online/offline status of users
 
   useEffect(() => {
     // Get backend URL from environment or default
@@ -32,6 +33,15 @@ export const SocketProvider = ({ children }) => {
     socketInstance.on('connect', () => {
       console.log('✅ Socket connected:', socketInstance.id);
       setIsConnected(true);
+      
+      // Register user as online when connected
+      const userId = localStorage.getItem('userId');
+      const userName = localStorage.getItem('fullName') || 'User';
+      const userRole = localStorage.getItem('userRole');
+      
+      if (userId) {
+        socketInstance.emit('user_online', { userId, userName, userRole });
+      }
     });
 
     socketInstance.on('disconnect', () => {
@@ -42,6 +52,12 @@ export const SocketProvider = ({ children }) => {
     socketInstance.on('connect_error', (error) => {
       console.error('Socket connection error:', error);
       setIsConnected(false);
+    });
+
+    // Listen for user status changes
+    socketInstance.on('user_status_changed', ({ userId, status }) => {
+      console.log(`👤 User ${userId} is now ${status}`);
+      setUserStatuses(prev => ({ ...prev, [userId]: status }));
     });
 
     setSocket(socketInstance);
@@ -55,7 +71,8 @@ export const SocketProvider = ({ children }) => {
     if (socket && projectId) {
       // Ensure projectId is consistent (convert to string for room name)
       const projectIdStr = String(projectId);
-      socket.emit('join_project', projectIdStr);
+      const userId = localStorage.getItem('userId');
+      socket.emit('join_project', { projectId: projectIdStr, userId });
       console.log(`📍 Emitted join_project for: ${projectIdStr}`);
     } else {
       console.log('⚠ Cannot join project - socket:', !!socket, 'projectId:', projectId);
@@ -82,13 +99,26 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
+  const checkUserStatus = (userId, callback) => {
+    if (socket && userId) {
+      socket.emit('check_user_status', { userId }, callback);
+    }
+  };
+
+  const getUserStatus = (userId) => {
+    return userStatuses[userId] || 'offline';
+  };
+
   const value = {
     socket,
     isConnected,
+    userStatuses,
     joinProject,
     leaveProject,
     emitTyping,
     emitStopTyping,
+    checkUserStatus,
+    getUserStatus,
   };
 
   return (

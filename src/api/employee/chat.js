@@ -42,3 +42,21 @@ export const getmessage = async (id) => {
     throw error.response?.data || { message: 'Something went wrong while fetching messages' };
   }
 };
+
+export const getProjectsWithMentions = async () => {
+  try {
+    const response = await api.get('/messages/mentions/projects');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Something went wrong while fetching mentions' };
+  }
+};
+
+export const markMentionsAsViewed = async (projectId) => {
+  try {
+    const response = await api.post(`/messages/mentions/viewed/${projectId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Something went wrong while marking mentions as viewed' };
+  }
+};

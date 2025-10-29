@@ -9,7 +9,8 @@ import {
   FiX,
   FiUser,
   FiLogOut,
-  FiDollarSign
+  FiDollarSign,
+  FiMessageSquare
 } from "react-icons/fi";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { RiCustomerService2Line } from "react-icons/ri";
@@ -83,6 +84,14 @@ const Sidebar = ({
           collapsed={isCollapsed}
           active={activeView === 'projects'}
           onClick={() => handleItemClick('projects')}
+        />
+
+        <SidebarItem
+          icon={<FiMessageSquare size={20} />}
+          text="Chat"
+          collapsed={isCollapsed}
+          active={activeView === 'chat'}
+          onClick={() => handleItemClick('chat')}
         />
 
         <SidebarItem

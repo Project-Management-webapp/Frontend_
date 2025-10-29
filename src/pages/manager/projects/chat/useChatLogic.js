@@ -7,9 +7,9 @@ import {
   replymessage,
   getProjectsWithMentions,
   markMentionsAsViewed,
-} from "../../../../api/employee/chat";
-import { getOngoingProjects } from "../../../../api/employee/assignProject";
-import { getProjectById } from "../../../../api/employee/project";
+} from "../../../../api/manager/chat";
+import { getAllProjectAssignments } from "../../../../api/manager/projectAssign";
+import { getProjectById } from "../../../../api/manager/project";
 import { useSocket } from "../../../../context/SocketContext";
 
 export const useChatLogic = () => {
@@ -236,18 +236,17 @@ export const useChatLogic = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getOngoingProjects();
+      const response = await getAllProjectAssignments();
 
-      if (response.success && response.projects) {
-        const acceptedProjects = response.projects.filter(
-          (assignment) => assignment.workStatus === "in_progress"
-        );
+      if (response.success && response.data && response.data.projects) {
+        // Manager can see all projects
+        const allProjects = response.data.projects.rows;
 
-        const formattedProjects = acceptedProjects.map((assignment) => ({
-          id: assignment.project.id,
-          name: assignment.project.name,
-          description: assignment.project.description,
-          assignmentId: assignment.id,
+        const formattedProjects = allProjects.map((project) => ({
+          id: project.id,
+          name: project.name,
+          description: project.description,
+          status: project.status,
         }));
 
         setProjects(formattedProjects);
@@ -283,7 +282,7 @@ export const useChatLogic = () => {
       setError(
         error.response?.data?.message ||
           error.message ||
-          "Failed to fetch assigned projects"
+          "Failed to fetch projects"
       );
     } finally {
       setLoading(false);
