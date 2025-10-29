@@ -36,7 +36,7 @@ export const deletemessage = async (id) => {
 };
 export const getmessage = async (id) => {
   try {
-    const response = await api.get(`/messages/project/${id}`);
+    const response = await api.get(`messages/project/${id}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Something went wrong while fetching messages' };

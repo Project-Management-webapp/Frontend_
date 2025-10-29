@@ -4,8 +4,11 @@ import {
   getmessage,
   updatemessage,
   deletemessage,
+  replymessage,
 } from "../../../../api/employee/chat";
 import { getOngoingProjects } from "../../../../api/employee/assignProject";
+import { getProjectById } from "../../../../api/employee/project";
+import { useSocket } from "../../../../context/SocketContext";
 
 export const useChatLogic = () => {
   const [message, setMessage] = useState("");
@@ -25,6 +28,12 @@ export const useChatLogic = () => {
   const [showOptionsForMessage, setShowOptionsForMessage] = useState(null);
   const [error, setError] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [selectedProjectDetails, setSelectedProjectDetails] = useState(null);
+  const [typingUsers, setTypingUsers] = useState([]);
+  const typingTimeoutRef = useRef(null);
+
+  const { socket, isConnected, joinProject, leaveProject, emitTyping, emitStopTyping } = useSocket();
 
   useEffect(() => {
     fetchAssignedProjects();
@@ -34,6 +43,12 @@ export const useChatLogic = () => {
         const userIdInt = parseInt(userIdString, 10);
         setCurrentUserId(userIdInt);
       }
+      
+      // Restore last selected project from localStorage
+      const lastSelectedProject = localStorage.getItem("lastSelectedProjectId");
+      if (lastSelectedProject) {
+        setSelectedProjectId(parseInt(lastSelectedProject, 10));
+      }
     } catch (e) {
       console.error("Failed to parse user from localStorage", e);
     }
@@ -42,8 +57,21 @@ export const useChatLogic = () => {
   useEffect(() => {
     if (selectedProjectId) {
       fetchProjectMessages(selectedProjectId);
+      fetchProjectDetails(selectedProjectId);
+      
+      // Join socket room for this project
+      if (socket && isConnected) {
+        joinProject(selectedProjectId);
+      }
+
+      // Cleanup: leave room when switching projects
+      return () => {
+        if (socket && isConnected) {
+          leaveProject(selectedProjectId);
+        }
+      };
     }
-  }, [selectedProjectId]);
+  }, [selectedProjectId, socket, isConnected]);
 
   useEffect(() => {
     if (messageListRef.current) {
@@ -65,6 +93,142 @@ export const useChatLogic = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showOptionsForMessage]);
 
+  // Socket event listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for room join notifications
+    socket.on('user_joined_room', ({ socketId, projectId, timestamp }) => {
+      console.log('👤 User joined room:', { socketId, projectId, timestamp });
+    });
+
+    // Listen for new messages
+    socket.on('new_message', ({ message: newMsg, projectId }) => {
+      console.log('📨 Received new_message event:', { 
+        messageId: newMsg?.id,
+        senderId: newMsg?.senderId,
+        isReply: !!newMsg.replyToMessageId,
+        hasParentMessage: !!newMsg.parentMessage,
+        projectId, 
+        selectedProjectId, 
+        currentUserId,
+        projectIdMatch: String(projectId) === String(selectedProjectId)
+      });
+      
+      // Compare as strings to handle type inconsistencies
+      if (String(projectId) === String(selectedProjectId)) {
+        const formattedMessage = {
+          id: newMsg.id,
+          content: newMsg.content,
+          senderId: newMsg.senderId,
+          senderName: newMsg.sender?.fullName || newMsg.sender?.email || "Unknown",
+          senderImage: newMsg.sender?.profileImage,
+          position: newMsg.sender?.position,
+          attachments: newMsg.attachments,
+          isEdited: newMsg.isEdited,
+          createdAt: newMsg.createdAt,
+          replyCount: 0,
+          hasReplies: false,
+          isReply: !!newMsg.replyToMessageId,
+          replyTo: newMsg.parentMessage ? {
+            id: newMsg.parentMessage.id,
+            content: newMsg.parentMessage.content,
+            senderName: newMsg.parentMessage.sender?.fullName || newMsg.parentMessage.sender?.email || "Unknown",
+            senderId: newMsg.parentMessage.senderId || newMsg.parentMessage.sender?.id
+          } : null,
+        };
+
+        console.log('✅ Formatted message:', {
+          id: formattedMessage.id,
+          isReply: formattedMessage.isReply,
+          hasReplyTo: !!formattedMessage.replyTo,
+          replyToContent: formattedMessage.replyTo?.content
+        });
+
+        // If it's from current user, replace the optimistic message or skip if already exists
+        if (newMsg.senderId === currentUserId) {
+          setCurrentMessages((prev) => {
+            // Check if message with this ID already exists (from API response)
+            if (prev.some(msg => msg.id === newMsg.id)) {
+              console.log('ℹ️ Message already exists from API response, skipping socket update');
+              return prev;
+            }
+            
+            // Find and replace the temporary/optimistic message
+            const hasTemp = prev.some(msg => !msg.id || msg.sending);
+            if (hasTemp) {
+              console.log('🔄 Replacing optimistic message with real message');
+              return prev.map(msg => 
+                (!msg.id || msg.sending) ? formattedMessage : msg
+              );
+            }
+            
+            console.log('ℹ️ No optimistic message found, adding to list');
+            return [...prev, formattedMessage];
+          });
+        } else {
+          // Add message from other users
+          setCurrentMessages((prev) => {
+            // Check if message already exists
+            if (prev.some(msg => msg.id === newMsg.id)) {
+              console.log('⚠️ Message already exists, skipping');
+              return prev;
+            }
+            console.log('➕ Adding new message from other user');
+            return [...prev, formattedMessage];
+          });
+        }
+      }
+    });
+
+    // Listen for message updates
+    socket.on('message_updated', ({ message: updatedMsg, projectId }) => {
+      if (String(projectId) === String(selectedProjectId)) {
+        setCurrentMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === updatedMsg.id
+              ? {
+                  ...msg,
+                  content: updatedMsg.content,
+                  isEdited: updatedMsg.isEdited,
+                }
+              : msg
+          )
+        );
+      }
+    });
+
+    // Listen for message deletions
+    socket.on('message_deleted', ({ messageId, projectId }) => {
+      if (String(projectId) === String(selectedProjectId)) {
+        setCurrentMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+      }
+    });
+
+    // Listen for typing indicators
+    socket.on('user_typing', ({ userName }) => {
+      setTypingUsers((prev) => {
+        if (!prev.includes(userName)) {
+          return [...prev, userName];
+        }
+        return prev;
+      });
+    });
+
+    socket.on('user_stop_typing', () => {
+      setTypingUsers([]);
+    });
+
+    return () => {
+      socket.off('user_joined_room');
+      socket.off('new_message');
+      socket.off('message_updated');
+      socket.off('message_deleted');
+      socket.off('user_typing');
+      socket.off('user_stop_typing');
+    };
+  }, [socket, selectedProjectId, currentUserId]);
+
   const fetchAssignedProjects = async () => {
     try {
       setLoading(true);
@@ -84,8 +248,29 @@ export const useChatLogic = () => {
         }));
 
         setProjects(formattedProjects);
-        if (formattedProjects.length > 0 && !selectedProjectId) {
+        
+        // Check if we have a saved project selection
+        const lastSelectedProject = localStorage.getItem("lastSelectedProjectId");
+        
+        if (lastSelectedProject) {
+          const lastProjectId = parseInt(lastSelectedProject, 10);
+          // Check if the saved project still exists in the list
+          const projectExists = formattedProjects.some(p => p.id === lastProjectId);
+          
+          if (projectExists && !selectedProjectId) {
+            setSelectedProjectId(lastProjectId);
+          } else if (!projectExists) {
+            // If saved project no longer exists, clear it and select first
+            localStorage.removeItem("lastSelectedProjectId");
+            if (formattedProjects.length > 0 && !selectedProjectId) {
+              setSelectedProjectId(formattedProjects[0].id);
+              localStorage.setItem("lastSelectedProjectId", formattedProjects[0].id);
+            }
+          }
+        } else if (formattedProjects.length > 0 && !selectedProjectId) {
+          // No saved project, select first one
           setSelectedProjectId(formattedProjects[0].id);
+          localStorage.setItem("lastSelectedProjectId", formattedProjects[0].id);
         }
       } else {
         setError("Failed to load projects. Invalid response from server.");
@@ -140,6 +325,18 @@ export const useChatLogic = () => {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProjectDetails = async (projectId) => {
+    try {
+      const response = await getProjectById(projectId);
+      console.log("Project details response:", response);
+      if (response.success && response.data) {
+        setSelectedProjectDetails(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching project details:", error.message || "Failed to fetch project details");
     }
   };
 
@@ -217,17 +414,20 @@ export const useChatLogic = () => {
 
       formData.append("projectId", selectedProjectId);
 
-      if (replyToMessage) {
-        formData.append("replyToMessageId", replyToMessage.id);
-      }
-
       if (filesToSend.length > 0) {
         filesToSend.forEach((file) => {
           formData.append("attachments", file);
         });
       }
 
-      const response = await sendmessage(formData);
+      let response;
+      
+      // Use different endpoints for reply vs regular message
+      if (replyToMessage) {
+        response = await replymessage(formData, replyToMessage.id);
+      } else {
+        response = await sendmessage(formData);
+      }
 
       if (response.success && response.data) {
         const sentMessage = response.data;
@@ -266,10 +466,9 @@ export const useChatLogic = () => {
         setCurrentMessages((prevMessages) =>
           prevMessages.filter((msg) => msg.id !== tempId)
         );
-        console.error(
-          "Failed to send message:",
-          response.message || "Unknown error"
-        );
+        const errorMsg = response.message || "Failed to send message";
+        console.error("Failed to send message:", errorMsg);
+        setToast({ show: true, message: errorMsg, type: "error" });
         setMessage(messageToSend);
         setSelectedFiles(filesToSend);
         setReplyingTo(replyToMessage);
@@ -278,10 +477,9 @@ export const useChatLogic = () => {
       setCurrentMessages((prevMessages) =>
         prevMessages.filter((msg) => msg.id !== tempId)
       );
-      console.error(
-        "Error sending message:",
-        error.message || "Failed to send message"
-      );
+      const errorMsg = error.message || "Failed to send message";
+      console.error("Error sending message:", errorMsg);
+      setToast({ show: true, message: errorMsg, type: "error" });
       setMessage(messageToSend);
       setSelectedFiles(filesToSend);
       setReplyingTo(replyToMessage);
@@ -293,6 +491,9 @@ export const useChatLogic = () => {
   const handleSelectProject = (projectId) => {
     setSelectedProjectId(projectId);
     setIsSidebarOpen(false);
+    
+    // Save selected project to localStorage for persistence
+    localStorage.setItem("lastSelectedProjectId", projectId);
   };
 
   const handleEditMessage = (msg) => {
@@ -322,7 +523,7 @@ export const useChatLogic = () => {
 
   const handleSaveEdit = async (messageId) => {
     if (!editingContent.trim()) {
-      console.error("Message cannot be empty");
+      setToast({ show: true, message: "Message cannot be empty", type: "error" });
       return;
     }
     const originalMessage = currentMessages.find(
@@ -351,10 +552,11 @@ export const useChatLogic = () => {
             msg.id === messageId ? originalMessage : msg
           )
         );
-        console.error(
-          "Failed to update message:",
-          response.message || "Unknown error"
-        );
+        const errorMsg = response.message || "Failed to update message";
+        console.error("Failed to update message:", errorMsg);
+        setToast({ show: true, message: errorMsg, type: "error" });
+      } else {
+        setToast({ show: true, message: "Message updated successfully", type: "success" });
       }
     } catch (error) {
       setCurrentMessages((prevMessages) =>
@@ -362,10 +564,9 @@ export const useChatLogic = () => {
           msg.id === messageId ? originalMessage : msg
         )
       );
-      console.error(
-        "Error updating message:",
-        error.message || "Failed to update message"
-      );
+      const errorMsg = error.message || "Failed to update message";
+      console.error("Error updating message:", errorMsg);
+      setToast({ show: true, message: errorMsg, type: "error" });
     }
   };
 
@@ -386,23 +587,46 @@ export const useChatLogic = () => {
 
       if (!response.success) {
         setCurrentMessages(originalMessages);
-        console.error(
-          "Failed to delete message:",
-          response.message || "Unknown error"
-        );
+        const errorMsg = response.message || "Failed to delete message";
+        console.error("Failed to delete message:", errorMsg);
+        setToast({ show: true, message: errorMsg, type: "error" });
+      } else {
+        setToast({ show: true, message: "Message deleted successfully", type: "success" });
       }
     } catch (error) {
       setCurrentMessages(originalMessages);
-      console.error(
-        "Error deleting message:",
-        error.message || "Failed to delete message"
-      );
+      const errorMsg = error.message || "Failed to delete message";
+      console.error("Error deleting message:", errorMsg);
+      setToast({ show: true, message: errorMsg, type: "error" });
+    }
+  };
+
+  const handleMessageInputChange = (value) => {
+    setMessage(value);
+
+    // Handle typing indicator
+    if (socket && selectedProjectId) {
+      const userFullName = localStorage.getItem('fullName') || 'Someone';
+      
+      // Emit typing event
+      emitTyping(selectedProjectId, userFullName);
+
+      // Clear previous timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Stop typing after 2 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        emitStopTyping(selectedProjectId);
+      }, 2000);
     }
   };
 
   return {
     message,
     setMessage,
+    handleMessageInputChange,
     selectedFiles,
     setSelectedFiles,
     fileInputRef,
@@ -424,6 +648,11 @@ export const useChatLogic = () => {
     error,
     replyingTo,
     setReplyingTo,
+    toast,
+    setToast,
+    selectedProjectDetails,
+    typingUsers,
+    isConnected,
     fetchAssignedProjects,
     handleFileChange,
     removeFile,

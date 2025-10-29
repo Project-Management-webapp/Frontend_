@@ -1,0 +1,99 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+
+const SocketContext = createContext();
+
+export const useSocket = () => {
+  const context = useContext(SocketContext);
+  if (!context) {
+    throw new Error('useSocket must be used within a SocketProvider');
+  }
+  return context;
+};
+
+export const SocketProvider = ({ children }) => {
+  const [socket, setSocket] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    // Get backend URL from environment or default
+    const backendURL = import.meta.env.VITE_API_URL;
+    console.log('🔌 Connecting to Socket.IO server at:', backendURL);
+    
+    // Initialize socket connection
+    const socketInstance = io(backendURL, {
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
+
+    socketInstance.on('connect', () => {
+      console.log('✅ Socket connected:', socketInstance.id);
+      setIsConnected(true);
+    });
+
+    socketInstance.on('disconnect', () => {
+      console.log('❌ Socket disconnected');
+      setIsConnected(false);
+    });
+
+    socketInstance.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      setIsConnected(false);
+    });
+
+    setSocket(socketInstance);
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, []);
+
+  const joinProject = (projectId) => {
+    if (socket && projectId) {
+      // Ensure projectId is consistent (convert to string for room name)
+      const projectIdStr = String(projectId);
+      socket.emit('join_project', projectIdStr);
+      console.log(`📍 Emitted join_project for: ${projectIdStr}`);
+    } else {
+      console.log('⚠ Cannot join project - socket:', !!socket, 'projectId:', projectId);
+    }
+  };
+
+  const leaveProject = (projectId) => {
+    if (socket && projectId) {
+      const projectIdStr = String(projectId);
+      socket.emit('leave_project', projectIdStr);
+      console.log(`👋 Emitted leave_project for: ${projectIdStr}`);
+    }
+  };
+
+  const emitTyping = (projectId, userName) => {
+    if (socket && projectId) {
+      socket.emit('typing', { projectId, userName });
+    }
+  };
+
+  const emitStopTyping = (projectId) => {
+    if (socket && projectId) {
+      socket.emit('stop_typing', { projectId });
+    }
+  };
+
+  const value = {
+    socket,
+    isConnected,
+    joinProject,
+    leaveProject,
+    emitTyping,
+    emitStopTyping,
+  };
+
+  return (
+    <SocketContext.Provider value={value}>
+      {children}
+    </SocketContext.Provider>
+  );
+};

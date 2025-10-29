@@ -5,11 +5,13 @@ import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import { useChatLogic } from "./useChatLogic";
 import { getFileIcon, formatTimestamp } from "./utils.jsx";
+import Toaster from "../../../../components/Toaster";
 
 const Chat = () => {
   const {
     message,
     setMessage,
+    handleMessageInputChange,
     selectedFiles,
     setSelectedFiles,
     fileInputRef,
@@ -31,6 +33,11 @@ const Chat = () => {
     error,
     replyingTo,
     setReplyingTo,
+    toast,
+    setToast,
+    selectedProjectDetails,
+    typingUsers,
+    isConnected,
     fetchAssignedProjects,
     handleFileChange,
     removeFile,
@@ -47,6 +54,14 @@ const Chat = () => {
 
   return (
     <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
+      {toast.show && (
+        <Toaster
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
+      
       <ProjectSidebar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
@@ -61,6 +76,7 @@ const Chat = () => {
       <div className="flex-1 flex flex-col h-full w-full md:w-2/3 lg:w-3/4">
         <ChatHeader
           selectedProject={selectedProject}
+          selectedProjectDetails={selectedProjectDetails}
           setIsSidebarOpen={setIsSidebarOpen}
         />
 
@@ -94,11 +110,14 @@ const Chat = () => {
           fileInputRef={fileInputRef}
           message={message}
           setMessage={setMessage}
+          handleMessageInputChange={handleMessageInputChange}
           handleSendMessage={handleSendMessage}
           sendingMessage={sendingMessage}
           handleFileChange={handleFileChange}
           removeFile={removeFile}
           getFileIcon={getFileIcon}
+          typingUsers={typingUsers}
+          isConnected={isConnected}
         />
       </div>
     </div>

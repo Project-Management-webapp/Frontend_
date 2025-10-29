@@ -10,6 +10,20 @@
   animation: scale-fade 0.4s ease-out forwards;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
 body {
   @apply bg-[#292929] text-white min-h-screen;
   font-family: 'Work Sans', sans-serif;

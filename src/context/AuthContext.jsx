@@ -26,7 +26,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", token);
     localStorage.setItem("userId", userData.id);
     localStorage.setItem("userRole", userData.role);
+
+    if (userData.fullName) {
+      localStorage.setItem("fullName", userData.fullName);
+    }
+
   };
+
+ 
 
   // Updated logout function to clear all auth data
   const logout = () => {
