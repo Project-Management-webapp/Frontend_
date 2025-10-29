@@ -43,3 +43,49 @@ export const PRIORITY_CONFIG = {
     label: "Critical",
   },
 };
+
+
+export const COMPLETION_STATUS_CONFIG = {
+  completed: {
+    bg: 'bg-green-600/20',
+    text: 'text-green-300',
+    label: 'Verified',
+  },
+  submitted: {
+    bg: 'bg-yellow-600/20',
+    text: 'text-yellow-300',
+    label: 'Submitted',
+  },
+  default: {
+    bg: 'bg-gray-600/20',
+    text: 'text-gray-300',
+    label: 'Unknown', 
+  },
+};
+
+export const WORK_STATUS_COLOR_CONFIG = {
+  in_progress: {
+    bg: 'bg-blue-600/20',
+    text: 'text-blue-300',
+  },
+  submitted: {
+    bg: 'bg-yellow-600/20',
+    text: 'text-yellow-300',
+  },
+  pending_review: {
+    bg: 'bg-yellow-600/20',
+    text: 'text-yellow-300',
+  },
+  revision_needed: {
+    bg: 'bg-red-600/20',
+    text: 'text-red-300',
+  },
+  completed: {
+    bg: 'bg-green-600/20',
+    text: 'text-green-300',
+  },
+  default: {
+    bg: 'bg-gray-600/20',
+    text: 'text-gray-300',
+  },
+};

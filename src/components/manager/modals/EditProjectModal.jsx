@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { updateProject } from '../../../api/manager/project';
 import Toaster from '../../Toaster';
-import { IoMdClose, IoMdAdd, IoMdRemove } from 'react-icons/io';
+import { IoMdClose, IoMdAdd } from 'react-icons/io';
 import {FiTrash2 } from 'react-icons/fi';
 import { FormInput, FormTextarea, FormSelect } from '../../atoms/FormFields';
 

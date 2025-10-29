@@ -54,27 +54,6 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  // Handle consumables array fields (technologies, frameworks, etc.)
-  const handleConsumableArrayChange = (field, value) => {
-    const items = value.split(',').map(item => item.trim()).filter(item => item !== '');
-    setFormData((prev) => ({
-      ...prev,
-      estimatedConsumables: {
-        ...prev.estimatedConsumables,
-        [field]: items
-      }
-    }));
-  };
-
-  const handleConsumableStringChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      estimatedConsumables: {
-        ...prev.estimatedConsumables,
-        [field]: value
-      }
-    }));
-  };
 
   // Handle risks
   const handleAddRisk = () => {
@@ -171,7 +150,6 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
       !payload.estimatedConsumables.programmingLanguages.length &&
       !payload.estimatedConsumables.database &&
       !payload.estimatedConsumables.cloudProvider) {
-      // Keep the structure but with empty values
       payload.estimatedConsumables = {
         technologies: [],
         frameworks: [],
@@ -188,7 +166,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
         type: 'error',
       });
       setIsLoading(false);
-      return; // Stop the submission
+      return; 
     }
 
     try {
@@ -596,7 +574,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
           <button
             type="submit"
             disabled={isLoading}
-            onClick={handleSubmit} // This is fine here, but the form's onSubmit handles it
+            onClick={handleSubmit}
             className="btn"
           >
             {isLoading ? 'Creating...' : 'Create Project'}
@@ -607,7 +585,6 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
   );
 };
 
-// Helper component
 const Section = ({ title, children }) => (
   <div>
     <h3 className="text-lg font-semibold text-purple-300 border-b border-gray-700 pb-2 mb-2">{title}</h3>

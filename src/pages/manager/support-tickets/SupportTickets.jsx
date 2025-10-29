@@ -3,10 +3,12 @@ import React, { useState, useEffect } from "react";
 import { RiSearchLine, RiTicket2Line } from "react-icons/ri";
 import { toast } from "react-hot-toast";
 import { getAllTickets } from "../../../api/manager/supportTicket";
-import TicketStatusBadge from "../../../components/atoms/TicketStatusBadge";
-import PriorityBadge from "../../../components/atoms/PriorityBadge";
 import TicketDetailsModalformanager from "../../../components/manager/modals/TicketDetailsModalformanager";
-
+import {
+  TICKET_STATUS_CONFIG,
+  PRIORITY_CONFIG,
+} from "../../../lib/badgeConfigs";
+import Badge from "../../../components/atoms/Badge";
 const SkeletonStat = () => (
   <div className="h-8 w-12 bg-gray-700/50 rounded-md animate-pulse"></div>
 );
@@ -195,9 +197,17 @@ const SupportTickets = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 mt-3 md:mt-0 flex-shrink-0">
-                    <PriorityBadge priority={ticket.priority} />
-                    
-                    <TicketStatusBadge status={ticket.status} />
+                     <Badge
+                      value={ticket.priority}
+                      configMap={PRIORITY_CONFIG}
+                      defaultKey="medium"
+                      className="text-xs"
+                    /><Badge
+                      value={ticket.status}
+                      configMap={TICKET_STATUS_CONFIG}
+                      defaultKey="open"
+                      className="text-sm"
+                    />
                   </div>
                 </div>
                 <p className="text-gray-300 text-sm mb-4 line-clamp-2">{ticket.description}</p>

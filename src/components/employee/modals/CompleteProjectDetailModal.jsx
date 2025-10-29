@@ -1,18 +1,14 @@
 import React from 'react';
 import {
-  IoClose,
- 
+  IoClose, 
   IoPersonOutline,
-  IoDocumentTextOutline,
   IoCheckmarkDoneCircleOutline,
   IoStarOutline,
- 
   IoCodeSlashOutline,
 } from 'react-icons/io5';
-import { formatDate } from '../../atoms/FormatedDate'; // Assuming path
+import { formatDate } from '../../atoms/FormatedDate'; 
 import { FiUserCheck } from 'react-icons/fi';
 
-// --- Re-usable DetailRow ---
 const DetailRow = ({ label, value, isTag = false, isDate = false, isCode = false }) => {
   if (!value && typeof value !== 'number') return null; 
 
@@ -85,7 +81,6 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
     verificationNotes,
     performanceFeedback,
     deliverables,
-    actualDeliverables,
     responsibilities,
   } = assignment;
 
@@ -94,9 +89,9 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
   const parseJsonArray = (str) => {
     try {
       const parsed = JSON.parse(str);
-      return Array.isArray(parsed) ? parsed : [str]; // Fallback if it's just a string
+      return Array.isArray(parsed) ? parsed : [str]; 
     } catch {
-      return str ? [str] : []; // Fallback for plain strings or empty
+      return str ? [str] : []; 
     }
   };
 

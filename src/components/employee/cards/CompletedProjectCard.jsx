@@ -1,32 +1,36 @@
 import React from 'react';
 import { FiEye, FiCheckCircle, FiClock, FiStar } from 'react-icons/fi';
 import { formatDate } from '../../atoms/FormatedDate';
+import {
+  COMPLETION_STATUS_CONFIG,
+} from "../../../lib/badgeConfigs";
+import Badge from "../../atoms/Badge";
 
 // Status Tag Component
 const CompletionStatusTag = ({ status }) => {
-  let bgColor, textColor, label;
-  
-  switch (status) {
-    case 'completed':
-      bgColor = 'bg-green-600/20';
-      textColor = 'text-green-300';
-      label = 'Verified';
-      break;
-    case 'submitted':
-      bgColor = 'bg-yellow-600/20';
-      textColor = 'text-yellow-300';
-      label = 'Submitted';
-      break;
-    default:
-      bgColor = 'bg-gray-600/20';
-      textColor = 'text-gray-300';
-      label = status?.replace(/_/g, ' ') || 'Unknown';
+  const lowerStatus = status?.toLowerCase();
+  const commonClasses = "px-2 py-0.5 text-xs font-semibold capitalize";
+  if (lowerStatus === 'completed' || lowerStatus === 'submitted') {
+   
+    return (
+      <Badge
+        value={lowerStatus}
+        configMap={COMPLETION_STATUS_CONFIG}
+        defaultKey="default"
+        className={commonClasses}
+      />
+    );
   }
+  const dynamicLabel = status?.replace(/_/g, ' ') || 'Unknown';
+  const defaultConfig = COMPLETION_STATUS_CONFIG.default;
 
   return (
-    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full capitalize ${bgColor} ${textColor}`}>
-      {label}
-    </span>
+    <Badge
+      label={dynamicLabel}
+      bg={defaultConfig.bg}
+      text={defaultConfig.text}
+      className={commonClasses}
+    />
   );
 };
 

@@ -2,9 +2,13 @@ import React, { useState, useEffect } from "react";
 import { RiAddLine, RiSearchLine, RiTicket2Line } from "react-icons/ri";
 import { toast } from "react-hot-toast";
 import { getMyTickets } from "../../../api/employee/supportTicket";
-import TicketStatusBadge from "../../../components/atoms/TicketStatusBadge";
-import PriorityBadge from "../../../components/atoms/PriorityBadge";
-import SupportTicketDetailModal from "../../../components/employee/modals/SupportTicketDetailModal"; 
+import SupportTicketDetailModal from "../../../components/employee/modals/SupportTicketDetailModal";
+
+import {
+  TICKET_STATUS_CONFIG,
+  PRIORITY_CONFIG,
+} from "../../../lib/badgeConfigs";
+import Badge from "../../../components/atoms/Badge";
 
 // --- Skeleton Component for Loading ---
 const TicketSkeleton = () => (
@@ -48,12 +52,12 @@ const SupportTickets = ({ setActiveView }) => {
     try {
       setLoading(true);
       const data = await getMyTickets();
-      
+
       let ticketsArray = [];
-      
+
       if (data?.tickets?.rows && Array.isArray(data.tickets.rows)) {
         ticketsArray = data.tickets.rows;
-      } 
+      }
       else if (Array.isArray(data)) {
         ticketsArray = data;
       } else if (Array.isArray(data?.data)) {
@@ -65,7 +69,7 @@ const SupportTickets = ({ setActiveView }) => {
       } else if (data?.data?.tickets?.rows && Array.isArray(data.data.tickets.rows)) {
         ticketsArray = data.data.tickets.rows;
       }
-      
+
       setTickets(ticketsArray);
     } catch (error) {
       console.error("Error:", error);
@@ -92,7 +96,7 @@ const SupportTickets = ({ setActiveView }) => {
 
   return (
     // 4. Wrap in a Fragment
-    <> 
+    <>
       <div className="min-h-screen">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Support Tickets</h2>
@@ -167,8 +171,19 @@ const SupportTickets = ({ setActiveView }) => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-white mb-2 md:mb-0 line-clamp-1">{ticket.subject}</h3>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <PriorityBadge priority={ticket.priority} />
-                    <TicketStatusBadge status={ticket.status} />
+
+                    <Badge
+                      value={ticket.priority}
+                      configMap={PRIORITY_CONFIG}
+                      defaultKey="medium"
+                      className="text-xs"
+                    /><Badge
+                      value={ticket.status}
+                      configMap={TICKET_STATUS_CONFIG}
+                      defaultKey="open"
+                      className="text-sm"
+                    />
+
                   </div>
                 </div>
                 <p className="text-gray-300 text-sm mb-4 line-clamp-2">{ticket.description}</p>

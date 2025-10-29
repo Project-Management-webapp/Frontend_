@@ -8,8 +8,12 @@ import {
 } from "react-icons/ri";
 import { toast } from "react-hot-toast";
 import { getTicketById, } from "../../../api/employee/supportTicket";
-import TicketStatusBadge from "../../atoms/TicketStatusBadge";
-import PriorityBadge from "../../atoms/PriorityBadge";
+
+import {
+  TICKET_STATUS_CONFIG,
+  PRIORITY_CONFIG,
+} from "../../../lib/badgeConfigs";
+import Badge from "../../atoms/Badge";
 
 // --- Skeleton Loader Component ---
 const TicketDetailsSkeleton = () => (
@@ -51,11 +55,11 @@ const SupportTicketDetailModal = ({ isOpen, onClose, ticketId }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Only fetch if the modal is open and we have a ticketId
+  
     if (isOpen && ticketId) {
       fetchTicketDetails();
     }
-  }, [isOpen, ticketId]); // Re-run effect if modal opens or ticketId changes
+  }, [isOpen, ticketId]);
 
   const fetchTicketDetails = async () => {
     try {
@@ -69,7 +73,7 @@ const SupportTicketDetailModal = ({ isOpen, onClose, ticketId }) => {
     } catch (error) {
       console.error("Error:", error);
       toast.error(error.message || "Failed to load ticket details");
-      onClose(); // Close modal on error
+      onClose(); 
     } finally {
       setLoading(false);
     }
@@ -78,17 +82,16 @@ const SupportTicketDetailModal = ({ isOpen, onClose, ticketId }) => {
   if (!isOpen) return null;
 
   return (
-    // Backdrop
     <div
       onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
     >
-      {/* Modal Panel: Added flex, flex-col, and max-h */}
+     
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-3xl bg-gray-800 border border-gray-700 rounded-lg shadow-xl flex flex-col max-h-[90vh]"
       >
-        {/* Modal Header: Added flex-shrink-0 */}
+        
         <div className="flex items-center justify-between p-4 border-b border-gray-700 flex-shrink-0">
           <h3 className="text-xl font-semibold text-white">
             Ticket Details: {loading ? "..." : ticket?.ticketId}
@@ -101,7 +104,7 @@ const SupportTicketDetailModal = ({ isOpen, onClose, ticketId }) => {
           </button>
         </div>
 
-        {/* Modal Body: Kept overflow-y-auto, removed max-h */}
+       
         <div className="p-6 overflow-y-auto">
           {loading || !ticket ? (
             <TicketDetailsSkeleton />
@@ -114,8 +117,19 @@ const SupportTicketDetailModal = ({ isOpen, onClose, ticketId }) => {
                     {ticket.subject}
                   </h2>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <PriorityBadge priority={ticket.priority} />
-                    <TicketStatusBadge status={ticket.status} />
+                    <Badge
+                      value={ticket.priority}
+                      configMap={PRIORITY_CONFIG}
+                      defaultKey="medium"
+                      className="text-xs"
+                    />
+                    <Badge
+                      value={ticket.status}
+                      configMap={TICKET_STATUS_CONFIG}
+                      defaultKey="open"
+                      className="text-sm"
+                    />
+
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -198,7 +212,7 @@ const SupportTicketDetailModal = ({ isOpen, onClose, ticketId }) => {
                         </div>
                       </div>
                       <p className="text-gray-300 whitespace-pre-wrap">{response.message}</p>
-                      
+
                       {(response.attachments && response.attachments.length > 0) && (
                         <div className="mt-4">
                           <h5 className="text-sm font-semibold text-gray-400 mb-2 flex items-center gap-2">

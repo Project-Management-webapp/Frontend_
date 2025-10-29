@@ -2,10 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   FiHome,
   FiFolder,
-  FiUsers,
-  FiCheckSquare,
-  FiBarChart2,
-  FiMessageSquare,
   FiChevronLeft,
   FiChevronRight,
   FiX,
@@ -97,9 +93,6 @@ const Sidebar = ({
             { text: "Completed Projects", view: "completedProjects" },
           ]}
         />
-
-
-
         <SidebarGroup
           icon={<RiCustomerService2Line size={20} />}
           text="Support Tickets"
@@ -123,8 +116,6 @@ const Sidebar = ({
             { text: "Request Payment", view: "requestPayment" },
           ]}
         />
-
-
         <SidebarItem
           icon={<IoMdNotificationsOutline size={20} />}
           text="Notifications"

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaIdBadge, FaBriefcase, FaMoneyBillWave, FaPaperPlane } from 'react-icons/fa';
+import {  FaMoneyBillWave } from 'react-icons/fa';
 import EmployeeDetailModal from '../modals/EmployeeDetailModal';
 
 const EmployeeCard = ({ employee }) => {

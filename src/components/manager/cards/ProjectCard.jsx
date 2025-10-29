@@ -28,14 +28,13 @@ const ProjectCard = ({ project, onDataChange, setToast }) => {
     onDataChange?.();
     setToast({ show: true, message: 'Project deleted successfully!', type: 'success' });
   };
-  // --- END OPTIMIZATION ---
+
 
   const budget = parseFloat(project.budget) || 0;
 
   return (
     <>
       <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-5 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-purple-500/20 hover:border-purple-500/50">
-        {/* ... (card content remains the same) ... */}
         <div onClick={() => setDetailsOpen(true)} className="cursor-pointer">
           <span className="px-3 py-1 text-xs font-semibold text-purple-200 bg-purple-600/30 rounded-full">
             {project.projectType || 'No Domain'}
@@ -56,7 +55,6 @@ const ProjectCard = ({ project, onDataChange, setToast }) => {
           </button>
           
           <div className="flex items-center justify-center sm:justify-end gap-2">
-            {/* ... (icon buttons remain the same) ... */}
             <button
               onClick={() => setDetailsOpen(true)}
               className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full transition-colors"

@@ -9,8 +9,13 @@ import {
 } from "react-icons/ri";
 import { toast } from "react-hot-toast";
 import { getTicketById, addTicketResponse, updateTicketStatus } from "../../../api/manager/supportTicket";
-import TicketStatusBadge from "../../atoms/TicketStatusBadge";
-import PriorityBadge from "../../atoms/PriorityBadge";
+
+
+import {
+  TICKET_STATUS_CONFIG,
+  PRIORITY_CONFIG,
+} from "../../../lib/badgeConfigs";
+import Badge from "../../atoms/Badge";
 
 // --- Skeleton Loader Component ---
 const TicketDetailsSkeleton = () => (
@@ -49,7 +54,7 @@ const TicketDetailsSkeleton = () => (
 const TicketDetailsModalformanager = ({ isOpen, onClose, ticketId, onTicketUpdate }) => {
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   // State for actions
   const [isAddingResponse, setIsAddingResponse] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -89,10 +94,10 @@ const TicketDetailsModalformanager = ({ isOpen, onClose, ticketId, onTicketUpdat
     try {
       const responseData = { message: responseText, attachments: [] };
       const data = await addTicketResponse(ticket.id, responseData);
-      
+
       if (data.success) {
-        setTicket(data.ticket); 
-        onTicketUpdate(); 
+        setTicket(data.ticket);
+        onTicketUpdate();
         toast.success(data.message);
         setResponseText("");
         setIsAddingResponse(false);
@@ -110,7 +115,7 @@ const TicketDetailsModalformanager = ({ isOpen, onClose, ticketId, onTicketUpdat
     setIsSubmitting(true);
     try {
       const data = await updateTicketStatus(ticket.id, { status: newStatus });
-      
+
       if (data.success) {
         setTicket(data.ticket); // Update modal with new ticket data
         onTicketUpdate(); // Refresh the list in the parent component
@@ -165,8 +170,20 @@ const TicketDetailsModalformanager = ({ isOpen, onClose, ticketId, onTicketUpdat
                     {ticket.subject}
                   </h2>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <PriorityBadge priority={ticket.priority} />
-                    <TicketStatusBadge status={ticket.status} />
+                    <Badge
+                      value={ticket.priority}
+                      configMap={PRIORITY_CONFIG}
+                      defaultKey="medium"
+                      className="text-xs"
+                    />
+                    <Badge
+                      value={ticket.status}
+                      configMap={TICKET_STATUS_CONFIG}
+                      defaultKey="open"
+                      className="text-sm"
+                    />
+
+
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -257,7 +274,7 @@ const TicketDetailsModalformanager = ({ isOpen, onClose, ticketId, onTicketUpdat
             </div>
           )}
         </div>
-        
+
         {/* Modal Footer (Actions) */}
         {!loading && ticket && (
           <div className="p-4 border-t border-gray-700 flex-shrink-0 bg-gray-800 rounded-b-lg">

@@ -1,36 +1,22 @@
 import React from 'react';
 import { FiEye, FiClock } from 'react-icons/fi';
 import { formatDate } from '../../atoms/FormatedDate';
+import Badge  from "../../atoms/Badge";
+import { WORK_STATUS_COLOR_CONFIG } from "../../../lib/badgeConfigs"
+
 
 const WorkStatusTag = ({ status }) => {
-  let bgColor, textColor;
-  switch (status) {
-    case 'in_progress':
-      bgColor = 'bg-blue-600/20';
-      textColor = 'text-blue-300';
-      break;
-    case 'submitted':
-    case 'pending_review': // Added this status
-      bgColor = 'bg-yellow-600/20';
-      textColor = 'text-yellow-300';
-      break;
-    case 'revision_needed':
-      bgColor = 'bg-red-600/20';
-      textColor = 'text-red-300';
-      break;
-    case 'completed': // Added this status
-      bgColor = 'bg-green-600/20';
-      textColor = 'text-green-300';
-      break;
-    default:
-      bgColor = 'bg-gray-600/20';
-      textColor = 'text-gray-300';
-  }
-
+  const lowerStatus = status?.toLowerCase() || 'default';
+  const label = lowerStatus.replace(/_/g, ' ');
+  const colors = WORK_STATUS_COLOR_CONFIG[lowerStatus] 
+                 ?? WORK_STATUS_COLOR_CONFIG.default;
   return (
-    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full capitalize ${bgColor} ${textColor}`}>
-      {status.replace(/_/g, ' ')}
-    </span>
+    <Badge
+      label={label}
+      bg={colors.bg}
+      textColor={colors.text}
+      className="px-2 py-0.5 text-xs font-semibold capitalize"
+    />
   );
 };
 
@@ -46,7 +32,7 @@ const OngoingProjectCard = ({ assignment, onViewDetails }) => {
         <div className="flex justify-between items-center mb-2">
           <h3 
             className="text-xl font-bold text-white truncate cursor-pointer hover:underline"
-            onClick={() => onViewDetails(assignment)} // This now acts as the primary link
+            onClick={() => onViewDetails(assignment)} 
           >
             {project.name}
           </h3>
@@ -72,7 +58,7 @@ const OngoingProjectCard = ({ assignment, onViewDetails }) => {
         </div>
       </div>
       
-      {/* Card Footer with Actions (Updated) */}
+     
       <div className="p-4 bg-gray-800/50 border-t border-gray-700 flex">
         <button
           onClick={() => onViewDetails(assignment)}
@@ -81,7 +67,6 @@ const OngoingProjectCard = ({ assignment, onViewDetails }) => {
           <FiEye />
           <span>View Details</span>
         </button>
-        {/* "Submit Work" button removed from card */}
       </div>
     </div>
   );
@@ -115,7 +100,6 @@ export const OngoingProjectCardSkeleton = ({ key }) => {
       {/* Skeleton Footer */}
       <div className="p-4 bg-gray-800/50 border-t border-gray-700 flex gap-3">
         <div className="h-10 bg-gray-700 rounded-md flex-1"></div>
-        {/* Second button skeleton removed */}
       </div>
     </div>
   );
