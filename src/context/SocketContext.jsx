@@ -60,6 +60,24 @@ export const SocketProvider = ({ children }) => {
       setUserStatuses(prev => ({ ...prev, [userId]: status }));
     });
 
+    // Listen for new mentions (real-time @ notifications)
+    socketInstance.on('new_mention', ({ userId, projectId, projectName, senderName }) => {
+      console.log('📥 Socket received new_mention:', { userId, projectId, projectName, senderName });
+      const currentUserId = localStorage.getItem('userId');
+      console.log('🔍 Comparing userId:', userId, '(type:', typeof userId, ') with currentUserId:', currentUserId, '(type:', typeof currentUserId, ')');
+      
+      if (currentUserId && String(userId) === String(currentUserId)) {
+        console.log(`✅ Match! Dispatching newMention CustomEvent for project ${projectId} (type: ${typeof projectId})`);
+        console.log(`📢 You were mentioned in project ${projectName} by ${senderName}`);
+        // Trigger callback to update mentions in UI
+        window.dispatchEvent(new CustomEvent('newMention', { 
+          detail: { projectId, projectName, senderName } 
+        }));
+      } else {
+        console.log('❌ No match - mention is for a different user');
+      }
+    });
+
     setSocket(socketInstance);
 
     return () => {

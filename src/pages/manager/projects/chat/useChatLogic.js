@@ -7,9 +7,9 @@ import {
   replymessage,
   getProjectsWithMentions,
   markMentionsAsViewed,
-} from "../../../../api/employee/chat";
-import { getOngoingProjects } from "../../../../api/employee/assignProject";
-import { getProjectById } from "../../../../api/employee/project";
+} from "../../../../api/manager/chat";
+import { getAllProjectAssignments } from "../../../../api/manager/projectAssign";
+import { getProjectById } from "../../../../api/manager/project";
 import { useSocket } from "../../../../context/SocketContext";
 
 export const useChatLogic = () => {
@@ -236,18 +236,17 @@ export const useChatLogic = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getOngoingProjects();
+      const response = await getAllProjectAssignments();
 
-      if (response.success && response.projects) {
-        const acceptedProjects = response.projects.filter(
-          (assignment) => assignment.workStatus === "in_progress"
-        );
+      if (response.success && response.data && response.data.projects) {
+        // Manager can see all projects
+        const allProjects = response.data.projects.rows;
 
-        const formattedProjects = acceptedProjects.map((assignment) => ({
-          id: assignment.project.id,
-          name: assignment.project.name,
-          description: assignment.project.description,
-          assignmentId: assignment.id,
+        const formattedProjects = allProjects.map((project) => ({
+          id: project.id,
+          name: project.name,
+          description: project.description,
+          status: project.status,
         }));
 
         setProjects(formattedProjects);
@@ -283,7 +282,7 @@ export const useChatLogic = () => {
       setError(
         error.response?.data?.message ||
           error.message ||
-          "Failed to fetch assigned projects"
+          "Failed to fetch projects"
       );
     } finally {
       setLoading(false);
@@ -345,15 +344,12 @@ export const useChatLogic = () => {
 
   const fetchProjectsWithMentionsData = async () => {
     try {
-      console.log('🔍 Fetching projects with mentions...');
       const response = await getProjectsWithMentions();
-      console.log('📥 Mentions API response:', response);
       if (response.success && response.data) {
-        console.log('✅ Setting projectsWithMentions:', response.data);
         setProjectsWithMentions(response.data);
       }
     } catch (error) {
-      console.error("❌ Error fetching mentions:", error);
+      console.error("Error fetching mentions:", error);
     }
   };
 
@@ -367,31 +363,20 @@ export const useChatLogic = () => {
   // Listen for real-time mention notifications
   useEffect(() => {
     const handleNewMention = (event) => {
-      const { projectId, projectName, senderName } = event.detail;
+      const { projectId } = event.detail;
       console.log('🔔 Received new mention notification for project:', projectId);
-      console.log('📝 Project name:', projectName);
-      console.log('👤 Sender:', senderName);
       
       // Add this project to mentions list if not already there
       setProjectsWithMentions(prev => {
-        console.log('📊 Current projectsWithMentions:', prev);
-        const projectIdInt = parseInt(projectId);
-        if (!prev.includes(projectIdInt)) {
-          const newList = [...prev, projectIdInt];
-          console.log('✅ Updated projectsWithMentions:', newList);
-          return newList;
+        if (!prev.includes(parseInt(projectId))) {
+          return [...prev, parseInt(projectId)];
         }
-        console.log('ℹ️ Project already in mentions list');
         return prev;
       });
     };
 
-    console.log('👂 Adding newMention event listener');
     window.addEventListener('newMention', handleNewMention);
-    return () => {
-      console.log('🗑️ Removing newMention event listener');
-      window.removeEventListener('newMention', handleNewMention);
-    };
+    return () => window.removeEventListener('newMention', handleNewMention);
   }, []);
 
   // Mark mentions as viewed when opening a project

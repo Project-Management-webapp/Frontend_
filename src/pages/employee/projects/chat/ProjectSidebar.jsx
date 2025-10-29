@@ -23,6 +23,9 @@ const ProjectSidebar = ({
   fetchAssignedProjects,
   projectsWithMentions = [], // Add this prop
 }) => {
+  console.log('🎯 ProjectSidebar - projectsWithMentions:', projectsWithMentions);
+  console.log('📋 ProjectSidebar - projects:', projects.map(p => ({ id: p.id, name: p.name })));
+  
   return (
     <>
       {isSidebarOpen && (
@@ -80,6 +83,7 @@ const ProjectSidebar = ({
           ) : (
             projects.map((project) => {
               const hasMention = projectsWithMentions.includes(project.id);
+              console.log(`🔍 Project ${project.id} (${project.name}) - hasMention:`, hasMention);
               
               return (
               <div

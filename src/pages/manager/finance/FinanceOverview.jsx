@@ -217,10 +217,12 @@ const FinanceOverview = () => {
                           ? "bg-green-900/30 text-green-400"
                           : project.status === "in-progress"
                           ? "bg-blue-900/30 text-blue-400"
-                          : "bg-yellow-900/30 text-yellow-400"
+                          : project.status === "pending" || !project.status
+                          ? "bg-yellow-900/30 text-yellow-400"
+                          : "bg-gray-900/30 text-gray-400"
                       }`}
                     >
-                      {project.status}
+                      {project.status || "pending"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-300">
