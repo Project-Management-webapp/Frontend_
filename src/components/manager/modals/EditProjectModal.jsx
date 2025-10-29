@@ -16,6 +16,37 @@ const formatDataForForm = (data) => {
     }
   });
   if (!Array.isArray(formatted.milestones)) formatted.milestones = [];
+  
+  // Parse risks if they are JSON strings
+  if (typeof formatted.risks === 'string') {
+    try {
+      formatted.risks = JSON.parse(formatted.risks);
+    } catch (e) {
+      formatted.risks = [];
+    }
+  }
+  if (!Array.isArray(formatted.risks)) formatted.risks = [];
+  
+  // Parse issues if they are JSON strings
+  if (typeof formatted.issues === 'string') {
+    try {
+      formatted.issues = JSON.parse(formatted.issues);
+    } catch (e) {
+      formatted.issues = [];
+    }
+  }
+  if (!Array.isArray(formatted.issues)) formatted.issues = [];
+  
+  // Parse referenceLinks if they are JSON strings
+  if (typeof formatted.referenceLinks === 'string') {
+    try {
+      formatted.referenceLinks = JSON.parse(formatted.referenceLinks);
+    } catch (e) {
+      formatted.referenceLinks = [];
+    }
+  }
+  if (!Array.isArray(formatted.referenceLinks)) formatted.referenceLinks = [];
+  
   return formatted;
 };
 
@@ -36,12 +67,72 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
   };
 
   const addMilestone = () => {
-    setFormData(prev => ({ ...prev, milestones: [...prev.milestones, { title: '', description: '', dueDate: '' }] }));
+    setFormData(prev => ({ 
+      ...prev, 
+      milestones: [...prev.milestones, { name: '', description: '', deadline: '', status: '', completedDate: '' }] 
+    }));
   };
 
   const removeMilestone = (index) => {
     const updated = formData.milestones.filter((_, i) => i !== index);
     setFormData(prev => ({ ...prev, milestones: updated }));
+  };
+
+  // Handle reference links
+  const handleAddReferenceLink = () => {
+    setFormData(prev => ({
+      ...prev,
+      referenceLinks: [...prev.referenceLinks, { title: '', url: '' }]
+    }));
+  };
+
+  const handleRemoveReferenceLink = (index) => {
+    const updatedLinks = formData.referenceLinks.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, referenceLinks: updatedLinks }));
+  };
+
+  const handleReferenceLinkChange = (index, field, value) => {
+    const updatedLinks = [...formData.referenceLinks];
+    updatedLinks[index][field] = value;
+    setFormData(prev => ({ ...prev, referenceLinks: updatedLinks }));
+  };
+
+  // Handle risks
+  const handleAddRisk = () => {
+    setFormData(prev => ({
+      ...prev,
+      risks: [...prev.risks, { description: '', severity: 'medium', mitigation: '', status: 'open' }]
+    }));
+  };
+
+  const handleRemoveRisk = (index) => {
+    const updatedRisks = formData.risks.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, risks: updatedRisks }));
+  };
+
+  const handleRiskChange = (index, field, value) => {
+    const updatedRisks = [...formData.risks];
+    updatedRisks[index][field] = value;
+    setFormData(prev => ({ ...prev, risks: updatedRisks }));
+  };
+
+  // Handle issues
+  const handleAddIssue = () => {
+    setFormData(prev => ({
+      ...prev,
+      issues: [...prev.issues, { description: '', priority: 'medium',  status: 'open' }]
+    }));
+  };
+
+  const handleRemoveIssue = (index) => {
+    const updatedIssues = formData.issues.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, issues: updatedIssues }));
+  };
+
+  const handleIssueChange = (index, field, value) => {
+    const updatedIssues = [...formData.issues];
+    updatedIssues[index][field] = value;
+    setFormData(prev => ({ ...prev, issues: updatedIssues }));
   };
 
   const showToast = (message, type = 'success', duration = 2000) => {
@@ -103,120 +194,352 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
         <form
           id="edit-project-form"
           onSubmit={handleSubmit}
-          className="flex-grow overflow-y-auto p-8 space-y-8"
+          className="flex-grow overflow-y-auto p-8 space-y-6"
         >
-          {/* --- Basic Info --- */}
-          <section>
-            <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1">Basic Info</h3>
+          {/* === BASIC INFO === */}
+          <Section title="Basic Information">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput id="name" label="Project Name" value={formData.name} onChange={handleChange} required />
-              <FormSelect id="projectType" label="Project Type" value={formData.projectType} onChange={handleChange}>
+              <FormSelect id="projectType" label="Project Type" value={formData.projectType} onChange={handleChange} required>
                 <option value="">Select Type</option>
                 <option value="quoted">Quoted</option>
-                <option value="time and materials">Time & Material</option>
+                <option value="time and materials">Time and Materials</option>
                 <option value="other">Other</option>
               </FormSelect>
             </div>
-            <FormTextarea id="description" label="Description" value={formData.description} onChange={handleChange} rows={3} />
-          </section>
+            {formData.projectType === 'other' && (
+              <FormInput id="customProjectType" label="Custom Project Type" value={formData.customProjectType} onChange={handleChange} placeholder="Specify project type" />
+            )}
+            <FormTextarea id="description" label="Description" value={formData.description} onChange={handleChange} />
+          </Section>
 
-          {/* --- Timeline & Status --- */}
-          <section>
-            <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1">Timeline & Status</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <FormInput id="startDate" label="Start Date" type="date" value={formData.startDate} onChange={handleChange} />
-              <FormInput id="deadline" label="Deadline" type="date" value={formData.deadline} onChange={handleChange} />
-              <FormInput id="actualStartDate" label="Actual Start" type="date" value={formData.actualStartDate} onChange={handleChange} />
-              <FormInput id="actualEndDate" label="Actual End" type="date" value={formData.actualEndDate} onChange={handleChange} />
-              <FormSelect id="status" label="Status" value={formData.status} onChange={handleChange}>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </FormSelect>
-              <FormSelect id="priority" label="Priority" value={formData.priority} onChange={handleChange}>
+          {/* === TIMELINE === */}
+          <Section title="Timeline">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormInput id="startDate" label="Start Date" type="date" value={formData.startDate} onChange={handleChange} required />
+              <FormInput id="deadline" label="Deadline" type="date" value={formData.deadline} onChange={handleChange} required />
+              <FormInput id="estimatedHours" label="Estimated Hours" type="number" value={formData.estimatedHours} onChange={handleChange} />
+              <FormSelect id="priority" label="Priority" value={formData.priority} onChange={handleChange} required>
+                <option value="">Select Priority</option>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
+                <option value="urgent">Urgent</option>
               </FormSelect>
             </div>
-          </section>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <FormInput id="actualStartDate" label="Actual Start Date" type="date" value={formData.actualStartDate} onChange={handleChange} />
+              <FormInput id="actualEndDate" label="Actual End Date" type="date" value={formData.actualEndDate} onChange={handleChange} />
+            </div>
+          </Section>
 
-          {/* --- Company  Info --- */}
-          <section>
-            <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1">Company Information</h3>
+          {/* === FINANCIAL === */}
+          <Section title="Financial">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormInput id="budget" label="Budget" type="number" value={formData.budget} onChange={handleChange} />
+              <FormSelect id="currency" label="Currency" value={formData.currency} onChange={handleChange}>
+                <option value="">Select Currency</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="INR">INR</option>
+              </FormSelect>
+              <FormSelect id="billingType" label="Billing Type" value={formData.billingType} onChange={handleChange}>
+                <option value="">Select Type</option>
+                <option value="fixed_price">Fixed Price</option>
+                <option value="hourly">Hourly</option>
+                <option value="monthly_retainer">Monthly Retainer</option>
+                <option value="milestone_based">Milestone Based</option>
+                <option value="other">Other</option>
+              </FormSelect>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <FormInput id="allocatedAmount" label="Allocated Amount" type="number" value={formData.allocatedAmount} onChange={handleChange} />
+              <FormInput id="spentAmount" label="Spent Amount" type="number" value={formData.spentAmount} onChange={handleChange} />
+            </div>
+          </Section>
+
+          {/* === COMPANY INFO === */}
+          <Section title="Company Information">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput id="companyName" label="Company Name" value={formData.companyName} onChange={handleChange} />
               <FormInput id="companyEmail" label="Company Email" type="email" value={formData.companyEmail} onChange={handleChange} />
               <FormInput id="companyPhone" label="Company Phone" value={formData.companyPhone} onChange={handleChange} />
-              
             </div>
-          </section>
+          </Section>
 
-         
+          {/* === REFERENCE LINKS === */}
+          <Section title="Reference Links">
+            {formData.referenceLinks && formData.referenceLinks.length > 0 ? (
+              formData.referenceLinks.map((link, index) => (
+                <div key={index} className="border border-gray-700 bg-gray-900 p-4 rounded-lg mb-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormInput
+                      id={`link-title-${index}`}
+                      label="Title"
+                      value={link.title}
+                      onChange={(e) => handleReferenceLinkChange(index, 'title', e.target.value)}
+                    />
+                    <FormInput
+                      id={`link-url-${index}`}
+                      label="URL"
+                      type="url"
+                      value={link.url}
+                      onChange={(e) => handleReferenceLinkChange(index, 'url', e.target.value)}
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveReferenceLink(index)}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      <FiTrash2 size={20} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm mb-2">No reference links added yet.</p>
+            )}
+            <button
+              type="button"
+              onClick={handleAddReferenceLink}
+              className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors"
+            >
+              + Add Reference Link
+            </button>
+          </Section>
 
-          {/* --- Financial Details --- */}
-          <section>
-            <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1">Financial Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormInput id="budget" label="Budget (USD)" type="number" value={formData.budget} onChange={handleChange} />
-              <FormInput id="allocatedAmount" label="Allocated Amount (USD)" type="number" value={formData.allocatedAmount} onChange={handleChange} />
-              <FormInput id="spentAmount" label="Spent Amount (USD)" type="number" value={formData.spentAmount} onChange={handleChange} />
-              <FormSelect id="billingType" label="Billing Type" value={formData.billingType} onChange={handleChange}>
-                <option value="fixed_price">Fixed Price</option>
-                <option value="hourly">Hourly</option>
+          {/* === MILESTONES === */}
+          <Section title="Project Milestones">
+            {formData.milestones.length > 0 ? (
+              formData.milestones.map((milestone, index) => (
+                <div key={index} className="border border-gray-700 bg-gray-900 p-4 rounded-lg mb-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormInput
+                      id={`milestone-name-${index}`}
+                      label="Milestone Name"
+                      value={milestone.name}
+                      onChange={(e) => handleMilestoneChange(index, 'name', e.target.value)}
+                    />
+                    <FormInput
+                      id={`milestone-deadline-${index}`}
+                      type="date"
+                      label="Deadline"
+                      value={milestone.deadline}
+                      onChange={(e) => handleMilestoneChange(index, 'deadline', e.target.value)}
+                    />
+                  </div>
+
+                  <FormTextarea
+                    id={`milestone-description-${index}`}
+                    label="Description"
+                    rows={2}
+                    value={milestone.description}
+                    onChange={(e) => handleMilestoneChange(index, 'description', e.target.value)}
+                  />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormSelect
+                      id={`milestone-status-${index}`}
+                      label="Status"
+                      value={milestone.status}
+                      onChange={(e) => handleMilestoneChange(index, 'status', e.target.value)}
+                    >
+                      <option value="">Select Status</option>
+                      <option value="pending">Pending</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                    </FormSelect>
+
+                    {milestone.status === 'completed' && (
+                      <FormInput
+                        id={`milestone-completedDate-${index}`}
+                        type="date"
+                        label="Completed Date"
+                        value={milestone.completedDate || ''}
+                        onChange={(e) => handleMilestoneChange(index, 'completedDate', e.target.value)}
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => removeMilestone(index)}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      <FiTrash2 size={20} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm mb-2">No milestones added yet.</p>
+            )}
+
+            <button
+              type="button"
+              onClick={addMilestone}
+              className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors"
+            >
+              + Add Milestone
+            </button>
+          </Section>
+
+          {/* === TEAM & SETTINGS === */}
+          <Section title="Team & Settings">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormInput id="teamSize" label="Team Size" type="number" value={formData.teamSize} onChange={handleChange} />
+              <FormSelect id="visibility" label="Visibility" value={formData.visibility} onChange={handleChange}>
+                <option value="">Select Visibility</option>
+                <option value="internal">Internal</option>
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+              </FormSelect>
+              <FormSelect id="testingStatus" label="Testing Status" value={formData.testingStatus} onChange={handleChange}>
+                <option value="">Select Status</option>
+                <option value="not_started">Not Started</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
               </FormSelect>
             </div>
-          </section>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <FormSelect id="status" label="Project Status" value={formData.status} onChange={handleChange}>
+                <option value="">Select Status</option>
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </FormSelect>
+            </div>
+          </Section>
 
-          {/* --- Milestones --- */}
-          <section>
-            <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1 flex items-center justify-between">
-              Milestones
-              <button type="button" onClick={addMilestone} className="flex items-center gap-1 text-purple-400 hover:text-purple-300">
-                <IoMdAdd /> Add
-              </button>
-            </h3>
-
-            {formData.milestones.length === 0 && <p className="text-gray-400">No milestones added yet.</p>}
-
-            {formData.milestones.map((ms, idx) => (
-              <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3 items-end">
-                <FormInput
-                  id={`milestoneTitle${idx}`}
-                  label="Title"
-                  value={ms.title}
-                  onChange={(e) => handleMilestoneChange(idx, 'title', e.target.value)}
-                />
-                <FormTextarea
-                  id={`milestoneDesc${idx}`}
-                  label="Description"
-                  value={ms.description}
-                  onChange={(e) => handleMilestoneChange(idx, 'description', e.target.value)}
-                  rows={1}
-                />
-                <div className="flex gap-2">
-                  <FormInput
-                    id={`milestoneDue${idx}`}
-                    label="Due Date"
-                    type="date"
-                    value={ms.dueDate}
-                    onChange={(e) => handleMilestoneChange(idx, 'dueDate', e.target.value)}
+          {/* === RISKS === */}
+          <Section title="Project Risks">
+            {formData.risks.length > 0 ? (
+              formData.risks.map((risk, index) => (
+                <div key={index} className="border border-gray-700 bg-gray-900 p-4 rounded-lg mb-4 space-y-3">
+                  <FormTextarea
+                    id={`risk-description-${index}`}
+                    label="Description"
+                    rows={2}
+                    value={risk.description}
+                    onChange={(e) => handleRiskChange(index, 'description', e.target.value)}
                   />
-                  <button type="button" onClick={() => removeMilestone(idx)} className="text-red-400 hover:text-red-300 mt-5">
-                    <FiTrash2 size={20} />
-                  </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <FormSelect
+                      id={`risk-severity-${index}`}
+                      label="Severity"
+                      value={risk.severity}
+                      onChange={(e) => handleRiskChange(index, 'severity', e.target.value)}
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </FormSelect>
+                    <FormSelect
+                      id={`risk-status-${index}`}
+                      label="Status"
+                      value={risk.status}
+                      onChange={(e) => handleRiskChange(index, 'status', e.target.value)}
+                    >
+                      <option value="open">Open</option>
+                      <option value="mitigated">Mitigated</option>
+                      <option value="closed">Closed</option>
+                    </FormSelect>
+                  </div>
+                  <FormInput
+                    id={`risk-mitigation-${index}`}
+                    label="Mitigation Strategy"
+                    value={risk.mitigation}
+                    onChange={(e) => handleRiskChange(index, 'mitigation', e.target.value)}
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveRisk(index)}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      <FiTrash2 size={20} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </section>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm mb-2">No risks added yet.</p>
+            )}
+            <button
+              type="button"
+              onClick={handleAddRisk}
+              className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors"
+            >
+              + Add Risk
+            </button>
+          </Section>
 
-          {/* --- Risks, Issues, Notes --- */}
-          <section>
-            <h3 className="text-lg font-semibold text-purple-300 mb-3 border-b border-gray-700 pb-1">Risks & Notes</h3>
-            <FormTextarea id="risks" label="Risks" value={formData.risks} onChange={handleChange} rows={2} />
-            <FormTextarea id="issues" label="Issues" value={formData.issues} onChange={handleChange} rows={2} />
-            <FormTextarea id="notes" label="Additional Notes" value={formData.notes} onChange={handleChange} rows={2} />
-          </section>
+          {/* === ISSUES === */}
+          <Section title="Project Issues">
+            {formData.issues.length > 0 ? (
+              formData.issues.map((issue, index) => (
+                <div key={index} className="border border-gray-700 bg-gray-900 p-4 rounded-lg mb-4 space-y-3">
+                  <FormTextarea
+                    id={`issue-description-${index}`}
+                    label="Description"
+                    rows={2}
+                    value={issue.description}
+                    onChange={(e) => handleIssueChange(index, 'description', e.target.value)}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <FormSelect
+                      id={`issue-priority-${index}`}
+                      label="Priority"
+                      value={issue.priority}
+                      onChange={(e) => handleIssueChange(index, 'priority', e.target.value)}
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </FormSelect>
+                    <FormSelect
+                      id={`issue-status-${index}`}
+                      label="Status"
+                      value={issue.status}
+                      onChange={(e) => handleIssueChange(index, 'status', e.target.value)}
+                    >
+                      <option value="open">Open</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                    </FormSelect>
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveIssue(index)}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      <FiTrash2 size={20} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm mb-2">No issues added yet.</p>
+            )}
+            <button
+              type="button"
+              onClick={handleAddIssue}
+              className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors"
+            >
+              + Add Issue
+            </button>
+          </Section>
+
+          {/* === NOTES === */}
+          <Section title="Additional Notes">
+            <FormTextarea id="notes" label="Notes" value={formData.notes} onChange={handleChange} rows={3} />
+          </Section>
         </form>
 
         {/* Footer Buttons */}
@@ -241,5 +564,12 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
     </div>
   );
 };
+
+const Section = ({ title, children }) => (
+  <div>
+    <h3 className="text-lg font-semibold text-purple-300 border-b border-gray-700 pb-2 mb-2">{title}</h3>
+    {children}
+  </div>
+);
 
 export default EditProjectModal;

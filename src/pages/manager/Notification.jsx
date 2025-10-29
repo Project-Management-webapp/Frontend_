@@ -139,13 +139,13 @@ const Notification = () => {
                         onChange={(e) => setFilterType(e.target.value)}
                         className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-md transition-colors border border-white/20 text-white"
                     >
-                        <option value="all">All Types</option>
-                        <option value="task_assignment">Task Assignment</option>
-                        <option value="project_assignment">Project Assignment</option>
-                        <option value="deadline_reminder">Deadline Reminder</option>
-                        <option value="payment">Payment</option>
-                        <option value="system">System</option>
-                        <option value="general">General</option>
+                        <option value="all" className='bg-gray-900/80'>All Types</option>
+                        <option value="task_assignment" className='bg-gray-900/80'>Task Assignment</option>
+                        <option value="project_assignment" className='bg-gray-900/80'>Project Assignment</option>
+                        <option value="deadline_reminder" className='bg-gray-900/80'>Deadline Reminder</option>
+                        <option value="payment" className='bg-gray-900/80'>Payment</option>
+                        <option value="system" className='bg-gray-900/80'>System</option>
+                        <option value="general" className='bg-gray-900/80'>General</option>
                     </select>
                     <button
                         onClick={clearAll}

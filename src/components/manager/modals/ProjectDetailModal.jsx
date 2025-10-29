@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  IoClose,
   IoChatbubblesOutline,
   IoBusinessOutline,
   IoCalendarOutline,
@@ -9,12 +8,16 @@ import {
   IoFlagOutline,
   IoInformationCircleOutline,
   IoCalendarClearOutline,
+  IoWarningOutline,
+  IoAlertCircleOutline,
+  IoDocumentTextOutline,
 } from 'react-icons/io5';
 import { formatDate } from '../../atoms/FormatedDate';
 import { Link } from 'react-router-dom';
 
 const DetailRow = ({ label, value, isTag = false, isDate = false }) => {
-  if (!value && typeof value !== 'number') return null;
+  // Allow 0 and other falsy numbers, but skip null, undefined, and empty strings
+  if (value === null || value === undefined || value === '') return null;
 
   let displayValue;
 
@@ -88,6 +91,26 @@ const DetailSection = ({ title, icon, children, grid = true }) => (
 const ProjectDetailsModal = ({ project, onClose }) => {
   const handleModalContentClick = (e) => e.stopPropagation();
 
+  // Parse JSON strings for risks, issues, milestones, and referenceLinks
+  const parseJSON = (field) => {
+    if (!field) return [];
+    if (Array.isArray(field)) return field;
+    if (typeof field === 'string') {
+      try {
+        const parsed = JSON.parse(field);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  const risks = parseJSON(project.risks);
+  const issues = parseJSON(project.issues);
+  const milestones = parseJSON(project.milestones);
+  const referenceLinks = parseJSON(project.referenceLinks);
+
   // Logic remains the same
   const budget = parseFloat(project.budget) || 0;
   const allocatedAmount = parseFloat(project.allocatedAmount) || 0;
@@ -160,38 +183,142 @@ const ProjectDetailsModal = ({ project, onClose }) => {
             <DetailRow label="Spent Amount" value={`$${spentAmount.toLocaleString()}`} />
             <DetailRow label="Currency" value={project.currency} />
           </DetailSection>
-          {/* company details */}
+
+          {/* Company Details */}
           <DetailSection title="Company Info" icon={<IoBusinessOutline size={22} />}>
             <DetailRow label="Company Name" value={project.companyName} />
             <DetailRow label="Company Email" value={project.companyEmail} />
             <DetailRow label="Company Phone" value={project.companyPhone} />
           </DetailSection>
 
+          {/* Team Information */}
+          <DetailSection title="Team Information" icon={<IoPeopleOutline size={22} />}>
+            <DetailRow label="Team Size" value={project.teamSize} />
+          </DetailSection>
 
-          {/* Milestones (List) */}
-          {project.milestones?.length > 0 && (
-            <DetailSection title="Milestones" icon={<IoFlagOutline size={22} />} grid={false}>
-              {project.milestones.map((ms, idx) => (
-                <div key={idx} className="p-3 border border-gray-700 rounded-lg bg-gray-800/50">
-                  <DetailRow label="Title" value={ms.title} />
-                  <DetailRow label="Description" value={ms.description} />
-                  <DetailRow label="Due Date" value={ms.dueDate} isDate />
+
+          {/* Milestones */}
+          {milestones?.length > 0 && (
+            <DetailSection title="Project Milestones" icon={<IoFlagOutline size={22} />} grid={false}>
+              {milestones.map((ms, idx) => (
+                <div key={idx} className="p-4 border border-gray-700 rounded-lg bg-gray-900/50">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="text-purple-300 font-semibold text-lg">{ms.name}</h4>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      ms.status === 'completed' ? 'bg-green-600/20 text-green-400' :
+                      ms.status === 'in-progress' ? 'bg-blue-600/20 text-blue-400' :
+                      'bg-yellow-600/20 text-yellow-400'
+                    }`}>
+                      {ms.status || 'pending'}
+                    </span>
+                  </div>
+                  <p className="text-gray-300 text-sm mb-2">{ms.description}</p>
+                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <IoCalendarClearOutline size={14} />
+                      Deadline: {formatDate(ms.deadline)}
+                    </span>
+                  </div>
                 </div>
               ))}
+            </DetailSection>
+          )}
+
+          {/* Risks */}
+          {risks?.length > 0 && (
+            <DetailSection title="Project Risks" icon={<IoWarningOutline size={22} />} grid={false}>
+              {risks.map((risk, idx) => (
+                <div key={idx} className="p-4 border border-orange-700/30 rounded-lg bg-orange-900/10">
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="text-gray-200 flex-1">{risk.description}</p>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ml-2 ${
+                      risk.severity === 'high' ? 'bg-red-600/20 text-red-400' :
+                      risk.severity === 'medium' ? 'bg-orange-600/20 text-orange-400' :
+                      'bg-yellow-600/20 text-yellow-400'
+                    }`}>
+                      {risk.severity}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm">
+                    <div>
+                      <span className="text-gray-400">Status: </span>
+                      <span className={`px-2 py-0.5 rounded text-xs ${
+                        risk.status === 'closed' ? 'bg-green-600/20 text-green-400' :
+                        risk.status === 'mitigated' ? 'bg-blue-600/20 text-blue-400' :
+                        'bg-red-600/20 text-red-400'
+                      }`}>
+                        {risk.status}
+                      </span>
+                    </div>
+                    {risk.mitigation && (
+                      <div className="md:col-span-2">
+                        <span className="text-gray-400">Mitigation: </span>
+                        <span className="text-gray-300">{risk.mitigation}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </DetailSection>
+          )}
+
+          {/* Issues */}
+          {issues?.length > 0 && (
+            <DetailSection title="Project Issues" icon={<IoAlertCircleOutline size={22} />} grid={false}>
+              {issues.map((issue, idx) => (
+                <div key={idx} className="p-4 border border-red-700/30 rounded-lg bg-red-900/10">
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="text-gray-200 flex-1">{issue.description}</p>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ml-2 ${
+                      issue.priority === 'high' ? 'bg-red-600/20 text-red-400' :
+                      issue.priority === 'medium' ? 'bg-orange-600/20 text-orange-400' :
+                      'bg-green-600/20 text-green-400'
+                    }`}>
+                      {issue.priority}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm">
+                    <div>
+                      <span className="text-gray-400">Status: </span>
+                      <span className={`px-2 py-0.5 rounded text-xs ${
+                        issue.status === 'resolved' ? 'bg-green-600/20 text-green-400' :
+                        issue.status === 'in-progress' ? 'bg-blue-600/20 text-blue-400' :
+                        'bg-yellow-600/20 text-yellow-400'
+                      }`}>
+                        {issue.status}
+                      </span>
+                    </div>
+                    {issue.assignedTo && (
+                      <div>
+                        <span className="text-gray-400">Assigned To: </span>
+                        <span className="text-gray-300">User ID: {issue.assignedTo}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </DetailSection>
+          )}
+
+          {/* Notes and Testing Status */}
+          {(project.notes || project.testingStatus) && (
+            <DetailSection title="Additional Information" icon={<IoDocumentTextOutline size={22} />}>
+              {project.testingStatus && (
+                <DetailRow label="Testing Status" value={project.testingStatus} isTag />
+              )}
+              {project.notes && (
+                <div className="md:col-span-2">
+                  <DetailRow label="Notes" value={project.notes} />
+                </div>
+              )}
             </DetailSection>
           )}
 
           {/* Assignments (List) */}
           {project.assignments?.length > 0 && (
             <DetailSection title="Team & Assignments" icon={<IoPeopleOutline size={22} />} grid={false}>
-              {/* Grid for top-level team info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-                <DetailRow label="Team Size" value={project.teamSize} />
-                <DetailRow label="Team Lead" value={project.teamLead} />
-              </div>
-
               {/* List for individual assignments */}
-              <div className="mt-4 space-y-4">
+              <div className="space-y-4">
                 {project.assignments.map((a, idx) => (
                   <div key={idx} className="border border-gray-700 rounded-lg overflow-hidden">
                     <div className="p-3 bg-gray-700/50">

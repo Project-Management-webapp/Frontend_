@@ -143,7 +143,7 @@ const Payments = ({ setActiveView }) => {
             className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400"
           >
             <option value="all" className="bg-gray-800">All Status</option>
-            <option value="pending" className="bg-gray-800">Pending</option>
+            <option value="requested" className="bg-gray-800">Requested</option>
             <option value="rejected" className="bg-gray-800">Rejected</option>
             <option value="paid" className="bg-gray-800">Completed</option>
           </select>

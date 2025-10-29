@@ -14,20 +14,6 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     startDate: '',
     deadline: '',
     estimatedHours: '',
-    estimatedConsumables: {
-      technologies: [],
-      frameworks: [],
-      programmingLanguages: [],
-      database: '',
-      cloudProvider: ''
-    },
-    actualConsumables: {
-      technologies: [],
-      frameworks: [],
-      programmingLanguages: [],
-      database: '',
-      cloudProvider: ''
-    },
     priority: 'medium',
     budget: '',
     currency: 'USD',
@@ -42,7 +28,6 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     testingStatus: 'not_started',
     notes: '',
     teamSize: '',
-    teamLead: '',
     visibility: 'internal',
   });
 
@@ -140,24 +125,12 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     const userIdString = localStorage.getItem("userId");
     const userId = parseInt(userIdString, 10);
     payload.createdBy = userId;
+    
     Object.keys(payload).forEach((key) => {
       if (payload[key] === '' && typeof payload[key] === 'string') {
         payload[key] = null;
       }
     });
-    if (!payload.estimatedConsumables.technologies.length &&
-      !payload.estimatedConsumables.frameworks.length &&
-      !payload.estimatedConsumables.programmingLanguages.length &&
-      !payload.estimatedConsumables.database &&
-      !payload.estimatedConsumables.cloudProvider) {
-      payload.estimatedConsumables = {
-        technologies: [],
-        frameworks: [],
-        programmingLanguages: [],
-        database: '',
-        cloudProvider: ''
-      };
-    }
 
     if (!payload.createdBy) {
       setToast({
@@ -412,9 +385,8 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
 
           {/* === TEAM === */}
           <Section title="Team & Settings">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormInput id="teamSize" label="Team Size" type="number" value={formData.teamSize} onChange={handleChange} />
-              <FormInput id="teamLead" label="Team Lead ID" value={formData.teamLead} onChange={handleChange} />
               <FormSelect id="visibility" label="Visibility" value={formData.visibility} onChange={handleChange}>
                 <option value="internal">Internal</option>
                 <option value="public">Public</option>
@@ -525,13 +497,13 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
                       <option value="in-progress">In Progress</option>
                       <option value="resolved">Resolved</option>
                     </FormSelect>
-                    <FormInput
+                    {/* <FormInput
                       id={`issue-assignedTo-${index}`}
                       label="Assigned To (User ID)"
                       type="number"
                       value={issue.assignedTo}
                       onChange={(e) => handleIssueChange(index, 'assignedTo', e.target.value)}
-                    />
+                    /> */}
                   </div>
                   <div className="flex justify-end">
                     <button

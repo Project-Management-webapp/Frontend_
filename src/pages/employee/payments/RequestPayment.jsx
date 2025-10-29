@@ -6,7 +6,7 @@ import { requestPayment } from "../../../api/employee/payment";
 import { FiInbox, FiClock, FiDollarSign, FiUser } from "react-icons/fi";
 import { formatDate } from "../../../components/atoms/FormatedDate";
 import {getMyPayments} from "../../../api/employee/payment"
-// Payment Request Modal Component
+
 const RequestPaymentModal = ({ isOpen, onClose, assignment, onSubmit, setToast }) => {
   const [requestNotes, setRequestNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

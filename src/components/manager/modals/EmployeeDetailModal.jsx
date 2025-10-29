@@ -4,7 +4,7 @@ import { IoMdClose } from 'react-icons/io';
 import {
   FaBriefcase, FaSitemap, FaCalendarAlt, FaClock, FaTint, FaRing,
   FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt, FaInfoCircle,
-  FaMoneyBillWave, FaPaperPlane, FaFileContract, FaBirthdayCake, FaVenusMars, FaFlag, FaToggleOn
+  FaMoneyBillWave, FaFileContract, FaBirthdayCake, FaVenusMars, FaFlag, FaToggleOn
 } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
 
@@ -82,11 +82,11 @@ const EmployeeDetailModal = ({ isOpen, onClose, employeeData }) => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Left: Profile Image and Basic Info */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-2">
               <img
                 src={employeeData.profileImage || "/default-profile.png"}
                 alt={employeeData.fullName || "Employee"}
-                className="w-32 h-32 rounded-full object-cover border-4 border-gray-700"
+                className="w-25 h-25 rounded-full object-cover border-4 border-gray-700"
               />
               <div className="text-center md:text-left flex-1">
                 <div className="bg-gray-700/50 text-sm px-3 py-1 rounded inline-block mb-2">

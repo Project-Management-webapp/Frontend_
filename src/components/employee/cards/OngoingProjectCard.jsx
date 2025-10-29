@@ -4,21 +4,17 @@ import { formatDate } from '../../atoms/FormatedDate';
 import Badge  from "../../atoms/Badge";
 import { WORK_STATUS_COLOR_CONFIG } from "../../../lib/badgeConfigs"
 
-
 const WorkStatusTag = ({ status }) => {
-  const lowerStatus = status?.toLowerCase() || 'default';
-  const label = lowerStatus.replace(/_/g, ' ');
-  const colors = WORK_STATUS_COLOR_CONFIG[lowerStatus] 
-                 ?? WORK_STATUS_COLOR_CONFIG.default;
   return (
     <Badge
-      label={label}
-      bg={colors.bg}
-      textColor={colors.text}
+      value={status} 
+      configMap={WORK_STATUS_COLOR_CONFIG} 
+      defaultKey="default"
       className="px-2 py-0.5 text-xs font-semibold capitalize"
     />
   );
 };
+
 
 // --- Main Card Component (Updated) ---
 const OngoingProjectCard = ({ assignment, onViewDetails }) => {
