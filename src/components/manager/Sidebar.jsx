@@ -86,13 +86,13 @@ const Sidebar = ({
           onClick={() => handleItemClick('projects')}
         />
 
-        <SidebarItem
+        {/* <SidebarItem
           icon={<FiMessageSquare size={20} />}
           text="Chat"
           collapsed={isCollapsed}
           active={activeView === 'chat'}
           onClick={() => handleItemClick('chat')}
-        />
+        /> */}
 
         <SidebarItem
           icon={<FiUsers size={20} />}
@@ -131,7 +131,6 @@ const Sidebar = ({
           onSubItemClick={handleItemClick}
           items={[
             { text: "All Payments", view: "payments" },
-            { text: "Pending Requests", view: "pending-payments" },
           ]}
         />
        

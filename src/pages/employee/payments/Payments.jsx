@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { RiAddLine, RiSearchLine, RiMoneyDollarCircleLine, RiCheckLine, RiHourglassFill } from "react-icons/ri"; // Added RiHourglassFill
-import { toast } from "react-hot-toast";
+import { RiAddLine, RiSearchLine, RiMoneyDollarCircleLine } from "react-icons/ri";
+import Toaster from "../../../components/Toaster";
 import { getMyPayments } from "../../../api/employee/payment";
-import PaymentStatusBadge from "../../../components/payments/PaymentStatusBadge"; // Assuming this component exists
+import PaymentStatusBadge from "../../../components/payments/PaymentStatusBadge";
 
 // --- Skeleton Loaders ---
 const SkeletonStat = () => (
@@ -38,13 +38,14 @@ const PaymentItemSkeleton = () => (
 
 
 const Payments = ({ setActiveView }) => {
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   
-  // State for calculated stats
-  const [stats, setStats] = useState({ totalEarned: 0, pendingAmount: 0, approvedCount: 0 });
+  // State for stats from API
+  const [stats, setStats] = useState({ totalEarnings: 0, totalPayments: 0 });
 
   useEffect(() => {
     fetchPayments();
@@ -53,55 +54,40 @@ const Payments = ({ setActiveView }) => {
   const fetchPayments = async () => {
     try {
       setLoading(true);
-      const response = await getMyPayments(); // Use the raw response
-      let paymentsArray = [];
+      const response = await getMyPayments();
 
-      // Updated data extraction based on your sample
+      // Extract data from API response
       if (response?.data?.payments && Array.isArray(response.data.payments)) {
-        paymentsArray = response.data.payments;
-      } 
-      // Add fallbacks if needed, but prioritize the sample structure
-      else if (Array.isArray(response?.payments)) paymentsArray = response.payments;
-      else if (Array.isArray(response)) paymentsArray = response; 
-      
-      setPayments(paymentsArray);
-      calculateStats(paymentsArray); // Calculate stats after fetching
+        setPayments(response.data.payments);
+        
+        // Use stats directly from API response
+        setStats({
+          totalEarnings: response.data.totalEarnings || 0,
+          totalPayments: response.data.totalPayments || 0,
+        });
+      } else {
+        setToast({ show: true, message: "Failed to load payments", type: "error" });
+      }
 
     } catch (error) {
       console.error("Error fetching payments:", error);
-      toast.error(error.message || "Failed to load payments");
-      setPayments([]); // Ensure it's an empty array on error
-      calculateStats([]); // Reset stats on error
+      setToast({ show: true, message: error.message || "Failed to load payments", type: "error" });
+      setPayments([]);
+      setStats({ totalEarnings: 0, totalPayments: 0 });
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to calculate stats based on the payments array
-  const calculateStats = (paymentsArray) => {
-    const totalEarned = paymentsArray
-      .filter(p => p.requestStatus === "confirmed") // Sum only confirmed payments
-      .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-
-    const pendingAmount = paymentsArray
-      .filter(p => p.status === "pending") // Sum pending amounts
-      .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-
-    const approvedCount = paymentsArray
-      .filter(p => p.status === "approved").length; // Count approved payments
-
-    setStats({ totalEarned, pendingAmount, approvedCount });
-  };
-
-  // Updated filter logic
+  // Filter logic
   const filteredPayments = payments.filter((payment) => {
     const searchTermLower = searchTerm.toLowerCase();
     const matchesSearch =
-      (payment.project?.name?.toLowerCase() || "").includes(searchTermLower) || // Search project name
-      (payment.requestNotes?.toLowerCase() || "").includes(searchTermLower) || // Search request notes
-      (payment.amount?.toString() || "").includes(searchTerm); // Search amount
+      (payment.project?.name?.toLowerCase() || "").includes(searchTermLower) ||
+      (payment.requestNotes?.toLowerCase() || "").includes(searchTermLower) ||
+      (payment.amount?.toString() || "").includes(searchTerm);
       
-    const matchesFilter = filterStatus === "all" || payment.status?.toLowerCase() === filterStatus;
+    const matchesFilter = filterStatus === "all" || payment.requestStatus?.toLowerCase() === filterStatus;
     
     return matchesSearch && matchesFilter;
   });
@@ -126,21 +112,16 @@ const Payments = ({ setActiveView }) => {
         </button>
       </div>
 
-      {/* Stats - Updated */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"> {/* Changed to 3 columns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20">
-          <p className="text-gray-400 text-sm mb-1">Total Earned (Confirmed)</p>
-          {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-white">${stats.totalEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>}
+          <p className="text-gray-400 text-sm mb-1">Total Earnings</p>
+          {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-white">${stats.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>}
         </div>
+        
         <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20">
-          <p className="text-gray-400 text-sm mb-1">Pending Amount</p>
-           {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-yellow-400">${stats.pendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>}
+          <p className="text-gray-400 text-sm mb-1">Total Payments</p>
+          {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-green-400">{stats.totalPayments}</p>}
         </div>
-        <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20">
-          <p className="text-gray-400 text-sm mb-1">Approved (Awaiting Confirmation)</p>
-          {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-green-400">{stats.approvedCount}</p>}
-        </div>
-        {/* Removed Completed Card */}
       </div>
 
       {/* Search and Filter */}
@@ -163,9 +144,8 @@ const Payments = ({ setActiveView }) => {
           >
             <option value="all" className="bg-gray-800">All Status</option>
             <option value="pending" className="bg-gray-800">Pending</option>
-            <option value="approved" className="bg-gray-800">Approved</option>
             <option value="rejected" className="bg-gray-800">Rejected</option>
-            <option value="completed" className="bg-gray-800">Completed</option>
+            <option value="paid" className="bg-gray-800">Completed</option>
           </select>
         </div>
       </div>
@@ -208,7 +188,7 @@ const Payments = ({ setActiveView }) => {
                     <h3 className="text-2xl font-bold text-white">
                        ${parseFloat(payment.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h3>
-                    <PaymentStatusBadge status={payment.status} />
+                    <PaymentStatusBadge status={payment.requestStatus} />
                   </div>
                    <p className="text-gray-300 text-sm mb-1">
                       Project: <span className="text-purple-300">{payment.project?.name || 'N/A'}</span>
@@ -283,6 +263,15 @@ const Payments = ({ setActiveView }) => {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <Toaster
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false, message: "", type: "" })}
+        />
       )}
     </div>
   );

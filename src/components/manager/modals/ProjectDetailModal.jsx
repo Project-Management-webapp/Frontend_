@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   IoClose,
+  IoChatbubblesOutline,
   IoBusinessOutline,
   IoCalendarOutline,
   IoWalletOutline,
@@ -10,6 +11,7 @@ import {
   IoCalendarClearOutline,
 } from 'react-icons/io5';
 import { formatDate } from '../../atoms/FormatedDate';
+import { Link } from 'react-router-dom';
 
 const DetailRow = ({ label, value, isTag = false, isDate = false }) => {
   if (!value && typeof value !== 'number') return null;
@@ -111,15 +113,23 @@ const ProjectDetailsModal = ({ project, onClose }) => {
       >
         {/* Header */}
         <div className="relative p-6 border-b border-gray-700">
-          <h2 className="text-2xl font-bold text-purple-300">{project.name}</h2>
-          <p className="text-gray-400 mt-1">{project.description}</p>
-          <button
-            onClick={onClose}
-            className="absolute cursor-pointer top-6 right-6 text-gray-400 hover:text-white"
-            aria-label="Close modal"
-          >
-            <IoClose size={24} />
-          </button>
+          <div className="flex justify-between items-start gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-purple-300">{project.name}</h2>
+              <p className="text-gray-400 mt-1">{project.description}</p>
+            </div>
+
+            <div className="flex-shrink-0">
+              <Link
+                to='/chat_manager'
+                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                <IoChatbubblesOutline />
+                <span>Chat</span>
+              </Link>
+            </div>
+
+          </div>
         </div>
 
         {/* Body (Refactored with Sections) */}
@@ -156,7 +166,7 @@ const ProjectDetailsModal = ({ project, onClose }) => {
             <DetailRow label="Company Email" value={project.companyEmail} />
             <DetailRow label="Company Phone" value={project.companyPhone} />
           </DetailSection>
-          
+
 
           {/* Milestones (List) */}
           {project.milestones?.length > 0 && (

@@ -12,7 +12,7 @@ import AllEmployee from "./AllEmployee";
 import AllProjects from "./project/AllProjects";
 import SupportTickets from "./support-tickets/SupportTickets";
 import Payments from "./payments/Payments";
-import Chat from "./projects/chat/index";
+// import Chat from "./projects/chat/index";
 
 import FinanceOverview from "./finance/FinanceOverview";
 import ProfitLoss from "./finance/ProfitLoss";
@@ -55,8 +55,6 @@ const ManagerLayout = () => {
         return <Performance />;
       case "projects":
         return <AllProjects />;
-      case "chat":
-        return <Chat />;
       case "supportTickets":
         return <SupportTickets setActiveView={setActiveView} />;
       case "payments":

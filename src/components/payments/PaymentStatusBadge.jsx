@@ -8,6 +8,12 @@ const PaymentStatusBadge = ({ status }) => {
         text: "text-yellow-400",
         label: "Pending",
       },
+
+      requested: {
+        bg: "bg-yellow-400/10",
+        text: "text-yellow-400",
+        label: "Requested",
+      },
       approved: {
         bg: "bg-green-400/10",
         text: "text-green-400",
@@ -22,6 +28,12 @@ const PaymentStatusBadge = ({ status }) => {
         bg: "bg-purple-400/10",
         text: "text-purple-400",
         label: "Completed",
+      },
+
+      paid: {
+        bg: "bg-purple-400/10",
+        text: "text-purple-400",
+        label: "Paid",
       },
       "awaiting-confirmation": {
         bg: "bg-blue-400/10",

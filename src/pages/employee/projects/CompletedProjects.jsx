@@ -53,48 +53,7 @@ const CompletedProjects = () => {
       )}
 
       <div className="p-4 sm:p-6 md:p-8 bg-gray-900 min-h-screen">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-green-600/20 rounded-lg">
-              <FiCheckCircle className="text-green-400" size={28} />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                Completed Projects
-              </h1>
-              <p className="text-gray-400 text-sm mt-1">
-                Projects you have successfully completed and verified
-              </p>
-            </div>
-          </div>
-
-          {/* Summary Section */}
-          {summary && (
-            <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 mt-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-2xl font-bold text-green-400">
-                    {summary.totalCompleted || 0}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">Total Completed</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {summary.averagePerProject ? `$${summary.averagePerProject}` : 'N/A'}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">Avg Earning</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-400">
-                    {`$${summary.totalEarned || 0}`}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">Total Earning</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      
 
         {/* Loading / Empty / Grid */}
         {isLoading ? (

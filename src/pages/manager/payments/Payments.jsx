@@ -7,7 +7,7 @@ import {
     RiHourglassFill 
 } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
-import { toast } from "react-hot-toast";
+import Toaster from "../../../components/Toaster";
 import { getAllPayments, approvePayment, rejectPayment } from "../../../api/manager/payment"; 
 import PaymentStatusBadge from "../../../components/payments/PaymentStatusBadge";
 
@@ -41,11 +41,16 @@ const PaymentItemSkeleton = () => (
   </div>
 );
 const Payments = () => {
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all"); 
-  const [stats, setStats] = useState({ totalAmountApprovedOrConfirmed: 0, pendingAmountRequested: 0 });
+  const [stats, setStats] = useState({ 
+    totalPayments: 0, 
+    totalPaidAmount: 0, 
+    totalPendingAmount: 0 
+  });
 
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showApproveModal, setShowApproveModal] = useState(false);
@@ -62,37 +67,35 @@ const Payments = () => {
     try {
       setLoading(true);
       const response = await getAllPayments(); 
-      let paymentsArray = [];
-
+      
       if (response?.data?.payments?.rows && Array.isArray(response.data.payments.rows)) {
-        paymentsArray = response.data.payments.rows;
-      }
-      else if (Array.isArray(response?.payments)) paymentsArray = response.payments; 
-      else if (Array.isArray(response)) paymentsArray = response; 
+        const paymentsArray = response.data.payments.rows;
+        setPayments(paymentsArray);
 
-      setPayments(paymentsArray);
-      calculateStats(paymentsArray);
+        const totalPayments = paymentsArray.filter(p => p.requestStatus === "paid").length;
+          
+        
+        const totalPaidAmount = paymentsArray
+          .filter(p => p.requestStatus === "paid")
+          .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+        
+        const totalPendingAmount = paymentsArray
+          .filter(p => p.requestStatus !== "paid" && p.requestStatus !== "rejected")
+          .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+        
+        setStats({ totalPayments, totalPaidAmount, totalPendingAmount });
+      } else {
+        setToast({ show: true, message: "Failed to load payments", type: "error" });
+      }
 
     } catch (error) {
       console.error("Error fetching payments:", error);
-      toast.error(error.message || "Failed to load payments");
+      setToast({ show: true, message: error.message || "Failed to load payments", type: "error" });
       setPayments([]);
-      calculateStats([]); 
+      setStats({ totalPayments: 0, totalPaidAmount: 0, totalPendingAmount: 0 });
     } finally {
       setLoading(false);
     }
-  };
-
-  const calculateStats = (paymentsArray) => {
-    const totalAmountApprovedOrConfirmed = paymentsArray
-      .filter(p => p.requestStatus === "approved" || p.requestStatus === "confirmed")
-      .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-
-    const pendingAmountRequested = paymentsArray
-      .filter(p => p.requestStatus === "requested") 
-      .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-
-    setStats({ totalAmountApprovedOrConfirmed, pendingAmountRequested });
   };
 
   const openApproveModal = (payment) => {
@@ -117,45 +120,75 @@ const Payments = () => {
 
   const handleApproveSubmit = async (e) => {
     e.preventDefault();
+    console.log("🟢 Approve payment initiated", { 
+      selectedPayment: selectedPayment?.id, 
+      transactionProofLink: transactionProofLink 
+    });
+    
     if (!transactionProofLink.trim()) {
-      toast.error("Transaction proof link is required");
+      setToast({ show: true, message: "Transaction proof link is required", type: "error" });
       return;
     }
-    if (!selectedPayment) return;
+    if (!selectedPayment) {
+      console.error("No payment selected");
+      return;
+    }
 
     setSubmitting(true);
     try {
-      // API expects { transactionProofLink: "..." }
-      await approvePayment(selectedPayment.id, { transactionProofLink: transactionProofLink.trim() });
-      toast.success("Payment approved successfully!");
+      console.log("📤 Sending approve request:", { 
+        paymentId: selectedPayment.id, 
+        transactionProofLink: transactionProofLink.trim() 
+      });
+      
+      const response = await approvePayment(selectedPayment.id, { transactionProofLink: transactionProofLink.trim() });
+      
+      console.log("✅ Approve response:", response);
+      setToast({ show: true, message: "Payment approved successfully!", type: "success" });
       closeModal();
       fetchPayments(); // Refresh list & stats
     } catch (error) {
-      console.error("Error approving payment:", error);
-      toast.error(error.message || "Failed to approve payment");
+      console.error("❌ Error approving payment:", error);
+      const errorMessage = error?.message || error?.error || "Failed to approve payment";
+      setToast({ show: true, message: errorMessage, type: "error" });
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleRejectSubmit = async (e) => {
-     e.preventDefault();
+    e.preventDefault();
+    console.log("🔴 Reject payment initiated", { 
+      selectedPayment: selectedPayment?.id, 
+      rejectionReason: rejectionReason 
+    });
+    
     if (!rejectionReason.trim()) {
-      toast.error("Rejection reason is required");
+      setToast({ show: true, message: "Rejection reason is required", type: "error" });
       return;
     }
-     if (!selectedPayment) return;
+    if (!selectedPayment) {
+      console.error("No payment selected");
+      return;
+    }
 
     setSubmitting(true);
     try {
-      // API expects { reason: "..." }
-      await rejectPayment(selectedPayment.id, { reason: rejectionReason.trim() });
-      toast.success("Payment rejected successfully!");
+      console.log("📤 Sending reject request:", { 
+        paymentId: selectedPayment.id, 
+        rejectedReason: rejectionReason.trim() 
+      });
+      
+      const response = await rejectPayment(selectedPayment.id, { rejectedReason: rejectionReason.trim() });
+      
+      console.log("✅ Reject response:", response);
+      setToast({ show: true, message: "Payment rejected successfully!", type: "success" });
       closeModal();
-      fetchPayments(); // Refresh list & stats
+      fetchPayments(); 
     } catch (error) {
-      console.error("Error rejecting payment:", error);
-      toast.error(error.message || "Failed to reject payment");
+      console.error("❌ Error rejecting payment:", error);
+      const errorMessage = error?.message || error?.error || "Failed to reject payment";
+      setToast({ show: true, message: errorMessage, type: "error" });
     } finally {
       setSubmitting(false);
     }
@@ -169,7 +202,7 @@ const Payments = () => {
       (payment.requestNotes?.toLowerCase() || "").includes(searchTermLower) ||
       (payment.amount?.toString() || "").includes(searchTerm);
 
-    const matchesFilter = filterStatus === "all" || payment.status?.toLowerCase() === filterStatus;
+    const matchesFilter = filterStatus === "all" || payment.requestStatus?.toLowerCase() === filterStatus;
 
     return matchesSearch && matchesFilter;
   });
@@ -191,14 +224,18 @@ const Payments = () => {
         </div>
 
         {/* **UPDATED Stats Display** */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20">
-            <p className="text-gray-400 text-sm mb-1">Total Amount (Approved/Confirmed)</p>
-            {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-white">${stats.totalAmountApprovedOrConfirmed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>}
+            <p className="text-gray-400 text-sm mb-1">Total Payments (Done)</p>
+            {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-white">{stats.totalPayments}</p>}
           </div>
           <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20">
-            <p className="text-gray-400 text-sm mb-1">Pending Amount (Requested)</p>
-             {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-yellow-400">${stats.pendingAmountRequested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>}
+            <p className="text-gray-400 text-sm mb-1">Total Paid Amount</p>
+            {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-green-400">${stats.totalPaidAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>}
+          </div>
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20">
+            <p className="text-gray-400 text-sm mb-1">Total Pending Amount</p>
+             {loading ? <SkeletonStat /> : <p className="text-2xl font-bold text-yellow-400">${stats.totalPendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>}
           </div>
         </div>
 
@@ -221,10 +258,9 @@ const Payments = () => {
               className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400"
             >
                <option value="all" className="bg-gray-800">All Status</option>
-               <option value="pending" className="bg-gray-800">Pending</option>
-               <option value="approved" className="bg-gray-800">Approved</option>
+               <option value="requested" className="bg-gray-800">Requested</option>
                <option value="rejected" className="bg-gray-800">Rejected</option>
-               <option value="completed" className="bg-gray-800">Completed</option>
+               <option value="paid" className="bg-gray-800">Paid</option>
             </select>
           </div>
         </div>
@@ -260,7 +296,7 @@ const Payments = () => {
                       <h3 className="text-2xl font-bold text-white">
                          ${parseFloat(payment.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h3>
-                      <PaymentStatusBadge status={payment.status} /> {/* Main status */}
+                      <PaymentStatusBadge status={payment.requestStatus} /> 
                       <span className="text-xs px-2 py-0.5 rounded-full bg-gray-600 text-gray-300 capitalize">
                          Request: {payment.requestStatus} {/* Request status */}
                       </span>
@@ -425,6 +461,15 @@ const Payments = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <Toaster
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false, message: "", type: "" })}
+        />
       )}
     </>
   );
