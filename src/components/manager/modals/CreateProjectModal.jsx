@@ -14,8 +14,10 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     startDate: '',
     deadline: '',
     estimatedHours: '',
+    rate: '',
+    estimatedMaterials: '',
+    estimatedConsumables: '',
     priority: 'medium',
-    budget: '',
     currency: 'USD',
     billingType: 'fixed_price',
     companyName: '',
@@ -25,8 +27,6 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     milestones: [],
     risks: [],
     issues: [],
-    estimatedMaterials: [],
-    estimatedConsumables: [],
     testingStatus: 'not_started',
     notes: '',
     teamSize: '',
@@ -39,46 +39,6 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-
-  //handle consumables and materials
-  const handleArrayChange = (e, field, index) => {
-    const newArr = [...formData[field]];
-    newArr[index] = e.target.value;
-    setFormData({ ...formData, [field]: newArr });
-  };
-
-  // Add new material input and its pair
-  const addMaterialRow = () => {
-    setFormData({
-      ...formData,
-      estimatedMaterials: [...formData.estimatedMaterials, ""],
-    });
-  };
-
-  // Add new consumable input and its pair
-  const addConsumableRow = () => {
-    setFormData({
-      ...formData,
-      estimatedConsumables: [...formData.estimatedConsumables, ""],
-    });
-  };
-
-  const handleArrayRemove = (fieldName, indexToRemove) => {
-    setFormData(prevData => {
-      // Get the current array (e.g., prevData.estimatedMaterials)
-      const currentArray = prevData[fieldName];
-
-      // Create a new array that excludes the item at the specified index
-      const newArray = currentArray.filter((_, index) => index !== indexToRemove);
-
-      // Return the new state object
-      return {
-        ...prevData,
-        [fieldName]: newArray,
-      };
-    });
   };
 
   // Handle risks
@@ -266,7 +226,8 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput id="startDate" label="Start Date" type="date" value={formData.startDate} onChange={handleChange} required />
               <FormInput id="deadline" label="Deadline" type="date" value={formData.deadline} onChange={handleChange} required />
-              <FormInput id="estimatedHours" label="Estimated Hours" min="0" type="number" value={formData.estimatedHours} onChange={handleChange} />
+              <FormInput id="estimatedHours" label="Estimated Hours" min="0" type="number" step="0.01" value={formData.estimatedHours} onChange={handleChange} />
+              <FormInput id="rate" label="Hourly Rate" min="0" type="number" step="0.01" value={formData.rate} onChange={handleChange} />
               <FormSelect id="priority" label="Priority" value={formData.priority} onChange={handleChange} required>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -275,80 +236,50 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
               </FormSelect>
             </div>
           </Section>
-          {/* consumables and materials */}
-          <Section title="Consumables and Materials">
 
-            {/* Materials Section */}
-            <h3 className=" mb-2">Materials</h3>
-
-            {/* Loop through materials */}
-            {formData.estimatedMaterials.map((value, i) => (
-              <div key={i} className="flex items-center gap-4 mb-2">
-                {/* Input field (takes up remaining space) */}
-                <div className="flex-grow">
-                  <FormInput
-                    id={`estimatedMaterials-${i}`}
-                    label={`Estimated Material ${i + 1}`}
-                    value={value}
-                    onChange={(e) => handleArrayChange(e, "estimatedMaterials", i)}
-                  />
-                </div>
-
-                {/* Remove Button */}
-                <button
-                  type="button"
-                  onClick={() => handleArrayRemove("estimatedMaterials", i)}
-                  className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
-                >
-                 <FiTrash2/>
-                </button>
+          {/* === MATERIALS AND CONSUMABLES === */}
+          <Section title="Materials and Consumables">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormInput 
+                id="estimatedMaterials" 
+                label="Estimated Materials Cost" 
+                type="number" 
+                min="0" 
+                step="0.01"
+                value={formData.estimatedMaterials} 
+                onChange={handleChange}
+                placeholder="0.00"
+              />
+              <FormInput 
+                id="estimatedConsumables" 
+                label="Estimated Consumables Cost" 
+                type="number" 
+                min="0" 
+                step="0.01"
+                value={formData.estimatedConsumables} 
+                onChange={handleChange}
+                placeholder="0.00"
+              />
+            </div>
+            {/* Auto-calculated Budget Display */}
+            {(formData.estimatedHours || formData.rate || formData.estimatedMaterials || formData.estimatedConsumables) && (
+              <div className="mt-4 p-4 bg-purple-900/20 border border-purple-700/50 rounded-lg">
+                <p className="text-sm text-gray-400 mb-1">Total Budget</p>
+                <p className="text-2xl font-bold text-purple-300">
+                  {formData.currency} {(
+                    (parseFloat(formData.estimatedHours) || 0) * (parseFloat(formData.rate) || 0) +
+                    (parseFloat(formData.estimatedMaterials) || 0) +
+                    (parseFloat(formData.estimatedConsumables) || 0)
+                  ).toFixed(2)}
+                </p>
+                
               </div>
-            ))}
-
-            {/* Add Material Button */}
-            <button type="button" onClick={addMaterialRow} className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors">
-              + Add Material
-            </button>
-
-            {/* Consumables Section */}
-            <h3 className="font-semibold mb-2">Consumables</h3>
-
-            {/* Loop through consumables */}
-            {formData.estimatedConsumables.map((value, i) => (
-              <div key={i} className="flex items-center gap-4 mb-2">
-                {/* Input field (takes up remaining space) */}
-                <div className="flex-grow">
-                  <FormInput
-                    id={`estimatedConsumables-${i}`}
-                    label={`Estimated Consumable ${i + 1}`}
-                    value={value}
-                    onChange={(e) => handleArrayChange(e, "estimatedConsumables", i)}
-                  />
-                </div>
-
-                {/* Remove Button */}
-                <button
-                  type="button"
-                  onClick={() => handleArrayRemove("estimatedConsumables", i)}
-                  className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
-                >
-                  <FiTrash2/>
-                </button>
-              </div>
-            ))}
-
-            {/* Add Consumable Button */}
-            <button type="button" onClick={addConsumableRow} className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors">
-              + Add Consumable
-            </button>
-
+            )}
           </Section>
-
 
           {/* === FINANCIAL === */}
           <Section title="Financial">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormInput id="budget" label="Budget" type="number" min="0" value={formData.budget} onChange={handleChange} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormSelect id="currency" label="Currency" value={formData.currency} onChange={handleChange}>
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>

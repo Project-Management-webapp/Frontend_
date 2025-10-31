@@ -1,54 +1,22 @@
 import React, { useState } from 'react';
-import { FiX, FiClock, FiPackage, FiBox, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiX, FiClock, FiPackage, FiBox } from 'react-icons/fi';
 import {FormInput} from "../../atoms/FormFields";
 
 const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
   const [actualHours, setActualHours] = useState('');
-  const [actualConsumables, setActualConsumables] = useState(['']);
-  const [actualMaterials, setActualMaterials] = useState(['']);
+  const [actualConsumables, setActualConsumables] = useState('');
+  const [actualMaterials, setActualMaterials] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleAddConsumable = () => {
-    setActualConsumables([...actualConsumables, '']);
-  };
-
-  const handleRemoveConsumable = (index) => {
-    setActualConsumables(actualConsumables.filter((_, i) => i !== index));
-  };
-
-  const handleConsumableChange = (index, value) => {
-    const updated = [...actualConsumables];
-    updated[index] = value;
-    setActualConsumables(updated);
-  };
-
-  const handleAddMaterial = () => {
-    setActualMaterials([...actualMaterials, '']);
-  };
-
-  const handleRemoveMaterial = (index) => {
-    setActualMaterials(actualMaterials.filter((_, i) => i !== index));
-  };
-
-  const handleMaterialChange = (index, value) => {
-    const updated = [...actualMaterials];
-    updated[index] = value;
-    setActualMaterials(updated);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Filter out empty strings
-    const filteredConsumables = actualConsumables.filter(item => item.trim() !== '');
-    const filteredMaterials = actualMaterials.filter(item => item.trim() !== '');
 
     const payload = {
-      actualHours: parseFloat(actualHours) || 0,
-      actualConsumables: filteredConsumables,
-      actualMaterials: filteredMaterials,
+      actualHours: actualHours ? parseFloat(actualHours) : 0,
+      actualConsumables: actualConsumables ? parseFloat(actualConsumables) : 0,
+      actualMaterials: actualMaterials ? parseFloat(actualMaterials) : 0,
     };
 
     setIsSubmitting(true);
@@ -103,77 +71,32 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
               <FiPackage className="text-yellow-400" />
-              Actual Consumables Used
+              Actual Consumables Cost
             </label>
-            <div className="space-y-2 w-full">
-              {actualConsumables.map((consumable, index) => (
-                <div key={index} className="flex gap-2">
-                  <FormInput
-                    type="text"
-                    value={consumable}
-                    onChange={(e) => handleConsumableChange(index, e.target.value)}
-                    placeholder="e.g., Printer ink, Paper, etc."
-                  />  
-                 
-                  {actualConsumables.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveConsumable(index)}
-                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
-                    >
-                      <FiTrash2 size={20} />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={handleAddConsumable}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-yellow-400 hover:text-yellow-300 hover:bg-yellow-900/20 rounded-lg transition-colors"
-              >
-                <FiPlus size={16} />
-                Add Consumable
-              </button>
-            </div>
-            
+            <FormInput
+              type="number"
+              step="0.01"
+              min="0"
+              value={actualConsumables}
+              onChange={(e) => setActualConsumables(e.target.value)}
+              placeholder="0.00"
+            />
           </div>
 
           {/* Actual Materials */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
               <FiBox className="text-green-400" />
-              Actual Materials Used
+              Actual Materials Cost
             </label>
-            <div className="space-y-2 w-full">
-              {actualMaterials.map((material, index) => (
-                <div key={index} className="flex gap-2">
-                  <FormInput
-                    type="text"
-                    value={material}
-                    onChange={(e) => handleMaterialChange(index, e.target.value)}
-                    placeholder="e.g., Steel, Wood, Concrete, etc."
-                  />
-                  {actualMaterials.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveMaterial(index)}
-                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
-                    >
-                      <FiTrash2 size={20} />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={handleAddMaterial}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded-lg transition-colors"
-              >
-                <FiPlus size={16} />
-                Add Material
-              </button>
-            </div>
-           
+            <FormInput
+              type="number"
+              step="0.01"
+              min="0"
+              value={actualMaterials}
+              onChange={(e) => setActualMaterials(e.target.value)}
+              placeholder="0.00"
+            />
           </div>
 
           {/* Action Buttons */}

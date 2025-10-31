@@ -107,24 +107,14 @@ export const WORK_STATUS_COLOR_CONFIG = {
     text: 'text-yellow-300',
     label: 'Submitted',
   },
-  pending_review: {
+  not_started: {
     bg: 'bg-yellow-600/20',
-    text: 'text-yellow-300',
-    label: 'Pending Review',
-  },
-  revision_needed: {
-    bg: 'bg-red-600/20',
     text: 'text-red-300',
-    label: 'Revision Needed',
-  },
-  completed: {
-    bg: 'bg-green-600/20',
-    text: 'text-green-300',
-    label: 'Completed',
+    label: 'Not Started',
   },
   default: {
     bg: 'bg-gray-600/20',
     text: 'text-gray-300',
-    label: 'Unknown',
+    label: 'Unknown', 
   },
 };

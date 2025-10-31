@@ -66,7 +66,6 @@ const RequestPaymentModal = ({ isOpen, onClose, assignment, onSubmit, setToast }
             />
             {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
             <div className="mt-4 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
-              <p className="text-sm text-gray-300 font-medium mb-2">Assignment ID: {assignment.id}</p>
               <p className="text-sm text-gray-300 mb-1">Role: <span className="text-purple-400">{assignment.role}</span></p>
               <p className="text-lg text-white font-bold">Amount: ${parseFloat(assignment.allocatedAmount).toLocaleString()} {assignment.currency}</p>
             </div>

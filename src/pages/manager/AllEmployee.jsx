@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import EmployeeCard from '../../components/manager/cards/EmployeeCard';
-import { getAllEmployees, addEmployee } from '../../api/manager/employeedetail';
+import { getAllEmployees, addEmployee, updateEmployeeDetails } from '../../api/manager/employeedetail';
 import Toaster from '../../components/Toaster';
 import AddEmployeeModal from '../../components/manager/modals/AddEmployeeModal'; 
-import { FaPlus } from 'react-icons/fa'; 
+import { FaPlus } from 'react-icons/fa';
 
 const AllEmployee = () => {
   const [employees, setEmployees] = useState([]);
@@ -50,6 +50,30 @@ const AllEmployee = () => {
     } catch (err) {
       setToast({ show: true, message: err.message || 'An error occurred.', type: 'error', loading: false });
       throw err; 
+    }
+  };
+
+  const handleUpdateRate = async (employeeId, rateData) => {
+    setToast({ show: true, message: 'Updating employee rate...', type: 'loading', loading: true });
+    
+    try {
+      const response = await updateEmployeeDetails(employeeId, rateData);
+      
+      if (response.success) {
+        setToast({ show: true, message: 'Employee rate updated successfully!', type: 'success', loading: false });
+        
+        // Update the employee in the local state
+        setEmployees(prevEmployees => 
+          prevEmployees.map(emp => 
+            emp.id === employeeId ? { ...emp, rate: rateData.rate } : emp
+          )
+        );
+      } else {
+        throw new Error(response.message || 'Failed to update employee rate.');
+      }
+    } catch (err) {
+      setToast({ show: true, message: err.message || 'Failed to update rate.', type: 'error', loading: false });
+      throw err;
     }
   };
 
@@ -100,6 +124,7 @@ const AllEmployee = () => {
             <EmployeeCard
               key={employee.id}
               employee={employee}
+              onRateUpdate={handleUpdateRate}
             />
           ))}
         </div>

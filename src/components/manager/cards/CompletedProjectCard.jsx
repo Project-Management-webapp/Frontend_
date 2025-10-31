@@ -129,7 +129,7 @@ const CompletedProjectCard = ({ project, onViewDetails }) => {
               Milestones
             </span>
             <span className="text-white font-semibold text-base">
-              {completedMilestones}/{totalMilestones}
+              {totalMilestones}
             </span>
           </div>
         )}
@@ -145,24 +145,13 @@ const CompletedProjectCard = ({ project, onViewDetails }) => {
           </span>
         </div>
 
-        {/* Issues & Risks Alert */}
-        {/* {(openIssues > 0 || openRisks > 0) && (
-          <div className="flex items-center gap-2 text-sm bg-red-500/10 border border-red-500/30 rounded px-2 py-1">
-            <FiAlertCircle size={16} className="text-red-400" />
-            <span className="text-red-400">
-              {openIssues > 0 && `${openIssues} open issue${openIssues > 1 ? 's' : ''}`}
-              {openIssues > 0 && openRisks > 0 && ', '}
-              {openRisks > 0 && `${openRisks} risk${openRisks > 1 ? 's' : ''}`}
-            </span>
-          </div>
-        )} */}
       </div>
 
       {/* Footer */}
       <div className="p-5 bg-gray-900/50 border-t border-gray-700/50">
         <button
           onClick={() => onViewDetails(project)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600/80 hover:bg-green-600 text-white rounded-lg font-semibold transition-all hover:shadow-lg hover:shadow-green-500/30"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600/80 hover:bg-green-600 text-white rounded-lg font-semibold transition-all hover:shadow-sm hover:shadow-green-500/30"
         >
           <FiEye size={20} />
           <span>View Details</span>

@@ -17,10 +17,10 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
   const [paymentTerms, setPaymentTerms] = useState('');
   const [responsibilities, setResponsibilities] = useState('');
   const [deliverables, setDeliverables] = useState('');
-  const [estimatedMaterials, setEstimatedMaterials] = useState([{ material: '' }]);
-  const [estimatedConsumables, setEstimatedConsumables] = useState([{ consumable: '' }]);
+  const [estimatedMaterials, setEstimatedMaterials] = useState('');
+  const [estimatedConsumables, setEstimatedConsumables] = useState('');
   const [notes, setNotes] = useState('');
-  const [employeeRate, setEmployeeRate] = useState('');
+  const [rate, setRate] = useState(''); // Manager inputs this manually
   // const [responseDeadline, setResponseDeadline] = useState('');
   const [userList, setUserList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,73 +47,30 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
     fetchUsers();
   }, [setToast]);
 
-  // Auto-calculate allocated amount when employee or estimated hours change
   useEffect(() => {
-    if (employeeId && estimatedHours !== '') {
-      const selectedEmp = userList.find(user => user.id === Number(employeeId));
-      if (selectedEmp && selectedEmp.rate) {
-        const rate = parseFloat(selectedEmp.rate) || 0;
-        const hours = parseFloat(estimatedHours) || 0;
-        const calculatedAmount = (rate * hours).toFixed(2);
-        setAllocatedAmount(calculatedAmount);
-        setEmployeeRate(selectedEmp.rate);
-      }
-    } else if (estimatedHours === '' || estimatedHours === '0' || parseFloat(estimatedHours) === 0) {
-      // If estimated hours is 0 or empty, set allocated amount to 0
-      setAllocatedAmount('0');
-    }
-  }, [employeeId, estimatedHours, userList]);
+    const rateValue = parseFloat(rate) || 0;
+    const hours = parseFloat(estimatedHours) || 0;
+    const materials = parseFloat(estimatedMaterials) || 0;
+    const consumables = parseFloat(estimatedConsumables) || 0;
+    
+    const calculatedAmount = (rateValue * hours + materials + consumables).toFixed(2);
+    setAllocatedAmount(calculatedAmount);
+  }, [rate, estimatedHours, estimatedMaterials, estimatedConsumables]);
 
-  // Update employee rate when employee changes
+  // Pre-fill rate with employee's rate when employee is selected (optional, manager can change it)
   useEffect(() => {
     if (employeeId) {
       const selectedEmp = userList.find(user => user.id === Number(employeeId));
       if (selectedEmp) {
-        setEmployeeRate(selectedEmp.rate || '');
-        // Set currency from project or employee if available
+        // Pre-fill rate with employee's rate, but manager can edit it
+        setRate(selectedEmp.rate || '');
+        // Set currency from project if available
         if (project.currency) {
           setCurrency(project.currency);
         }
       }
     }
   }, [employeeId, userList, project.currency]);
-
-  // Handler for adding material row
-  const addMaterialRow = () => {
-    setEstimatedMaterials([...estimatedMaterials, { material: '' }]);
-  };
-
-  // Handler for adding consumable row
-  const addConsumableRow = () => {
-    setEstimatedConsumables([...estimatedConsumables, { consumable: '' }]);
-  };
-
-  // Handler for changing array items
-  const handleArrayChange = (e, fieldName, index) => {
-    const newValue = e.target.value;
-    if (fieldName === 'estimatedMaterials') {
-      const newArray = [...estimatedMaterials];
-      newArray[index] = { material: newValue };
-      setEstimatedMaterials(newArray);
-    } else if (fieldName === 'estimatedConsumables') {
-      const newArray = [...estimatedConsumables];
-      newArray[index] = { consumable: newValue };
-      setEstimatedConsumables(newArray);
-    }
-  };
-
-  // Handler for removing array items
-  const handleArrayRemove = (fieldName, indexToRemove) => {
-    if (fieldName === 'estimatedMaterials') {
-      if (estimatedMaterials.length > 1) {
-        setEstimatedMaterials(estimatedMaterials.filter((_, index) => index !== indexToRemove));
-      }
-    } else if (fieldName === 'estimatedConsumables') {
-      if (estimatedConsumables.length > 1) {
-        setEstimatedConsumables(estimatedConsumables.filter((_, index) => index !== indexToRemove));
-      }
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -126,27 +83,19 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
     const responsibilitiesArray = responsibilities.split('\n').filter(line => line.trim() !== '');
     const deliverablesArray = deliverables.split('\n').filter(line => line.trim() !== '');
 
-    // Filter and map materials and consumables
-    const materialsArray = estimatedMaterials
-      .map(item => item.material)
-      .filter(material => material.trim() !== '');
-    const consumablesArray = estimatedConsumables
-      .map(item => item.consumable)
-      .filter(consumable => consumable.trim() !== '');
-
     const payload = {
       projectId: project.id,
       employeeId: Number(employeeId),
       role,
-      estimatedHours: estimatedHours ? Number(estimatedHours) : null,
-      allocatedAmount: allocatedAmount ? Number(allocatedAmount) : 0,
+      estimatedHours: estimatedHours ? Number(estimatedHours) : 0,
+      estimatedMaterials: estimatedMaterials ? Number(estimatedMaterials) : 0,
+      estimatedConsumables: estimatedConsumables ? Number(estimatedConsumables) : 0,
+      rate: rate ? Number(rate) : 0, // Manager manually inputs the rate
       currency,
       paymentSchedule,
       paymentTerms,
       responsibilities: responsibilitiesArray,
       deliverables: deliverablesArray,
-      estimatedMaterials: materialsArray.length > 0 ? materialsArray : null,
-      estimatedConsumables: consumablesArray.length > 0 ? consumablesArray : null,
       notes: notes || null,
       // responseDeadline,
     };
@@ -232,10 +181,11 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
             </div>
 
             {/* Employee Rate Display */}
-            {employeeRate && (
-              <div className="bg-purple-900/20 border border-purple-700/30 rounded-lg p-3">
-                <p className="text-sm text-purple-300">
-                  <span className="font-semibold">Employee Hourly Rate:</span> {currency} {employeeRate}/hour
+            {employeeId && (
+              <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-3">
+                <p className="text-sm text-blue-300">
+                  <span className="font-semibold">Employee's Base Rate:</span> {currency} {userList.find(user => user.id === Number(employeeId))?.rate || 'N/A'}/hour
+                  
                 </p>
               </div>
             )}
@@ -249,6 +199,19 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               placeholder="e.g. Frontend Developer"
             />
 
+            {/* Rate per Hour - Manager Input */}
+            <FormInput
+              id="rate"
+              label="Rate per Hour for this Assignment"
+              type="number"
+              step="0.01"
+              min="0"
+              value={rate}
+              onChange={(e) => setRate(e.target.value)}
+              placeholder="Enter hourly rate"
+              required
+            />
+
             {/* Estimated Hours */}
             <FormInput
               id="estimatedHours"
@@ -259,6 +222,28 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               value={estimatedHours}
               onChange={(e) => setEstimatedHours(e.target.value)}
               placeholder="Enter estimated hours"
+            />
+
+            <FormInput
+              id="estimatedMaterials"
+              label="Estimated Materials Cost (Optional)"
+              type="number"
+              step="0.01"
+              min="0"
+              value={estimatedMaterials}
+              onChange={(e) => setEstimatedMaterials(e.target.value)}
+              placeholder="0.00"
+            />
+
+            <FormInput
+              id="estimatedConsumables"
+              label="Estimated Consumables Cost (Optional)"
+              type="number"
+              step="0.01"
+              min="0"
+              value={estimatedConsumables}
+              onChange={(e) => setEstimatedConsumables(e.target.value)}
+              placeholder="0.00"
             />
 
             {/* Allocated Amount (Auto-calculated - disabled) */}
@@ -274,7 +259,6 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
                 placeholder="Auto-calculated"
                 disabled={true}
               />
-              
             </div>
 
             {/* Currency */}
@@ -332,74 +316,6 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               placeholder="Enter deliverables (one per line)"
               rows={3}
             />
-
-            {/* Estimated Materials */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Estimated Materials (Optional)
-              </label>
-              {estimatedMaterials.map((item, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={item.material}
-                    onChange={(e) => handleArrayChange(e, 'estimatedMaterials', index)}
-                    placeholder="Enter material"
-                    className="flex-1 px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
-                  />
-                  {estimatedMaterials.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleArrayRemove('estimatedMaterials', index)}
-                      className="px-3 py-2 text-red-600 hover:text-red-700  text-lg transition-colors"
-                    >
-                     <RiDeleteBin6Line />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addMaterialRow}
-                className="mt-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
-              >
-                + Add Material
-              </button>
-            </div>
-
-            {/* Estimated Consumables */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Estimated Consumables (Optional)
-              </label>
-              {estimatedConsumables.map((item, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={item.consumable}
-                    onChange={(e) => handleArrayChange(e, 'estimatedConsumables', index)}
-                    placeholder="Enter consumable"
-                    className="flex-1 px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
-                  />
-                  {estimatedConsumables.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleArrayRemove('estimatedConsumables', index)}
-                      className="px-3 py-2 text-red-600 hover:text-red-700 text-lg transition-colors"
-                    >
-                      <RiDeleteBin6Line />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addConsumableRow}
-                className="mt-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
-              >
-                + Add Consumable
-              </button>
-            </div>
 
             {/* Notes */}
             <FormTextarea

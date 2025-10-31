@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
-import {  FaMoneyBillWave } from 'react-icons/fa';
+import {  FaMoneyBillWave, FaEdit } from 'react-icons/fa';
 import EmployeeDetailModal from '../modals/EmployeeDetailModal';
+import EditRateModal from '../modals/EditRateModal';
 
-const EmployeeCard = ({ employee }) => {
+const EmployeeCard = ({ employee, onRateUpdate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditRateModalOpen, setIsEditRateModalOpen] = useState(false);
   const name = employee.fullName || 'Unnamed Employee';
   const position = employee.position || employee.jobTitle || 'No Position';
   const department = employee.department || 'No Department';
   const profileImage = employee.profileImage || '/default-profile.png';
   const rate = employee.rate || 'N/A';
 
+  const handleUpdateRate = async (rateData) => {
+    if (onRateUpdate) {
+      await onRateUpdate(employee.id, rateData);
+    }
+  };
 
   return (
     <>
@@ -39,13 +46,31 @@ const EmployeeCard = ({ employee }) => {
           </div>
         </div>
         <div className="flex justify-end">
-      </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditRateModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
+            title="Edit employee rate"
+          >
+            <FaEdit className="text-sm" />
+            Edit Rate
+          </button>
+        </div>
       </div>
 
       <EmployeeDetailModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         employeeData={employee}
+      />
+
+      <EditRateModal
+        isOpen={isEditRateModalOpen}
+        onClose={() => setIsEditRateModalOpen(false)}
+        employee={employee}
+        onUpdateRate={handleUpdateRate}
       />
     </>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  IoClose, 
+  IoClose,
   IoPersonOutline,
   IoCheckmarkDoneCircleOutline,
   IoStarOutline,
@@ -11,7 +11,7 @@ import {
   IoTimeOutline,
   IoBusinessOutline,
 } from 'react-icons/io5';
-import { formatDate } from '../../atoms/FormatedDate'; 
+import { formatDate } from '../../atoms/FormatedDate';
 import { FiUserCheck, FiDollarSign } from 'react-icons/fi';
 import Badge from "../../atoms/Badge";
 import { PRIORITY_CONFIG, PROJECT_STATUS_CONFIG } from "../../../lib/badgeConfigs";
@@ -28,8 +28,8 @@ const DetailRow = ({ label, value, isTag = false, isDate = false, isCode = false
       </div>
     );
   }
-  
-  if (!value && typeof value !== 'number') return null; 
+
+  if (!value && typeof value !== 'number') return null;
 
   let displayValue;
   if (isDate) {
@@ -89,12 +89,9 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
   if (!assignment) return null;
 
   const {
-    id,
-    projectId,
-    employeeId,
+   
     project,
     assigner,
-    verifier,
     role,
     allocatedAmount,
     currency,
@@ -102,10 +99,9 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
     paymentTerms,
     workStatus,
     assignedDate,
-    isActive,
+    rate,
     workStartedAt,
     workSubmittedAt,
-    workVerifiedAt,
     verificationNotes,
     performanceFeedback,
     deliverables,
@@ -120,7 +116,6 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
     notes,
     createdAt,
     updatedAt,
-    workVerifiedBy,
   } = assignment;
 
   const handleModalContentClick = (e) => e.stopPropagation();
@@ -131,9 +126,9 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
     if (typeof data === 'string') {
       try {
         const parsed = JSON.parse(data);
-        return Array.isArray(parsed) ? parsed : [data]; 
+        return Array.isArray(parsed) ? parsed : [data];
       } catch {
-        return [data]; 
+        return [data];
       }
     }
     return [];
@@ -181,15 +176,11 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
 
         {/* Body */}
         <div className="flex-grow overflow-y-auto p-6 space-y-4">
-          
+
           {/* Your Assignment */}
           <DetailSection title="Your Assignment" icon={<IoPersonOutline size={22} />}>
-            <DetailRow label="Assignment ID" value={id} />
-            <DetailRow label="Project ID" value={projectId} />
-            <DetailRow label="Employee ID" value={employeeId} />
             <DetailRow label="Your Role" value={role} isTag />
             <DetailRow label="Work Status" value={workStatus} isTag />
-            <DetailRow label="Is Active" value={isActive ? 'Yes' : 'No'} />
             <DetailRow label="Assigned Date" value={assignedDate} isDate />
             <DetailRow label="Assigned By" value={assigner?.fullName || assigner?.email} />
           </DetailSection>
@@ -197,23 +188,21 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
           {/* Project Details */}
           <DetailSection title="Project Details" icon={<IoBusinessOutline size={22} />}>
             <DetailRow label="Project Name" value={project?.name} />
-            <div className="md:col-span-2">
-              <DetailRow label="Description" value={project?.description} />
-            </div>
+            <DetailRow label="Description" value={project?.description} />
             <DetailRow label="Project Status" value={project?.status} isTag />
             <DetailRow label="Priority" value={project?.priority} isTag />
-            <DetailRow label="Budget" value={project?.budget ? `USD ${parseFloat(project.budget).toLocaleString()}` : null} />
             <DetailRow label="Deadline" value={project?.deadline} isDate />
           </DetailSection>
 
           {/* Payment Information */}
           <DetailSection title="Payment Information" icon={<FiDollarSign size={22} />}>
             <DetailRow label="Allocated Amount" value={`${currency || 'USD'} ${parseFloat(allocatedAmount || 0).toLocaleString()}`} />
-            <DetailRow label="Currency" value={currency} />
+            <DetailRow label="Rate per hour" value={`${currency || 'USD'} ${parseFloat(rate || 0).toLocaleString()}`} />
+  
             <DetailRow label="Payment Schedule" value={paymentSchedule} isTag />
-            <div className="md:col-span-2">
+            
               <DetailRow label="Payment Terms" value={paymentTerms} />
-            </div>
+          
           </DetailSection>
 
           {/* Hours Tracking */}
@@ -224,17 +213,6 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
             <DetailRow label="Work Submitted At" value={workSubmittedAt} isDate />
             <DetailRow label="Created At" value={createdAt} isDate />
             <DetailRow label="Last Updated" value={updatedAt} isDate />
-          </DetailSection>
-
-          {/* Completion Details */}
-          <DetailSection title="Completion Details" icon={<IoCheckmarkDoneCircleOutline size={22} />}>
-            <DetailRow label="Submitted On" value={workSubmittedAt} isDate />
-            <DetailRow label="Verified On" value={workVerifiedAt} isDate />
-            <DetailRow 
-              label="Verified By" 
-              value={verifier?.fullName || verifier?.email || (workVerifiedBy ? `Manager ID: ${workVerifiedBy}` : 'Pending Verification')} 
-              icon={<FiUserCheck />} 
-            />
           </DetailSection>
 
           {/* Feedback & Review */}
@@ -264,18 +242,16 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
 
           {/* Materials & Consumables */}
           <DetailSection title="Materials & Consumables" icon={<IoDocumentTextOutline size={22} />}>
-            <div className="md:col-span-2">
+            
               <DetailRow label="Estimated Materials" value={parseJsonArray(estimatedMaterials)} />
-            </div>
-            <div className="md:col-span-2">
+           
+          
               <DetailRow label="Actual Materials" value={parseJsonArray(actualMaterials)} />
-            </div>
-            <div className="md:col-span-2">
+           
               <DetailRow label="Estimated Consumables" value={parseJsonArray(estimatedConsumables)} />
-            </div>
-            <div className="md:col-span-2">
+           
               <DetailRow label="Actual Consumables" value={parseJsonArray(actualConsumables)} />
-            </div>
+          
           </DetailSection>
 
           {/* Additional Notes */}
@@ -292,8 +268,8 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
             <DetailSection title="Assigned By" icon={<IoPersonOutline size={22} />}>
               <div className="md:col-span-2 flex items-center gap-4">
                 {assigner.profileImage && (
-                  <img 
-                    src={assigner.profileImage} 
+                  <img
+                    src={assigner.profileImage}
                     alt={assigner.fullName || assigner.email}
                     className="w-16 h-16 rounded-full object-cover border-2 border-green-500"
                   />

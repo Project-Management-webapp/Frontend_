@@ -84,7 +84,7 @@ const AllProjects = () => {
               <p className="text-gray-400 mb-8 text-base sm:text-lg max-w-md">Get started by creating your first project and begin managing your team efficiently</p>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-purple-500/50 font-semibold"
+                className="btn flex gap-2"
               >
                 <FiPlus size={20} />
                 <span>Create Project</span>

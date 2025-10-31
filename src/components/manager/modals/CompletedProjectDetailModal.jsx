@@ -10,7 +10,8 @@ import {
   FiClock,
   FiTrendingUp,
   FiCode,
-  FiInfo
+  FiInfo,
+  FiExternalLink
 } from 'react-icons/fi';
 import { formatDate } from '../../atoms/FormatedDate';
 import Badge from "../../atoms/Badge";
@@ -73,9 +74,9 @@ const MilestoneItem = ({ milestone, index }) => {
     <div className={`p-3 rounded-lg border ${colorClass}`}>
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="font-semibold text-white">{milestone.name}</h4>
-        <span className="text-xs px-2 py-1 rounded capitalize bg-gray-900/50">
+        {/* <span className="text-xs px-2 py-1 rounded capitalize bg-gray-900/50">
           {milestone.status?.replace(/_/g, ' ') || 'pending'}
-        </span>
+        </span> */}
       </div>
       {milestone.description && (
         <p className="text-sm text-gray-400 mb-2">{milestone.description}</p>
@@ -172,15 +173,6 @@ const CompletedProjectDetailModal = ({ project, onClose }) => {
   const issues = parseJSON(project.issues);
   const referenceLinks = parseJSON(project.referenceLinks);
 
-  // Parse consumables
-  const estimatedConsumables = typeof project.estimatedConsumables === 'string'
-    ? JSON.parse(project.estimatedConsumables)
-    : project.estimatedConsumables || {};
-
-  const actualConsumables = typeof project.actualConsumables === 'string'
-    ? JSON.parse(project.actualConsumables)
-    : project.actualConsumables || {};
-
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -217,20 +209,22 @@ const CompletedProjectDetailModal = ({ project, onClose }) => {
           {/* Project Overview */}
           <DetailSection title="Project Overview" icon={<FiInfo size={20} />}>
             <DetailRow label="Project Type" value={project.projectType || project.customProjectType} />
+            <DetailRow label="Custom Type" value={project.customProjectType} />
             <DetailRow label="Company Name" value={project.companyName} />
             <DetailRow label="Company Email" value={project.companyEmail} />
             <DetailRow label="Company Phone" value={project.companyPhone} />
             <DetailRow label="Visibility" value={project.visibility} />
             <DetailRow label="Team Size" value={project.teamSize} />
+
           </DetailSection>
 
           {/* Financial Information */}
           <DetailSection title="Financial Information" icon={<FiDollarSign size={20} />}>
-            <DetailRow label="Budget" value={`${project.currency} ${parseFloat(project.budget || 0).toLocaleString()}`} />
-            <DetailRow label="Allocated Amount" value={`${project.currency} ${parseFloat(project.allocatedAmount || 0).toLocaleString()}`} />
-            <DetailRow label="Spent Amount" value={`${project.currency} ${parseFloat(project.spentAmount || 0).toLocaleString()}`} />
+            <DetailRow label="Budget" value={`${project.currency || 'USD'} ${parseFloat(project.budget || 0).toLocaleString()}`} />
+            <DetailRow label="Allocated Amount" value={`${project.currency || 'USD'} ${parseFloat(project.allocatedAmount || 0).toLocaleString()}`} />
+            <DetailRow label="Spent Amount" value={`${project.currency || 'USD'} ${parseFloat(project.spentAmount || 0).toLocaleString()}`} />
+            <DetailRow label="Rate per Hour" value={`${project.currency || 'USD'} ${parseFloat(project.rate || 0).toLocaleString()}`} />
             <DetailRow label="Billing Type" value={project.billingType?.replace(/_/g, ' ')} />
-            <DetailRow label="Currency" value={project.currency} />
           </DetailSection>
 
           {/* Timeline */}
@@ -243,45 +237,139 @@ const CompletedProjectDetailModal = ({ project, onClose }) => {
             <DetailRow label="Last Updated" value={project.updatedAt} isDate />
           </DetailSection>
 
-          {/* Hours Tracking */}
-          <DetailSection title="Hours Tracking" icon={<FiClock size={20} />}>
-            <DetailRow 
-              label="Estimated Hours" 
-              value={project.estimatedHours ? `${project.estimatedHours} hours` : 'Not set'} 
+          {/* Hours & Resources Tracking */}
+          <DetailSection title="Estimated vs Actual Resources" icon={<FiClock size={20} />}>
+            <DetailRow
+              label="Estimated Hours"
+              value={project.estimatedHours ? `${parseFloat(project.estimatedHours).toLocaleString()} hours` : 'Not set'}
             />
-            <DetailRow 
-              label="Actual Hours" 
-              value={project.actualHours && parseFloat(project.actualHours) > 0 ? `${project.actualHours} hours` : 'Not tracked'} 
+            <DetailRow
+              label="Actual Hours"
+              value={project.actualHours ? `${parseFloat(project.actualHours).toLocaleString()} hours` : '0 hours'}
+            />
+            <DetailRow
+              label="Estimated Materials"
+              value={project.estimatedMaterials ? `${project.currency || 'USD'} ${parseFloat(project.estimatedMaterials).toLocaleString()}` : 'Not set'}
+            />
+            <DetailRow
+              label="Actual Materials"
+              value={project.actualMaterials ? `${project.currency || 'USD'} ${parseFloat(project.actualMaterials).toLocaleString()}` : `${project.currency || 'USD'} 0`}
+            />
+            <DetailRow
+              label="Estimated Consumables"
+              value={project.estimatedConsumables ? `${project.currency || 'USD'} ${parseFloat(project.estimatedConsumables).toLocaleString()}` : 'Not set'}
+            />
+            <DetailRow
+              label="Actual Consumables"
+              value={project.actualConsumables ? `${project.currency || 'USD'} ${parseFloat(project.actualConsumables).toLocaleString()}` : `${project.currency || 'USD'} 0`}
             />
           </DetailSection>
 
-          {/* Technologies & Consumables */}
-          {estimatedConsumables && Object.keys(estimatedConsumables).length > 0 && (
-            <DetailSection title="Technologies & Consumables" icon={<FiCode size={20} />}>
-              <div className="md:col-span-2">
-                <DetailRow 
-                  label="Programming Languages" 
-                  value={estimatedConsumables.programmingLanguages} 
-                  isArray 
-                />
+          {/* Team Assignments */}
+          {project.assignments && project.assignments.length > 0 && (
+            <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+              <h3 className="text-lg font-semibold text-purple-300 flex items-center gap-2 p-4 border-b border-gray-700">
+                <FiUsers size={20} />
+                <span>Team Assignments ({project.assignments.length})</span>
+              </h3>
+              <div className="p-4 space-y-4">
+                {project.assignments.map((assignment) => (
+                  <div key={assignment.id} className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="text-lg font-semibold text-white">
+                          {assignment.employee?.fullName || 'Unknown Employee'}
+                        </h4>
+                        <p className="text-sm text-gray-400">{assignment.employee?.email}</p>
+                        <p className="text-sm text-purple-400 capitalize mt-1">{assignment.role || 'Team Member'}</p>
+                      </div>
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${assignment.workStatus === 'submitted'
+                          ? 'bg-green-600/20 text-green-400 border border-green-500/30'
+                          : assignment.workStatus === 'in_progress'
+                            ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+                            : 'bg-gray-600/20 text-gray-400 border border-gray-500/30'
+                        }`}>
+                        {assignment.workStatus?.replace(/_/g, ' ').toUpperCase() || 'NOT STARTED'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500 uppercase text-xs mb-1">Financial</p>
+                        <p className="text-gray-300">Allocated: <span className="text-green-400 font-semibold">{assignment.currency || 'USD'} {parseFloat(assignment.allocatedAmount || 0).toLocaleString()}</span></p>
+                        <p className="text-gray-300">Rate: <span className="text-purple-400 font-semibold">{assignment.currency || 'USD'} {parseFloat(assignment.rate || 0).toLocaleString()}/hr</span></p>
+                        <p className="text-gray-300">Payment: <span className="capitalize">{assignment.paymentSchedule?.replace(/_/g, ' ') || 'N/A'}</span></p>
+                      </div>
+
+                      <div>
+                        <p className="text-gray-500 uppercase text-xs mb-1">Hours</p>
+                        <p className="text-gray-300">Estimated: <span className="text-blue-400 font-semibold">{parseFloat(assignment.estimatedHours || 0).toLocaleString()} hrs</span></p>
+                        <p className="text-gray-300">Actual: <span className="text-green-400 font-semibold">{parseFloat(assignment.actualHours || 0).toLocaleString()} hrs</span></p>
+                      </div>
+
+                      <div>
+                        <p className="text-gray-500 uppercase text-xs mb-1">Materials</p>
+                        <p className="text-gray-300">Estimated: <span className="text-blue-400 font-semibold">{assignment.currency || 'USD'} {parseFloat(assignment.estimatedMaterials || 0).toLocaleString()}</span></p>
+                        <p className="text-gray-300">Actual: <span className="text-green-400 font-semibold">{assignment.currency || 'USD'} {parseFloat(assignment.actualMaterials || 0).toLocaleString()}</span></p>
+                      </div>
+
+                      <div>
+                        <p className="text-gray-500 uppercase text-xs mb-1">Consumables</p>
+                        <p className="text-gray-300">Estimated: <span className="text-blue-400 font-semibold">{assignment.currency || 'USD'} {parseFloat(assignment.estimatedConsumables || 0).toLocaleString()}</span></p>
+                        <p className="text-gray-300">Actual: <span className="text-green-400 font-semibold">{assignment.currency || 'USD'} {parseFloat(assignment.actualConsumables || 0).toLocaleString()}</span></p>
+                      </div>
+                    </div>
+
+                    {assignment.responsibilities && assignment.responsibilities.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-gray-500 uppercase text-xs mb-1">Responsibilities</p>
+                        <div className="flex flex-wrap gap-2">
+                          {assignment.responsibilities.map((resp, idx) => (
+                            <span key={idx} className="px-2 py-1 bg-purple-600/20 text-purple-300 rounded text-xs">
+                              {resp}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {assignment.deliverables && assignment.deliverables.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-gray-500 uppercase text-xs mb-1">Deliverables</p>
+                        <div className="flex flex-wrap gap-2">
+                          {assignment.deliverables.map((deliv, idx) => (
+                            <span key={idx} className="px-2 py-1 bg-blue-600/20 text-blue-300 rounded text-xs">
+                              {deliv}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {assignment.paymentTerms && (
+                      <div className="mt-3">
+                        <p className="text-gray-500 uppercase text-xs mb-1">Payment Terms</p>
+                        <p className="text-gray-300 text-sm">{assignment.paymentTerms}</p>
+                      </div>
+                    )}
+
+                    {assignment.notes && (
+                      <div className="mt-3">
+                        <p className="text-gray-500 uppercase text-xs mb-1">Notes</p>
+                        <p className="text-gray-300 text-sm">{assignment.notes}</p>
+                      </div>
+                    )}
+
+                    <div className="mt-3 pt-3 border-t border-gray-700 grid grid-cols-2 gap-2 text-xs text-gray-500">
+                      <p>Assigned: {formatDate(assignment.assignedDate)}</p>
+                      {assignment.workSubmittedAt && (
+                        <p>Submitted: {formatDate(assignment.workSubmittedAt)}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="md:col-span-2">
-                <DetailRow 
-                  label="Frameworks" 
-                  value={estimatedConsumables.frameworks} 
-                  isArray 
-                />
-              </div>
-              <div className="md:col-span-2">
-                <DetailRow 
-                  label="Technologies" 
-                  value={estimatedConsumables.technologies} 
-                  isArray 
-                />
-              </div>
-              <DetailRow label="Database" value={estimatedConsumables.database} />
-              <DetailRow label="Cloud Provider" value={estimatedConsumables.cloudProvider} />
-            </DetailSection>
+            </div>
           )}
 
           {/* Milestones */}
@@ -329,17 +417,6 @@ const CompletedProjectDetailModal = ({ project, onClose }) => {
             </div>
           )}
 
-          {/* Team Assignments */}
-          {project.assignments && project.assignments.length > 0 && (
-            <DetailSection title="Team Assignments" icon={<FiUsers size={20} />}>
-              <div className="md:col-span-2">
-                <p className="text-gray-300">
-                  {project.assignments.length} team member{project.assignments.length > 1 ? 's' : ''} assigned
-                </p>
-              </div>
-            </DetailSection>
-          )}
-
           {/* Additional Information */}
           {(project.notes || referenceLinks.length > 0) && (
             <DetailSection title="Additional Information" icon={<FiInfo size={20} />}>
@@ -350,7 +427,28 @@ const CompletedProjectDetailModal = ({ project, onClose }) => {
               )}
               {referenceLinks.length > 0 && (
                 <div className="md:col-span-2">
-                  <DetailRow label="Reference Links" value={referenceLinks} isArray />
+                  <div className="p-0">
+                    <strong className="text-sm font-medium text-gray-400 flex items-center gap-2 mb-2 uppercase tracking-wide">
+                      <FiExternalLink size={16} />
+                      Reference Links
+                    </strong>
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      {referenceLinks.map((link, index) => (
+                        <a
+                          key={index}
+                          href={link.url?.startsWith('http') ? link.url : `https://${link.url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group px-4 py-2.5 bg-gradient-to-r from-purple-600/20 to-blue-600/20 hover:from-purple-600/30 hover:to-blue-600/30 border border-purple-500/30 hover:border-purple-400/50 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md hover:shadow-purple-500/20"
+                        >
+                          <span className="text-purple-300 group-hover:text-purple-200">
+                            {link.title || 'Link'}
+                          </span>
+                          <FiExternalLink size={14} className="text-purple-400 group-hover:text-purple-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </DetailSection>

@@ -27,3 +27,12 @@ export const addEmployee = async (formData) => {
   }
 };
 
+export const updateEmployeeDetails = async (employeeId, updateData) => {
+  try {
+    const response = await api.put(`/user/manager/employees/${employeeId}`, updateData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to update employee details' };
+  }
+};
+

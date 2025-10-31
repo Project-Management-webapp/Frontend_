@@ -47,25 +47,14 @@ const formatDataForForm = (data) => {
   }
   if (!Array.isArray(formatted.referenceLinks)) formatted.referenceLinks = [];
 
-  // Parse actualMaterials if they are JSON strings
-  if (typeof formatted.actualMaterials === 'string') {
-    try {
-      formatted.actualMaterials = JSON.parse(formatted.actualMaterials);
-    } catch (e) {
-      formatted.actualMaterials = [];
-    }
-  }
-  if (!Array.isArray(formatted.actualMaterials)) formatted.actualMaterials = [];
-
-  // Parse actualConsumables if they are JSON strings
-  if (typeof formatted.actualConsumables === 'string') {
-    try {
-      formatted.actualConsumables = JSON.parse(formatted.actualConsumables);
-    } catch (e) {
-      formatted.actualConsumables = [];
-    }
-  }
-  if (!Array.isArray(formatted.actualConsumables)) formatted.actualConsumables = [];
+  // actualMaterials and actualConsumables are now numbers, not arrays
+  // Ensure they are set to empty string if null/undefined
+  if (!formatted.actualMaterials && formatted.actualMaterials !== 0) formatted.actualMaterials = '';
+  if (!formatted.actualConsumables && formatted.actualConsumables !== 0) formatted.actualConsumables = '';
+  if (!formatted.estimatedMaterials && formatted.estimatedMaterials !== 0) formatted.estimatedMaterials = '';
+  if (!formatted.estimatedConsumables && formatted.estimatedConsumables !== 0) formatted.estimatedConsumables = '';
+  if (!formatted.estimatedHours && formatted.estimatedHours !== 0) formatted.estimatedHours = '';
+  if (!formatted.rate && formatted.rate !== 0) formatted.rate = '';
 
   return formatted;
 };
@@ -115,39 +104,6 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
     const updatedLinks = [...formData.referenceLinks];
     updatedLinks[index][field] = value;
     setFormData(prev => ({ ...prev, referenceLinks: updatedLinks }));
-  };
-
-  // Handle actual materials
-  const addMaterialRow = () => {
-    setFormData(prev => ({
-      ...prev,
-      actualMaterials: [...prev.actualMaterials, '']
-    }));
-  };
-
-  const handleArrayChange = (e, fieldName, index) => {
-    const { value } = e.target;
-    setFormData(prev => {
-      const newArray = [...prev[fieldName]];
-      newArray[index] = value;
-      return { ...prev, [fieldName]: newArray };
-    });
-  };
-
-  const handleArrayRemove = (fieldName, indexToRemove) => {
-    setFormData(prev => {
-      const currentArray = prev[fieldName];
-      const newArray = currentArray.filter((_, index) => index !== indexToRemove);
-      return { ...prev, [fieldName]: newArray };
-    });
-  };
-
-  // Handle actual consumables
-  const addConsumableRow = () => {
-    setFormData(prev => ({
-      ...prev,
-      actualConsumables: [...prev.actualConsumables, '']
-    }));
   };
 
   // Handle risks
@@ -271,7 +227,9 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput id="startDate" label="Start Date" type="date" value={formData.startDate} onChange={handleChange} required />
               <FormInput id="deadline" label="Deadline" type="date" value={formData.deadline} onChange={handleChange} required />
-              <FormInput id="actualHours" label="Actual Hours" min="0" type="number" value={formData.actualHours} onChange={handleChange} />
+              <FormInput id="estimatedHours" label="Estimated Hours" min="0" type="number" step="0.01" value={formData.estimatedHours} onChange={handleChange} />
+              <FormInput id="actualHours" label="Actual Hours" min="0" type="number" step="0.01" value={formData.actualHours} onChange={handleChange} />
+              <FormInput id="rate" label="Hourly Rate" min="0" type="number" step="0.01" value={formData.rate} onChange={handleChange} />
               <FormSelect id="priority" label="Priority" value={formData.priority} onChange={handleChange} required>
                 <option value="">Select Priority</option>
                 <option value="low">Low</option>
@@ -287,76 +245,68 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
           </Section>
 
           {/* === CONSUMABLES AND MATERIALS === */}
-          <Section title="Consumables and Materials">
-            {/* Materials Section */}
-            <h3 className="font-semibold mb-2">Actual Materials</h3>
-
-            {/* Loop through materials */}
-            {formData.actualMaterials && formData.actualMaterials.map((value, i) => (
-              <div key={i} className="flex items-center gap-4 mb-2">
-                {/* Input field (takes up remaining space) */}
-                <div className="flex-grow">
-                  <FormInput
-                    id={`actualMaterials-${i}`}
-                    label={`Actual Material ${i + 1}`}
-                    value={value}
-                    onChange={(e) => handleArrayChange(e, "actualMaterials", i)}
-                  />
-                </div>
-
-                {/* Remove Button */}
-                <button
-                  type="button"
-                  onClick={() => handleArrayRemove("actualMaterials", i)}
-                  className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
-                >
-                  <FiTrash2 />
-                </button>
+          <Section title="Materials and Consumables">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormInput 
+                id="estimatedMaterials" 
+                label="Estimated Materials Cost" 
+                type="number" 
+                min="0" 
+                step="0.01"
+                value={formData.estimatedMaterials} 
+                onChange={handleChange}
+                placeholder="0.00"
+              />
+              <FormInput 
+                id="actualMaterials" 
+                label="Actual Materials Cost" 
+                type="number" 
+                min="0" 
+                step="0.01"
+                value={formData.actualMaterials} 
+                onChange={handleChange}
+                placeholder="0.00"
+              />
+              <FormInput 
+                id="estimatedConsumables" 
+                label="Estimated Consumables Cost" 
+                type="number" 
+                min="0" 
+                step="0.01"
+                value={formData.estimatedConsumables} 
+                onChange={handleChange}
+                placeholder="0.00"
+              />
+              <FormInput 
+                id="actualConsumables" 
+                label="Actual Consumables Cost" 
+                type="number" 
+                min="0" 
+                step="0.01"
+                value={formData.actualConsumables} 
+                onChange={handleChange}
+                placeholder="0.00"
+              />
+            </div>
+            {/* Auto-calculated Budget Display */}
+            {(formData.estimatedHours || formData.rate || formData.estimatedMaterials || formData.estimatedConsumables) && (
+              <div className="mt-4 p-4 bg-purple-900/20 border border-purple-700/50 rounded-lg">
+                <p className="text-sm text-gray-400 mb-1">Total Budget:</p>
+                <p className="text-2xl font-bold text-purple-300">
+                  {formData.currency || 'USD'} {(
+                    (parseFloat(formData.estimatedHours) || 0) * (parseFloat(formData.rate) || 0) +
+                    (parseFloat(formData.estimatedMaterials) || 0) +
+                    (parseFloat(formData.estimatedConsumables) || 0)
+                  ).toFixed(2)}
+                </p>
+                
               </div>
-            ))}
-
-            {/* Add Material Button */}
-            <button type="button" onClick={addMaterialRow} className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors">
-              + Add Material
-            </button>
-
-            {/* Consumables Section */}
-            <h3 className="font-semibold mb-2">Actual Consumables</h3>
-
-            {/* Loop through consumables */}
-            {formData.actualConsumables && formData.actualConsumables.map((value, i) => (
-              <div key={i} className="flex items-center gap-4 mb-2">
-                {/* Input field (takes up remaining space) */}
-                <div className="flex-grow">
-                  <FormInput
-                    id={`actualConsumables-${i}`}
-                    label={`Actual Consumable ${i + 1}`}
-                    value={value}
-                    onChange={(e) => handleArrayChange(e, "actualConsumables", i)}
-                  />
-                </div>
-
-                {/* Remove Button */}
-                <button
-                  type="button"
-                  onClick={() => handleArrayRemove("actualConsumables", i)}
-                  className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
-                >
-                  <FiTrash2 />
-                </button>
-              </div>
-            ))}
-
-            {/* Add Consumable Button */}
-            <button type="button" onClick={addConsumableRow} className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors">
-              + Add Consumable
-            </button>
+            )}
           </Section>
 
           {/* === FINANCIAL === */}
           <Section title="Financial">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormInput id="budget" label="Budget" type="number" min="0" value={formData.budget} onChange={handleChange} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormSelect id="currency" label="Currency" value={formData.currency} onChange={handleChange}>
                 <option value="">Select Currency</option>
                 <option value="USD">USD</option>

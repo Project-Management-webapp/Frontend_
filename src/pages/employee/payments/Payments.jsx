@@ -231,7 +231,7 @@ const Payments = ({ setActiveView }) => {
                   <div className="sm:col-span-1 md:col-span-1"> {/* Allow link to take more space if needed */}
                     <p className="text-gray-500 text-xs mb-0.5">Transaction Proof</p>
                     <a
-                      href={payment.transactionProofLink}
+                      href={payment.transactionProofLink.startsWith('http') ? payment.transactionProofLink : `https://${payment.transactionProofLink}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-purple-400 hover:text-purple-300 hover:underline break-all"

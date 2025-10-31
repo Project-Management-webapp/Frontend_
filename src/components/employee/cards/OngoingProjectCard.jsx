@@ -69,9 +69,9 @@ const OngoingProjectCard = ({ assignment, onViewDetails }) => {
 };
 
 // --- Skeleton Component (Unchanged) ---
-export const OngoingProjectCardSkeleton = ({ key }) => {
+export const OngoingProjectCardSkeleton = () => {
   return (
-    <div key={key} className="bg-gray-800 rounded-lg shadow-lg border border-gray-700 flex flex-col animate-pulse">
+    <div className="bg-gray-800 rounded-lg shadow-lg border border-gray-700 flex flex-col animate-pulse">
       {/* Skeleton Header */}
       <div className="p-5 border-b border-gray-700">
         <div className="flex justify-between items-center mb-2">

@@ -37,7 +37,7 @@ const DetailRow = ({ label, value, isTag = false, isDate = false }) => {
   }
 
   return (
-    <div className="p-0"> 
+    <div className="p-0">
       <strong className="text-sm font-medium text-gray-400 block mb-0.5 uppercase tracking-wide">
         {label}
       </strong>
@@ -58,33 +58,28 @@ const DetailSection = ({ title, icon, children }) => (
   </div>
 );
 
-const ProjectAssignmentDetail = ({ 
-  assignment, 
-  onBack, 
-  onFinishWork 
+const ProjectAssignmentDetail = ({
+  assignment,
+  onBack,
+  onFinishWork
 }) => {
-  const { 
-    project, 
-    assigner, 
-    role, 
-    allocatedAmount, 
+  const {
+    project,
+    assigner,
+    role,
+    allocatedAmount,
     currency,
-    paymentSchedule, 
-    paymentTerms, 
-    responsibilities, 
+    paymentSchedule,
+    paymentTerms,
+    responsibilities,
     deliverables,
-    actualDeliverables,
     workStatus,
+    rate,
     estimatedHours,
-    actualHours,
     estimatedMaterials,
-    actualMaterials,
     estimatedConsumables,
-    actualConsumables,
     notes,
     assignedDate,
-    workStartedAt,
-    workSubmittedAt,
     workVerifiedBy,
     createdAt,
     updatedAt
@@ -98,17 +93,17 @@ const ProjectAssignmentDetail = ({
         const parsed = JSON.parse(data);
         return Array.isArray(parsed) ? parsed : [];
       } catch {
-        return []; 
+        return [];
       }
     }
     return [];
   };
-  
+
   const isWorkSubmitted = workStatus === 'pending_review' || workStatus === 'completed';
 
   return (
     <div>
-     
+
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <button
           onClick={onBack}
@@ -117,18 +112,17 @@ const ProjectAssignmentDetail = ({
           <IoArrowBack size={20} />
           <span>Back to Projects</span>
         </button>
-        
+
         <div className="flex items-center gap-3">
           <Link
             to='/chat'
-            // onClick={onOpenChatModal}
             className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
           >
             <IoChatbubblesOutline />
             <span>Chat</span>
           </Link>
           <button
-            onClick={onFinishWork} 
+            onClick={onFinishWork}
             disabled={isWorkSubmitted}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:opacity-50"
           >
@@ -143,13 +137,13 @@ const ProjectAssignmentDetail = ({
         <h1 className="text-3xl font-bold text-white">{project.name}</h1>
         <p className="text-gray-400 mt-1">{project.description}</p>
       </div>
-      
+
       <div className="space-y-6">
         {/* Your Assignment Details */}
         <DetailSection title="Your Assignment" icon={<IoPersonOutline size={20} />}>
           <DetailRow label="Your Role" value={role} isTag />
           <DetailRow label="Work Status" value={workStatus} isTag />
-         
+
           <DetailRow label="Assigned Date" value={assignedDate} isDate />
           <DetailRow label="Allocated Amount" value={`${currency} ${parseFloat(allocatedAmount || 0).toLocaleString()}`} />
           <DetailRow label="Payment Schedule" value={paymentSchedule} isTag />
@@ -162,17 +156,19 @@ const ProjectAssignmentDetail = ({
           <DetailRow label="Description" value={project.description} />
           <DetailRow label="Project Status" value={project.status} isTag />
           <DetailRow label="Priority" value={project.priority} isTag />
-        
+
           <DetailRow label="Deadline" value={project.deadline} isDate />
         </DetailSection>
 
         {/* Hours & Timeline */}
         <DetailSection title="Hours & Timeline" icon={<IoCalendarOutline size={20} />}>
           <DetailRow label="Estimated Hours" value={estimatedHours ? `${estimatedHours} hours` : null} />
-         
+
+          <DetailRow label="Rate per Hour" value={rate ? `${rate} ${currency}` : null} />
+
           <DetailRow label="Assignment Created" value={createdAt} isDate />
           <DetailRow label="Last Updated" value={updatedAt} isDate />
-         
+
         </DetailSection>
 
         {/* Responsibilities & Deliverables */}
@@ -183,19 +179,15 @@ const ProjectAssignmentDetail = ({
           <div className="md:col-span-2">
             <DetailRow label="Expected Deliverables" value={parseJsonArray(deliverables)} />
           </div>
-          
+
         </DetailSection>
 
         {/* Materials & Consumables */}
         <DetailSection title="Materials & Consumables" icon={<IoBusinessOutline size={20} />}>
-          <div className="md:col-span-2">
-            <DetailRow label="Estimated Materials" value={parseJsonArray(estimatedMaterials)} />
-          </div>
-          
-          <div className="md:col-span-2">
-            <DetailRow label="Estimated Consumables" value={parseJsonArray(estimatedConsumables)} />
-          </div>
-          
+          <DetailRow label="Estimated Hours" value={estimatedConsumables ? `${estimatedConsumables} ${currency}` : null} />
+          <DetailRow label="Estimated Hours" value={estimatedMaterials ? `${estimatedMaterials} ${currency}` : null} />
+
+
         </DetailSection>
 
         {/* Additional Information */}
@@ -212,8 +204,8 @@ const ProjectAssignmentDetail = ({
         <DetailSection title="Assigned By" icon={<IoPersonOutline size={20} />}>
           <div className="md:col-span-2 flex items-center gap-4">
             {assigner.profileImage && (
-              <img 
-                src={assigner.profileImage} 
+              <img
+                src={assigner.profileImage}
                 alt={assigner.fullName}
                 className="w-16 h-16 rounded-full object-cover border-2 border-purple-500"
               />
