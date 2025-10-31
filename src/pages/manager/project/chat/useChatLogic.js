@@ -16,6 +16,7 @@ export const useChatLogic = () => {
   const [message, setMessage] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
+  const messageInputRef = useRef(null);
   const messageListRef = useRef(null);
   const editTextareaRef = useRef(null);
   const [projects, setProjects] = useState([]);
@@ -434,6 +435,10 @@ export const useChatLogic = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    // Reset textarea height to original size
+    if (messageInputRef.current) {
+      messageInputRef.current.style.height = '40px';
+    }
 
     try {
       setSendingMessage(true);
@@ -695,6 +700,7 @@ export const useChatLogic = () => {
     selectedFiles,
     setSelectedFiles,
     fileInputRef,
+    messageInputRef,
     messageListRef,
     editTextareaRef,
     projects,

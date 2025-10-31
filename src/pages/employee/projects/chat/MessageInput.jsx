@@ -11,6 +11,7 @@ const MessageInput = ({
   selectedFiles,
   setSelectedFiles,
   fileInputRef,
+  messageInputRef,
   message,
   setMessage,
   handleMessageInputChange,
@@ -29,7 +30,8 @@ const MessageInput = ({
   const [cursorPosition, setCursorPosition] = useState(0);
   const emojiPickerRef = useRef(null);
   const mentionDropdownRef = useRef(null);
-  const inputRef = useRef(null);
+  // Use messageInputRef passed from parent instead of local inputRef
+  const inputRef = messageInputRef || useRef(null);
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -90,7 +92,9 @@ const MessageInput = ({
     
     if (lastAtIndex !== -1) {
       const beforeAt = textBeforeCursor.slice(0, lastAtIndex);
+      // Always add a space after the mention to ensure proper detection
       const newMessage = `${beforeAt}@${member.name} ${textAfterCursor}`;
+      const newCursorPosition = beforeAt.length + member.name.length + 2; // Position after @Name and space
       
       if (handleMessageInputChange) {
         handleMessageInputChange(newMessage);
@@ -99,7 +103,18 @@ const MessageInput = ({
       }
       
       setShowMentionDropdown(false);
-      inputRef.current?.focus();
+      
+      // Focus and set cursor position after the space
+      if (inputRef.current) {
+        inputRef.current.focus();
+        // Set cursor position in next tick to ensure the value is updated
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.selectionStart = newCursorPosition;
+            inputRef.current.selectionEnd = newCursorPosition;
+          }
+        }, 0);
+      }
     }
   };
 
@@ -246,7 +261,7 @@ const MessageInput = ({
           </div>
         )}
 
-        <div className="flex items-center md:gap-3 gap-1.5 bg-gray-900/50 rounded-full p-1.5 border border-gray-700/50 focus-within:border-purple-500/50 transition-all relative">
+        <div className="flex items-center md:gap-3 gap-1.5 bg-gray-900/50 rounded-[25px] p-1.5 border border-gray-700/50 focus-within:border-purple-500/50 transition-all relative">
           <input
             type="file"
             ref={fileInputRef}
@@ -300,16 +315,31 @@ const MessageInput = ({
           >
             <IoAttach size={22} />
           </button>
-          <input
+          <textarea
             ref={inputRef}
-            type="text"
             value={message}
-            onChange={(e) => handleInputChange(e.target.value)}
+            onChange={(e) => {
+              handleInputChange(e.target.value);
+              // Auto-resize textarea
+              e.target.style.height = 'auto';
+              e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
+            }}
+            onPaste={(e) => {
+              // Auto-resize on paste
+              setTimeout(() => {
+                if (inputRef.current) {
+                  inputRef.current.style.height = 'auto';
+                  inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 150) + 'px';
+                }
+              }, 0);
+            }}
             placeholder={
               replyingTo ? "Type your reply..." : "Type your message... (@mention someone)"
             }
-            className="flex-1 bg-transparent border-none py-2 px-2 focus:outline-none text-white placeholder-gray-500 transition-all"
+            className="flex-1 bg-transparent border-none py-2 px-2 focus:outline-none text-white placeholder-gray-500 transition-all resize-none overflow-y-auto rounded-l-[20px] rounded-r-[20px]"
+            style={{ minHeight: '40px', maxHeight: '150px' }}
             disabled={sendingMessage}
+            rows={1}
             onKeyDown={(e) => {
               if (showMentionDropdown && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
                 // Let the dropdown handle these keys

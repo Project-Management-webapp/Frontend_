@@ -15,6 +15,7 @@ const Chat = () => {
     selectedFiles,
     setSelectedFiles,
     fileInputRef,
+    messageInputRef,
     messageListRef,
     editTextareaRef,
     projects,
@@ -111,6 +112,7 @@ const Chat = () => {
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
           fileInputRef={fileInputRef}
+          messageInputRef={messageInputRef}
           message={message}
           setMessage={setMessage}
           handleMessageInputChange={handleMessageInputChange}

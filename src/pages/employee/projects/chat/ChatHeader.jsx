@@ -1,11 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaBars, FaUsers } from "react-icons/fa";
 import { IoPerson } from "react-icons/io5";
+import { HiRefresh } from "react-icons/hi";
 import { useSocket } from "../../../../context/SocketContext";
 
 const ChatHeader = ({ selectedProject, selectedProjectDetails, setIsSidebarOpen }) => {
-  const { isConnected, getUserStatus } = useSocket();
+  const { isConnected, getUserStatus, socket } = useSocket();
   const currentUserId = localStorage.getItem('userId');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  const handleReconnect = () => {
+    setIsRefreshing(true);
+    
+    // If socket exists, try to reconnect
+    if (socket) {
+      socket.disconnect();
+      setTimeout(() => {
+        socket.connect();
+        console.log('🔄 Attempting to reconnect...');
+      }, 500);
+    } else {
+      // Fallback: reload the page
+      window.location.reload();
+    }
+    
+    // Stop spinning after 3 seconds
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 3000);
+  };
   
   const getInitials = (name) => {
     if (!name) return "?";
@@ -61,12 +84,31 @@ const ChatHeader = ({ selectedProject, selectedProjectDetails, setIsSidebarOpen 
               <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
                 {selectedProject?.name || "Select a Project"}
               </h2>
-              {/* Online/Offline Status */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-800/50 border border-gray-700/50">
-                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'} ${isOnline ? 'animate-pulse' : ''}`}></div>
-                <span className={`text-xs font-medium ${isOnline ? 'text-green-400' : 'text-red-400'}`}>
-                  {isOnline ? 'Online' : 'Offline'}
-                </span>
+              {/* Online/Offline Status with Refresh */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-800/50 border border-gray-700/50">
+                  <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'} ${isOnline ? 'animate-pulse' : ''}`}></div>
+                  <span className={`text-xs font-medium ${isOnline ? 'text-green-400' : 'text-red-400'}`}>
+                    {isOnline ? 'Online' : 'Offline'}
+                  </span>
+                </div>
+                
+                {/* Refresh Button */}
+                <button
+                  onClick={handleReconnect}
+                  disabled={isRefreshing}
+                  className={`p-1.5 rounded-full transition-all ${
+                    isOnline 
+                      ? 'bg-green-900/20 hover:bg-green-900/40 text-green-400' 
+                      : 'bg-red-900/20 hover:bg-red-900/40 text-red-400'
+                  } ${isRefreshing ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-110'}`}
+                  title={isOnline ? 'Refresh connection' : 'Reconnect'}
+                >
+                  <HiRefresh 
+                    size={14} 
+                    className={isRefreshing ? 'animate-spin' : ''}
+                  />
+                </button>
               </div>
             </div>
             {selectedProjectDetails?.description && (

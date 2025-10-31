@@ -13,6 +13,7 @@ import {
   FaReply,
   FaCheck,
   FaExpand,
+  FaCopy,
 } from "react-icons/fa";
 
 const MessageItem = ({
@@ -36,6 +37,19 @@ const MessageItem = ({
   const isEditing = editingMessageId === msg.id;
   const [lightboxImage, setLightboxImage] = useState(null);
   const [loadedImages, setLoadedImages] = useState({});
+  const [showCopied, setShowCopied] = useState(false);
+
+  const handleCopyMessage = () => {
+    if (msg.content) {
+      navigator.clipboard.writeText(msg.content).then(() => {
+        setShowCopied(true);
+        setTimeout(() => setShowCopied(false), 2000);
+        setShowOptionsForMessage(null);
+      }).catch(err => {
+        console.error('Failed to copy message:', err);
+      });
+    }
+  };
 
   const handleImageLoad = (index) => {
     setLoadedImages(prev => ({ ...prev, [index]: true }));
@@ -141,6 +155,12 @@ const MessageItem = ({
                     <FaReply /> Reply
                   </button>
                   <button
+                    onClick={handleCopyMessage}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 flex items-center gap-2 text-purple-400"
+                  >
+                    <FaCopy /> {showCopied ? 'Copied!' : 'Copy'}
+                  </button>
+                  <button
                     onClick={() => handleEditMessage(msg)}
                     className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 flex items-center gap-2 text-blue-400"
                   >
@@ -173,9 +193,15 @@ const MessageItem = ({
                 <div className="absolute left-0 -mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 min-w-[140px]">
                   <button
                     onClick={() => handleReplyMessage(msg)}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 flex items-center gap-2 text-green-400 rounded-lg"
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 flex items-center gap-2 text-green-400 rounded-t-lg"
                   >
                     <FaReply /> Reply
+                  </button>
+                  <button
+                    onClick={handleCopyMessage}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 flex items-center gap-2 text-purple-400 rounded-b-lg"
+                  >
+                    <FaCopy /> {showCopied ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
               )}
