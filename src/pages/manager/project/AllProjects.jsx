@@ -60,9 +60,9 @@ const AllProjects = () => {
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 font-semibold transition-all shadow-lg hover:shadow-purple-500/50 text-sm sm:text-base"
+              className="btn flex gap-2"
             >
-              <FiPlus size={20} /> <span>New Project</span>
+              <FiPlus size={20} className='mt-1' /> <span>New Project</span>
             </button>
           </div>
         </div>

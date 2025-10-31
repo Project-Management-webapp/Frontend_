@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FiX, FiClock, FiPackage, FiBox, FiPlus, FiTrash2 } from 'react-icons/fi';
+import {FormInput} from "../../atoms/FormFields";
 
 const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
   const [actualHours, setActualHours] = useState('');
@@ -59,7 +60,7 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-700">
         {/* Header */}
         <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-6 flex justify-between items-center z-10">
@@ -86,19 +87,16 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
               <FiClock className="text-blue-400" />
               Actual Hours Worked <span className="text-red-400">*</span>
             </label>
-            <input
+            <FormInput
               type="number"
               step="0.5"
               min="0"
               value={actualHours}
               onChange={(e) => setActualHours(e.target.value)}
               placeholder="Enter actual hours worked"
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Estimated: {assignment?.estimatedHours || 0} hours
-            </p>
+            
           </div>
 
           {/* Actual Consumables */}
@@ -107,16 +105,16 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
               <FiPackage className="text-yellow-400" />
               Actual Consumables Used
             </label>
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               {actualConsumables.map((consumable, index) => (
                 <div key={index} className="flex gap-2">
-                  <input
+                  <FormInput
                     type="text"
                     value={consumable}
                     onChange={(e) => handleConsumableChange(index, e.target.value)}
                     placeholder="e.g., Printer ink, Paper, etc."
-                    className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  />
+                  />  
+                 
                   {actualConsumables.length > 1 && (
                     <button
                       type="button"
@@ -137,11 +135,7 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
                 Add Consumable
               </button>
             </div>
-            {assignment?.estimatedConsumables && assignment.estimatedConsumables.length > 0 && (
-              <p className="text-xs text-gray-500 mt-2">
-                Estimated: {JSON.stringify(assignment.estimatedConsumables)}
-              </p>
-            )}
+            
           </div>
 
           {/* Actual Materials */}
@@ -150,15 +144,14 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
               <FiBox className="text-green-400" />
               Actual Materials Used
             </label>
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               {actualMaterials.map((material, index) => (
                 <div key={index} className="flex gap-2">
-                  <input
+                  <FormInput
                     type="text"
                     value={material}
                     onChange={(e) => handleMaterialChange(index, e.target.value)}
                     placeholder="e.g., Steel, Wood, Concrete, etc."
-                    className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                   {actualMaterials.length > 1 && (
                     <button
@@ -180,11 +173,7 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
                 Add Material
               </button>
             </div>
-            {assignment?.estimatedMaterials && assignment.estimatedMaterials.length > 0 && (
-              <p className="text-xs text-gray-500 mt-2">
-                Estimated: {JSON.stringify(assignment.estimatedMaterials)}
-              </p>
-            )}
+           
           </div>
 
           {/* Action Buttons */}

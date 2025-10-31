@@ -58,7 +58,7 @@ const ProjectCard = ({ project, onDataChange, setToast }) => {
 
   return (
     <>
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-xl shadow-xl p-6 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 hover:border-purple-500/50 hover:-translate-y-1">
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-xl shadow-xl p-6 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-md hover:shadow-purple-500/20 hover:border-purple-500/50 hover:-translate-y-1">
         <div onClick={() => setDetailsOpen(true)} className="cursor-pointer mb-5">
           <div className="flex items-center justify-between mb-4">
             <span className="px-4 py-1.5 text-xs font-semibold text-purple-200 bg-purple-600/30 rounded-full border border-purple-500/30">
@@ -88,7 +88,7 @@ const ProjectCard = ({ project, onDataChange, setToast }) => {
           <div className="flex gap-3">
             <button
               onClick={() => setAssignOpen(true)}
-              className="flex-1 text-center py-2.5 px-4 bg-blue-600/80 hover:bg-blue-600 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-blue-500/30"
+              className="flex-1 text-center py-2.5 px-4 bg-blue-600/80 hover:bg-blue-600 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-sm hover:shadow-blue-500/30"
             >
               <FiUsers size={18} />
               <span>Assign</span>
@@ -102,7 +102,7 @@ const ProjectCard = ({ project, onDataChange, setToast }) => {
                   ? 'bg-green-600/30 text-green-300 cursor-not-allowed border border-green-500/30'
                   : isMarkingComplete
                   ? 'bg-green-600/50 text-white cursor-wait'
-                  : 'bg-green-600/80 hover:bg-green-600 text-white hover:shadow-lg hover:shadow-green-500/30'
+                  : 'bg-green-600/80 hover:bg-green-600 text-white hover:shadow-sm hover:shadow-green-500/30'
               }`}
             >
               <FiCheckCircle size={18} />

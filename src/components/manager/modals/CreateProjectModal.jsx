@@ -25,7 +25,6 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     milestones: [],
     risks: [],
     issues: [],
-    // actualMaterials: [],
     estimatedMaterials: [],
     estimatedConsumables: [],
     testingStatus: 'not_started',
@@ -267,7 +266,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput id="startDate" label="Start Date" type="date" value={formData.startDate} onChange={handleChange} required />
               <FormInput id="deadline" label="Deadline" type="date" value={formData.deadline} onChange={handleChange} required />
-              <FormInput id="estimatedHours" label="Estimated Hours" type="number" value={formData.estimatedHours} onChange={handleChange} />
+              <FormInput id="estimatedHours" label="Estimated Hours" min="0" type="number" value={formData.estimatedHours} onChange={handleChange} />
               <FormSelect id="priority" label="Priority" value={formData.priority} onChange={handleChange} required>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -280,7 +279,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
           <Section title="Consumables and Materials">
 
             {/* Materials Section */}
-            <h3 className="font-semibold mb-2">Materials</h3>
+            <h3 className=" mb-2">Materials</h3>
 
             {/* Loop through materials */}
             {formData.estimatedMaterials.map((value, i) => (
@@ -301,13 +300,13 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
                   onClick={() => handleArrayRemove("estimatedMaterials", i)}
                   className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
                 >
-                  Remove
+                 <FiTrash2/>
                 </button>
               </div>
             ))}
 
             {/* Add Material Button */}
-            <button type="button" onClick={addMaterialRow} className="text-blue-500 text-sm mb-4">
+            <button type="button" onClick={addMaterialRow} className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors">
               + Add Material
             </button>
 
@@ -333,13 +332,13 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
                   onClick={() => handleArrayRemove("estimatedConsumables", i)}
                   className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
                 >
-                  Remove
+                  <FiTrash2/>
                 </button>
               </div>
             ))}
 
             {/* Add Consumable Button */}
-            <button type="button" onClick={addConsumableRow} className="text-blue-500 text-sm">
+            <button type="button" onClick={addConsumableRow} className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors">
               + Add Consumable
             </button>
 
@@ -349,7 +348,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
           {/* === FINANCIAL === */}
           <Section title="Financial">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormInput id="budget" label="Budget" type="number" value={formData.budget} onChange={handleChange} />
+              <FormInput id="budget" label="Budget" type="number" min="0" value={formData.budget} onChange={handleChange} />
               <FormSelect id="currency" label="Currency" value={formData.currency} onChange={handleChange}>
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
@@ -497,7 +496,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
           {/* === TEAM === */}
           <Section title="Team & Settings">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormInput id="teamSize" label="Team Size" type="number" value={formData.teamSize} onChange={handleChange} />
+              <FormInput id="teamSize" label="Team Size" type="number" min="0" value={formData.teamSize} onChange={handleChange} />
               <FormSelect id="visibility" label="Visibility" value={formData.visibility} onChange={handleChange}>
                 <option value="internal">Internal</option>
                 <option value="public">Public</option>
@@ -608,13 +607,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
                       <option value="in-progress">In Progress</option>
                       <option value="resolved">Resolved</option>
                     </FormSelect>
-                    {/* <FormInput
-                      id={`issue-assignedTo-${index}`}
-                      label="Assigned To (User ID)"
-                      type="number"
-                      value={issue.assignedTo}
-                      onChange={(e) => handleIssueChange(index, 'assignedTo', e.target.value)}
-                    /> */}
+                    
                   </div>
                   <div className="flex justify-end">
                     <button

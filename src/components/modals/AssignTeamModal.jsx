@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { IoMdClose, IoMdInformationCircleOutline } from 'react-icons/io';
-import Toaster from '../Toaster'; // This can be removed
+import Toaster from '../Toaster'; 
+import { RiDeleteBin6Line } from "react-icons/ri";
 import { FormSelect, FormInput, FormTextarea } from '../atoms/FormFields';
 import { assignProject } from '../../api/manager/projectAssign';
 import { getAllEmployees } from '../../api/manager/employeedetail';
@@ -48,7 +49,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
 
   // Auto-calculate allocated amount when employee or estimated hours change
   useEffect(() => {
-    if (employeeId && estimatedHours) {
+    if (employeeId && estimatedHours !== '') {
       const selectedEmp = userList.find(user => user.id === Number(employeeId));
       if (selectedEmp && selectedEmp.rate) {
         const rate = parseFloat(selectedEmp.rate) || 0;
@@ -57,6 +58,9 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
         setAllocatedAmount(calculatedAmount);
         setEmployeeRate(selectedEmp.rate);
       }
+    } else if (estimatedHours === '' || estimatedHours === '0' || parseFloat(estimatedHours) === 0) {
+      // If estimated hours is 0 or empty, set allocated amount to 0
+      setAllocatedAmount('0');
     }
   }, [employeeId, estimatedHours, userList]);
 
@@ -72,7 +76,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
         }
       }
     }
-  }, [employeeId, userList, project.currency]); 
+  }, [employeeId, userList, project.currency]);
 
   // Handler for adding material row
   const addMaterialRow = () => {
@@ -121,7 +125,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
 
     const responsibilitiesArray = responsibilities.split('\n').filter(line => line.trim() !== '');
     const deliverablesArray = deliverables.split('\n').filter(line => line.trim() !== '');
-    
+
     // Filter and map materials and consumables
     const materialsArray = estimatedMaterials
       .map(item => item.material)
@@ -132,7 +136,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
 
     const payload = {
       projectId: project.id,
-      employeeId: Number(employeeId), 
+      employeeId: Number(employeeId),
       role,
       estimatedHours: estimatedHours ? Number(estimatedHours) : null,
       allocatedAmount: allocatedAmount ? Number(allocatedAmount) : 0,
@@ -146,19 +150,11 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
       notes: notes || null,
       // responseDeadline,
     };
-  
+
     setIsLoading(true);
     try {
       await assignProject(payload);
-
-      // --- OPTIMIZATION ---
-      // 1. Call onSuccess (this now shows toast + refetches + closes)
       onSuccess?.();
-      
-      // 2. Remove internal toast and setTimeout
-      // setToast({ show: true, message: 'Employee assigned successfully!', type: 'success' });
-      // setTimeout(onClose, 1500);
-      // --- END OPTIMIZATION ---
 
     } catch (error) {
       // Use parent's toast for errors, the modal will stay open
@@ -167,7 +163,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
       setIsLoading(false);
     }
   };
-  
+
   const selectedEmployee = userList.find(user => user.id === Number(employeeId));
 
   return (
@@ -194,15 +190,15 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               <IoMdClose size={24} />
             </button>
           </div>
-{          toast.show && (
-          <div className="absolute top-20 right-6 z-20">
-            <Toaster
-              message={toast.message}
-              type={toast.type}
-              onClose={() => setToast({ ...toast, show: false })}
-            />
-          </div>
-        )}
+          {toast.show && (
+            <div className="absolute top-20 right-6 z-20">
+              <Toaster
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast({ ...toast, show: false })}
+              />
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} id="assign-form" className="flex-grow overflow-y-auto p-6 space-y-5">
@@ -259,6 +255,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               label="Estimated Hours"
               type="number"
               step="0.01"
+              min="0"
               value={estimatedHours}
               onChange={(e) => setEstimatedHours(e.target.value)}
               placeholder="Enter estimated hours"
@@ -271,16 +268,13 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
                 label="Allocated Amount"
                 type="number"
                 step="0.01"
+                min="0"
                 value={allocatedAmount}
                 onChange={(e) => setAllocatedAmount(e.target.value)}
                 placeholder="Auto-calculated"
                 disabled={true}
               />
-              {employeeRate && estimatedHours && (
-                <p className="text-xs text-gray-400 mt-1">
-                  Calculated: {currency} {employeeRate} × {estimatedHours} hours = {currency} {allocatedAmount}
-                </p>
-              )}
+              
             </div>
 
             {/* Currency */}
@@ -357,9 +351,9 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
                     <button
                       type="button"
                       onClick={() => handleArrayRemove('estimatedMaterials', index)}
-                      className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                      className="px-3 py-2 text-red-600 hover:text-red-700  text-lg transition-colors"
                     >
-                      Remove
+                     <RiDeleteBin6Line />
                     </button>
                   )}
                 </div>
@@ -391,9 +385,9 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
                     <button
                       type="button"
                       onClick={() => handleArrayRemove('estimatedConsumables', index)}
-                      className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                      className="px-3 py-2 text-red-600 hover:text-red-700 text-lg transition-colors"
                     >
-                      Remove
+                      <RiDeleteBin6Line />
                     </button>
                   )}
                 </div>

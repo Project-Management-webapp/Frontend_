@@ -192,10 +192,10 @@ const ProjectDetailsModal = ({ project, onClose }) => {
           </DetailSection>
 {/* consumables and materials */}
           <DetailSection title="Consumables and Materials" icon={<IoBusinessOutline size={22} />}>
-            <DetailRow label="Estimated Materials" value={project.estimatedMaterials.join(', ')} />
-            <DetailRow label="Actual Materials" value={project.actualMaterials.join(', ')} />
-            <DetailRow label="Estimated Consumables" value={project.estimatedConsumables.join(', ')} />
-            <DetailRow label="Actual Consumables" value={project.actualConsumables.join(', ')} />
+            <DetailRow label="Estimated Materials" value={project.estimatedMaterials ? (Array.isArray(project.estimatedMaterials) ? project.estimatedMaterials.join(', ') : project.estimatedMaterials) : 'N/A'} />
+            <DetailRow label="Actual Materials" value={project.actualMaterials ? (Array.isArray(project.actualMaterials) ? project.actualMaterials.join(', ') : project.actualMaterials) : 'N/A'} />
+            <DetailRow label="Estimated Consumables" value={project.estimatedConsumables ? (Array.isArray(project.estimatedConsumables) ? project.estimatedConsumables.join(', ') : project.estimatedConsumables) : 'N/A'} />
+            <DetailRow label="Actual Consumables" value={project.actualConsumables ? (Array.isArray(project.actualConsumables) ? project.actualConsumables.join(', ') : project.actualConsumables) : 'N/A'} />
           </DetailSection>
 
           {/* Team Information */}

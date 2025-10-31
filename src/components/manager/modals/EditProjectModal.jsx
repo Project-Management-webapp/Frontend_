@@ -271,7 +271,7 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput id="startDate" label="Start Date" type="date" value={formData.startDate} onChange={handleChange} required />
               <FormInput id="deadline" label="Deadline" type="date" value={formData.deadline} onChange={handleChange} required />
-              <FormInput id="actualHours" label="Actual Hours" type="number" value={formData.actualHours} onChange={handleChange} />
+              <FormInput id="actualHours" label="Actual Hours" min="0" type="number" value={formData.actualHours} onChange={handleChange} />
               <FormSelect id="priority" label="Priority" value={formData.priority} onChange={handleChange} required>
                 <option value="">Select Priority</option>
                 <option value="low">Low</option>
@@ -310,13 +310,13 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
                   onClick={() => handleArrayRemove("actualMaterials", i)}
                   className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
                 >
-                  Remove
+                  <FiTrash2 />
                 </button>
               </div>
             ))}
 
             {/* Add Material Button */}
-            <button type="button" onClick={addMaterialRow} className="text-blue-500 text-sm mb-4">
+            <button type="button" onClick={addMaterialRow} className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors">
               + Add Material
             </button>
 
@@ -342,13 +342,13 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
                   onClick={() => handleArrayRemove("actualConsumables", i)}
                   className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
                 >
-                  Remove
+                  <FiTrash2 />
                 </button>
               </div>
             ))}
 
             {/* Add Consumable Button */}
-            <button type="button" onClick={addConsumableRow} className="text-blue-500 text-sm">
+            <button type="button" onClick={addConsumableRow} className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors">
               + Add Consumable
             </button>
           </Section>
@@ -356,7 +356,7 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
           {/* === FINANCIAL === */}
           <Section title="Financial">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormInput id="budget" label="Budget" type="number" value={formData.budget} onChange={handleChange} />
+              <FormInput id="budget" label="Budget" type="number" min="0" value={formData.budget} onChange={handleChange} />
               <FormSelect id="currency" label="Currency" value={formData.currency} onChange={handleChange}>
                 <option value="">Select Currency</option>
                 <option value="USD">USD</option>
@@ -373,8 +373,8 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
               </FormSelect>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <FormInput id="allocatedAmount" label="Allocated Amount" type="number" value={formData.allocatedAmount} onChange={handleChange} />
-              <FormInput id="spentAmount" label="Spent Amount" type="number" value={formData.spentAmount} onChange={handleChange} />
+              <FormInput id="allocatedAmount" label="Allocated Amount" min="0" type="number" value={formData.allocatedAmount} onChange={handleChange} />
+              <FormInput id="spentAmount" label="Spent Amount" min="0" type="number" value={formData.spentAmount} onChange={handleChange} />
             </div>
           </Section>
 
@@ -510,7 +510,7 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
           {/* === TEAM & SETTINGS === */}
           <Section title="Team & Settings">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormInput id="teamSize" label="Team Size" type="number" value={formData.teamSize} onChange={handleChange} />
+              <FormInput id="teamSize" label="Team Size" type="number" min="1" value={formData.teamSize} onChange={handleChange} />
               <FormSelect id="visibility" label="Visibility" value={formData.visibility} onChange={handleChange}>
                 <option value="">Select Visibility</option>
                 <option value="internal">Internal</option>

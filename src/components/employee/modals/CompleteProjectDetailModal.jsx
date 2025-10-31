@@ -17,6 +17,18 @@ import Badge from "../../atoms/Badge";
 import { PRIORITY_CONFIG, PROJECT_STATUS_CONFIG } from "../../../lib/badgeConfigs";
 
 const DetailRow = ({ label, value, isTag = false, isDate = false, isCode = false }) => {
+  // Handle empty arrays
+  if (Array.isArray(value) && value.length === 0) {
+    return (
+      <div className="py-2">
+        <strong className="text-sm font-medium text-gray-400 block mb-0.5 uppercase tracking-wide">
+          {label}
+        </strong>
+        <span className="text-gray-500 italic text-sm">Not specified</span>
+      </div>
+    );
+  }
+  
   if (!value && typeof value !== 'number') return null; 
 
   let displayValue;
@@ -77,6 +89,9 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
   if (!assignment) return null;
 
   const {
+    id,
+    projectId,
+    employeeId,
     project,
     assigner,
     verifier,
@@ -87,6 +102,7 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
     paymentTerms,
     workStatus,
     assignedDate,
+    isActive,
     workStartedAt,
     workSubmittedAt,
     workVerifiedAt,
@@ -168,14 +184,22 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
           
           {/* Your Assignment */}
           <DetailSection title="Your Assignment" icon={<IoPersonOutline size={22} />}>
+            <DetailRow label="Assignment ID" value={id} />
+            <DetailRow label="Project ID" value={projectId} />
+            <DetailRow label="Employee ID" value={employeeId} />
             <DetailRow label="Your Role" value={role} isTag />
             <DetailRow label="Work Status" value={workStatus} isTag />
+            <DetailRow label="Is Active" value={isActive ? 'Yes' : 'No'} />
             <DetailRow label="Assigned Date" value={assignedDate} isDate />
             <DetailRow label="Assigned By" value={assigner?.fullName || assigner?.email} />
           </DetailSection>
 
           {/* Project Details */}
           <DetailSection title="Project Details" icon={<IoBusinessOutline size={22} />}>
+            <DetailRow label="Project Name" value={project?.name} />
+            <div className="md:col-span-2">
+              <DetailRow label="Description" value={project?.description} />
+            </div>
             <DetailRow label="Project Status" value={project?.status} isTag />
             <DetailRow label="Priority" value={project?.priority} isTag />
             <DetailRow label="Budget" value={project?.budget ? `USD ${parseFloat(project.budget).toLocaleString()}` : null} />
@@ -206,7 +230,11 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
           <DetailSection title="Completion Details" icon={<IoCheckmarkDoneCircleOutline size={22} />}>
             <DetailRow label="Submitted On" value={workSubmittedAt} isDate />
             <DetailRow label="Verified On" value={workVerifiedAt} isDate />
-            <DetailRow label="Verified By" value={verifier?.fullName || verifier?.email || (workVerifiedBy ? `Manager ID: ${workVerifiedBy}` : null)} icon={<FiUserCheck />} />
+            <DetailRow 
+              label="Verified By" 
+              value={verifier?.fullName || verifier?.email || (workVerifiedBy ? `Manager ID: ${workVerifiedBy}` : 'Pending Verification')} 
+              icon={<FiUserCheck />} 
+            />
           </DetailSection>
 
           {/* Feedback & Review */}
@@ -235,22 +263,20 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
           </DetailSection>
 
           {/* Materials & Consumables */}
-          {(estimatedMaterials || actualMaterials || estimatedConsumables || actualConsumables) && (
-            <DetailSection title="Materials & Consumables" icon={<IoDocumentTextOutline size={22} />}>
-              <div className="md:col-span-2">
-                <DetailRow label="Estimated Materials" value={parseJsonArray(estimatedMaterials)} />
-              </div>
-              <div className="md:col-span-2">
-                <DetailRow label="Actual Materials" value={parseJsonArray(actualMaterials)} />
-              </div>
-              <div className="md:col-span-2">
-                <DetailRow label="Estimated Consumables" value={parseJsonArray(estimatedConsumables)} />
-              </div>
-              <div className="md:col-span-2">
-                <DetailRow label="Actual Consumables" value={parseJsonArray(actualConsumables)} />
-              </div>
-            </DetailSection>
-          )}
+          <DetailSection title="Materials & Consumables" icon={<IoDocumentTextOutline size={22} />}>
+            <div className="md:col-span-2">
+              <DetailRow label="Estimated Materials" value={parseJsonArray(estimatedMaterials)} />
+            </div>
+            <div className="md:col-span-2">
+              <DetailRow label="Actual Materials" value={parseJsonArray(actualMaterials)} />
+            </div>
+            <div className="md:col-span-2">
+              <DetailRow label="Estimated Consumables" value={parseJsonArray(estimatedConsumables)} />
+            </div>
+            <div className="md:col-span-2">
+              <DetailRow label="Actual Consumables" value={parseJsonArray(actualConsumables)} />
+            </div>
+          </DetailSection>
 
           {/* Additional Notes */}
           {notes && (
