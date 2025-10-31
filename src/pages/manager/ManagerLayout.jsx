@@ -18,6 +18,7 @@ import FinanceOverview from "./finance/FinanceOverview";
 import ProfitLoss from "./finance/ProfitLoss";
 import IncomeSummary from "./finance/IncomeSummary";
 import EmployeeAllocations from "./finance/EmployeeAllocations";
+import CompletedProjects from "./project/CompletedProjects";
 
 const AssignEmployee = () => <div className="text-white text-2xl">Assign Employee Page</div>;
 const Workload = () => <div className="text-white text-2xl">Workload & Tasks Page</div>;
@@ -53,8 +54,10 @@ const ManagerLayout = () => {
         return <Workload />;
       case "employees-performance":
         return <Performance />;
-      case "projects":
+      case "active_projects":
         return <AllProjects />;
+      case "completed_projects":
+        return <CompletedProjects />;
       case "supportTickets":
         return <SupportTickets setActiveView={setActiveView} />;
       case "payments":

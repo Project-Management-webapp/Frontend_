@@ -10,25 +10,13 @@ import Badge from "../../atoms/Badge";
 const CompletionStatusTag = ({ status }) => {
   const lowerStatus = status?.toLowerCase();
   const commonClasses = "px-2 py-0.5 text-xs font-semibold capitalize";
-  if (lowerStatus === 'completed' || lowerStatus === 'submitted') {
-   
-    return (
-      <Badge
-        value={lowerStatus}
-        configMap={COMPLETION_STATUS_CONFIG}
-        defaultKey="default"
-        className={commonClasses}
-      />
-    );
-  }
-  const dynamicLabel = status?.replace(/_/g, ' ') || 'Unknown';
-  const defaultConfig = COMPLETION_STATUS_CONFIG.default;
-
+  
+  // Always use Badge component with proper props
   return (
     <Badge
-      label={dynamicLabel}
-      bg={defaultConfig.bg}
-      text={defaultConfig.text}
+      value={lowerStatus || 'unknown'}
+      configMap={COMPLETION_STATUS_CONFIG}
+      defaultKey="default"
       className={commonClasses}
     />
   );

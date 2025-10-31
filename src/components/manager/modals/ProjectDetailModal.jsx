@@ -190,6 +190,11 @@ const ProjectDetailsModal = ({ project, onClose }) => {
             <DetailRow label="Company Email" value={project.companyEmail} />
             <DetailRow label="Company Phone" value={project.companyPhone} />
           </DetailSection>
+{/* consumables and materials */}
+          <DetailSection title="Consumables and Materials" icon={<IoBusinessOutline size={22} />}>
+            <DetailRow label="Estimated Materials" value={project.estimatedMaterials.join(', ')} />
+            <DetailRow label="Estimated Consumables" value={project.estimatedConsumables.join(', ')} />
+          </DetailSection>
 
           {/* Team Information */}
           <DetailSection title="Team Information" icon={<IoPeopleOutline size={22} />}>

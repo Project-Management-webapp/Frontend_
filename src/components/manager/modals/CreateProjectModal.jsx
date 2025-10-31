@@ -25,6 +25,9 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     milestones: [],
     risks: [],
     issues: [],
+    // actualMaterials: [],
+    estimatedMaterials: [],
+    estimatedConsumables: [],
     testingStatus: 'not_started',
     notes: '',
     teamSize: '',
@@ -39,6 +42,45 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
+
+  //handle consumables and materials
+  const handleArrayChange = (e, field, index) => {
+    const newArr = [...formData[field]];
+    newArr[index] = e.target.value;
+    setFormData({ ...formData, [field]: newArr });
+  };
+
+  // Add new material input and its pair
+  const addMaterialRow = () => {
+    setFormData({
+      ...formData,
+      estimatedMaterials: [...formData.estimatedMaterials, ""],
+    });
+  };
+
+  // Add new consumable input and its pair
+  const addConsumableRow = () => {
+    setFormData({
+      ...formData,
+      estimatedConsumables: [...formData.estimatedConsumables, ""],
+    });
+  };
+
+  const handleArrayRemove = (fieldName, indexToRemove) => {
+    setFormData(prevData => {
+      // Get the current array (e.g., prevData.estimatedMaterials)
+      const currentArray = prevData[fieldName];
+
+      // Create a new array that excludes the item at the specified index
+      const newArray = currentArray.filter((_, index) => index !== indexToRemove);
+
+      // Return the new state object
+      return {
+        ...prevData,
+        [fieldName]: newArray,
+      };
+    });
+  };
 
   // Handle risks
   const handleAddRisk = () => {
@@ -125,7 +167,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
     const userIdString = localStorage.getItem("userId");
     const userId = parseInt(userIdString, 10);
     payload.createdBy = userId;
-    
+
     Object.keys(payload).forEach((key) => {
       if (payload[key] === '' && typeof payload[key] === 'string') {
         payload[key] = null;
@@ -139,7 +181,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
         type: 'error',
       });
       setIsLoading(false);
-      return; 
+      return;
     }
 
     try {
@@ -234,6 +276,75 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
               </FormSelect>
             </div>
           </Section>
+          {/* consumables and materials */}
+          <Section title="Consumables and Materials">
+
+            {/* Materials Section */}
+            <h3 className="font-semibold mb-2">Materials</h3>
+
+            {/* Loop through materials */}
+            {formData.estimatedMaterials.map((value, i) => (
+              <div key={i} className="flex items-center gap-4 mb-2">
+                {/* Input field (takes up remaining space) */}
+                <div className="flex-grow">
+                  <FormInput
+                    id={`estimatedMaterials-${i}`}
+                    label={`Estimated Material ${i + 1}`}
+                    value={value}
+                    onChange={(e) => handleArrayChange(e, "estimatedMaterials", i)}
+                  />
+                </div>
+
+                {/* Remove Button */}
+                <button
+                  type="button"
+                  onClick={() => handleArrayRemove("estimatedMaterials", i)}
+                  className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            {/* Add Material Button */}
+            <button type="button" onClick={addMaterialRow} className="text-blue-500 text-sm mb-4">
+              + Add Material
+            </button>
+
+            {/* Consumables Section */}
+            <h3 className="font-semibold mb-2">Consumables</h3>
+
+            {/* Loop through consumables */}
+            {formData.estimatedConsumables.map((value, i) => (
+              <div key={i} className="flex items-center gap-4 mb-2">
+                {/* Input field (takes up remaining space) */}
+                <div className="flex-grow">
+                  <FormInput
+                    id={`estimatedConsumables-${i}`}
+                    label={`Estimated Consumable ${i + 1}`}
+                    value={value}
+                    onChange={(e) => handleArrayChange(e, "estimatedConsumables", i)}
+                  />
+                </div>
+
+                {/* Remove Button */}
+                <button
+                  type="button"
+                  onClick={() => handleArrayRemove("estimatedConsumables", i)}
+                  className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            {/* Add Consumable Button */}
+            <button type="button" onClick={addConsumableRow} className="text-blue-500 text-sm">
+              + Add Consumable
+            </button>
+
+          </Section>
+
 
           {/* === FINANCIAL === */}
           <Section title="Financial">

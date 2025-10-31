@@ -5,9 +5,16 @@ import {
   IoCheckmarkDoneCircleOutline,
   IoStarOutline,
   IoCodeSlashOutline,
+  IoCalendarOutline,
+  IoCashOutline,
+  IoDocumentTextOutline,
+  IoTimeOutline,
+  IoBusinessOutline,
 } from 'react-icons/io5';
 import { formatDate } from '../../atoms/FormatedDate'; 
-import { FiUserCheck } from 'react-icons/fi';
+import { FiUserCheck, FiDollarSign } from 'react-icons/fi';
+import Badge from "../../atoms/Badge";
+import { PRIORITY_CONFIG, PROJECT_STATUS_CONFIG } from "../../../lib/badgeConfigs";
 
 const DetailRow = ({ label, value, isTag = false, isDate = false, isCode = false }) => {
   if (!value && typeof value !== 'number') return null; 
@@ -75,24 +82,45 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
     verifier,
     role,
     allocatedAmount,
+    currency,
+    paymentSchedule,
+    paymentTerms,
     workStatus,
+    assignedDate,
+    workStartedAt,
     workSubmittedAt,
     workVerifiedAt,
     verificationNotes,
     performanceFeedback,
     deliverables,
+    actualDeliverables,
     responsibilities,
+    estimatedHours,
+    actualHours,
+    estimatedMaterials,
+    actualMaterials,
+    estimatedConsumables,
+    actualConsumables,
+    notes,
+    createdAt,
+    updatedAt,
+    workVerifiedBy,
   } = assignment;
 
   const handleModalContentClick = (e) => e.stopPropagation();
 
-  const parseJsonArray = (str) => {
-    try {
-      const parsed = JSON.parse(str);
-      return Array.isArray(parsed) ? parsed : [str]; 
-    } catch {
-      return str ? [str] : []; 
+  const parseJsonArray = (data) => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        return Array.isArray(parsed) ? parsed : [data]; 
+      } catch {
+        return [data]; 
+      }
     }
+    return [];
   };
 
   return (
@@ -106,6 +134,24 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
       >
         {/* Header */}
         <div className="relative p-6 border-b border-gray-700">
+          <div className="flex items-center gap-3 mb-2">
+            {project?.status && (
+              <Badge
+                value={project.status.toLowerCase()}
+                configMap={PROJECT_STATUS_CONFIG}
+                defaultKey="default"
+                className="px-3 py-1 text-sm font-semibold capitalize"
+              />
+            )}
+            {project?.priority && (
+              <Badge
+                value={project.priority.toLowerCase()}
+                configMap={PRIORITY_CONFIG}
+                defaultKey="medium"
+                className="px-3 py-1 text-sm font-semibold capitalize"
+              />
+            )}
+          </div>
           <h2 className="text-2xl font-bold text-green-300">{project?.name || 'Completed Project'}</h2>
           <p className="text-gray-400 mt-1">{project?.description}</p>
           <button
@@ -120,38 +166,119 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
         {/* Body */}
         <div className="flex-grow overflow-y-auto p-6 space-y-4">
           
+          {/* Your Assignment */}
           <DetailSection title="Your Assignment" icon={<IoPersonOutline size={22} />}>
             <DetailRow label="Your Role" value={role} isTag />
             <DetailRow label="Work Status" value={workStatus} isTag />
-            <DetailRow label="Allocated Amount" value={`$${parseFloat(allocatedAmount || 0).toLocaleString()}`} />
+            <DetailRow label="Assigned Date" value={assignedDate} isDate />
             <DetailRow label="Assigned By" value={assigner?.fullName || assigner?.email} />
           </DetailSection>
 
+          {/* Project Details */}
+          <DetailSection title="Project Details" icon={<IoBusinessOutline size={22} />}>
+            <DetailRow label="Project Status" value={project?.status} isTag />
+            <DetailRow label="Priority" value={project?.priority} isTag />
+            <DetailRow label="Budget" value={project?.budget ? `USD ${parseFloat(project.budget).toLocaleString()}` : null} />
+            <DetailRow label="Deadline" value={project?.deadline} isDate />
+          </DetailSection>
+
+          {/* Payment Information */}
+          <DetailSection title="Payment Information" icon={<FiDollarSign size={22} />}>
+            <DetailRow label="Allocated Amount" value={`${currency || 'USD'} ${parseFloat(allocatedAmount || 0).toLocaleString()}`} />
+            <DetailRow label="Currency" value={currency} />
+            <DetailRow label="Payment Schedule" value={paymentSchedule} isTag />
+            <div className="md:col-span-2">
+              <DetailRow label="Payment Terms" value={paymentTerms} />
+            </div>
+          </DetailSection>
+
+          {/* Hours Tracking */}
+          <DetailSection title="Hours & Timeline" icon={<IoTimeOutline size={22} />}>
+            <DetailRow label="Estimated Hours" value={estimatedHours && parseFloat(estimatedHours) > 0 ? `${estimatedHours} hours` : 'Not set'} />
+            <DetailRow label="Actual Hours" value={actualHours && parseFloat(actualHours) > 0 ? `${actualHours} hours` : 'Not tracked'} />
+            <DetailRow label="Work Started At" value={workStartedAt} isDate />
+            <DetailRow label="Work Submitted At" value={workSubmittedAt} isDate />
+            <DetailRow label="Created At" value={createdAt} isDate />
+            <DetailRow label="Last Updated" value={updatedAt} isDate />
+          </DetailSection>
+
+          {/* Completion Details */}
           <DetailSection title="Completion Details" icon={<IoCheckmarkDoneCircleOutline size={22} />}>
             <DetailRow label="Submitted On" value={workSubmittedAt} isDate />
             <DetailRow label="Verified On" value={workVerifiedAt} isDate />
-            <DetailRow label="Verified By" value={verifier?.fullName || verifier?.email} icon={<FiUserCheck />} />
+            <DetailRow label="Verified By" value={verifier?.fullName || verifier?.email || (workVerifiedBy ? `Manager ID: ${workVerifiedBy}` : null)} icon={<FiUserCheck />} />
           </DetailSection>
 
-          <DetailSection title="Feedback & Review" icon={<IoStarOutline size={22} />}>
-            <DetailRow label="Performance Feedback" value={performanceFeedback || 'N/A'} />
+          {/* Feedback & Review */}
+          {(performanceFeedback || verificationNotes) && (
+            <DetailSection title="Feedback & Review" icon={<IoStarOutline size={22} />}>
+              <div className="md:col-span-2">
+                <DetailRow label="Performance Feedback" value={performanceFeedback} isCode />
+              </div>
+              <div className="md:col-span-2">
+                <DetailRow label="Manager's Verification Notes" value={verificationNotes} isCode />
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Responsibilities & Deliverables */}
+          <DetailSection title="Responsibilities & Deliverables" icon={<IoCodeSlashOutline size={22} />}>
             <div className="md:col-span-2">
-              <DetailRow 
-                label="Manager's Verification Notes" 
-                value={verificationNotes} 
-                isCode 
-              />
+              <DetailRow label="Your Responsibilities" value={parseJsonArray(responsibilities)} />
+            </div>
+            <div className="md:col-span-2">
+              <DetailRow label="Expected Deliverables" value={parseJsonArray(deliverables)} />
+            </div>
+            <div className="md:col-span-2">
+              <DetailRow label="Actual Deliverables" value={parseJsonArray(actualDeliverables)} />
             </div>
           </DetailSection>
 
-          <DetailSection title="Original Scope" icon={<IoCodeSlashOutline size={22} />}>
-            <div className="md:col-span-2">
-              <DetailRow label="Original Responsibilities" value={parseJsonArray(responsibilities)} />
-            </div>
-            <div className="md:col-span-2">
-              <DetailRow label="Original Deliverables" value={deliverables ? [deliverables] : []} />
-            </div>
-          </DetailSection>
+          {/* Materials & Consumables */}
+          {(estimatedMaterials || actualMaterials || estimatedConsumables || actualConsumables) && (
+            <DetailSection title="Materials & Consumables" icon={<IoDocumentTextOutline size={22} />}>
+              <div className="md:col-span-2">
+                <DetailRow label="Estimated Materials" value={parseJsonArray(estimatedMaterials)} />
+              </div>
+              <div className="md:col-span-2">
+                <DetailRow label="Actual Materials" value={parseJsonArray(actualMaterials)} />
+              </div>
+              <div className="md:col-span-2">
+                <DetailRow label="Estimated Consumables" value={parseJsonArray(estimatedConsumables)} />
+              </div>
+              <div className="md:col-span-2">
+                <DetailRow label="Actual Consumables" value={parseJsonArray(actualConsumables)} />
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Additional Notes */}
+          {notes && (
+            <DetailSection title="Additional Notes" icon={<IoDocumentTextOutline size={22} />}>
+              <div className="md:col-span-2">
+                <DetailRow label="Notes" value={notes} isCode />
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Assigner Details */}
+          {assigner && (
+            <DetailSection title="Assigned By" icon={<IoPersonOutline size={22} />}>
+              <div className="md:col-span-2 flex items-center gap-4">
+                {assigner.profileImage && (
+                  <img 
+                    src={assigner.profileImage} 
+                    alt={assigner.fullName || assigner.email}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-green-500"
+                  />
+                )}
+                <div>
+                  <DetailRow label="Name" value={assigner.fullName || 'N/A'} />
+                  <DetailRow label="Email" value={assigner.email} />
+                </div>
+              </div>
+            </DetailSection>
+          )}
 
         </div>
 

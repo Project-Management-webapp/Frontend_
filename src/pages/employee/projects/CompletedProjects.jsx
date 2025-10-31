@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getCompletedProjects } from "../../../api/employee/assignProject";
 import CompletedProjectCard, { CompletedProjectCardSkeleton } from '../../../components/employee/cards/CompletedProjectCard';
 import Toaster from '../../../components/Toaster';
-import { FiInbox, FiCheckCircle } from 'react-icons/fi';
+import { FiInbox } from 'react-icons/fi';
 import CompleteProjectDetailModal from '../../../components/employee/modals/CompleteProjectDetailModal';
 
 const CompletedProjects = () => {

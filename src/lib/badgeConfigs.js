@@ -44,6 +44,39 @@ export const PRIORITY_CONFIG = {
   },
 };
 
+export const PROJECT_STATUS_CONFIG = {
+  pending: {
+    bg: "bg-gray-400/10",
+    text: "text-gray-400",
+    label: "Pending",
+  },
+  in_progress: {
+    bg: "bg-blue-400/10",
+    text: "text-blue-400",
+    label: "In Progress",
+  },
+  on_hold: {
+    bg: "bg-yellow-400/10",
+    text: "text-yellow-400",
+    label: "On Hold",
+  },
+  completed: {
+    bg: "bg-green-400/10",
+    text: "text-green-400",
+    label: "Completed",
+  },
+  cancelled: {
+    bg: "bg-red-400/10",
+    text: "text-red-400",
+    label: "Cancelled",
+  },
+  default: {
+    bg: "bg-gray-400/10",
+    text: "text-gray-400",
+    label: "Unknown",
+  },
+};
+
 
 export const COMPLETION_STATUS_CONFIG = {
   completed: {

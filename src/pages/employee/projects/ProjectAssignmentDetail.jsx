@@ -63,15 +63,45 @@ const ProjectAssignmentDetail = ({
   onBack, 
   onFinishWork 
 }) => {
-  const { project, assigner, role, allocatedAmount, paymentSchedule, paymentTerms, responsibilities, deliverables, workStatus } = assignment;
+  const { 
+    project, 
+    assigner, 
+    role, 
+    allocatedAmount, 
+    currency,
+    paymentSchedule, 
+    paymentTerms, 
+    responsibilities, 
+    deliverables,
+    actualDeliverables,
+    workStatus,
+    estimatedHours,
+    actualHours,
+    estimatedMaterials,
+    actualMaterials,
+    estimatedConsumables,
+    actualConsumables,
+    notes,
+    assignedDate,
+    workStartedAt,
+    workSubmittedAt,
+    workVerifiedBy,
+    createdAt,
+    updatedAt
+  } = assignment;
 
-  const parseJsonArray = (str) => {
-    try {
-      const parsed = JSON.parse(str);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return []; 
+  const parseJsonArray = (data) => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return []; 
+      }
     }
+    return [];
   };
   
   const isWorkSubmitted = workStatus === 'pending_review' || workStatus === 'completed';
@@ -119,30 +149,80 @@ const ProjectAssignmentDetail = ({
         <DetailSection title="Your Assignment" icon={<IoPersonOutline size={20} />}>
           <DetailRow label="Your Role" value={role} isTag />
           <DetailRow label="Work Status" value={workStatus} isTag />
-          <DetailRow label="Assigned By" value={assigner.fullName || assigner.email} />
-          <DetailRow label="Allocated Amount" value={`$${parseFloat(allocatedAmount || 0).toLocaleString()}`} />
+         
+          <DetailRow label="Assigned Date" value={assignedDate} isDate />
+          <DetailRow label="Allocated Amount" value={`${currency} ${parseFloat(allocatedAmount || 0).toLocaleString()}`} />
           <DetailRow label="Payment Schedule" value={paymentSchedule} isTag />
           <DetailRow label="Payment Terms" value={paymentTerms} />
         </DetailSection>
 
         {/* Project Details */}
         <DetailSection title="Project Details" icon={<IoBusinessOutline size={20} />}>
+          <DetailRow label="Project Name" value={project.name} />
+          <DetailRow label="Description" value={project.description} />
           <DetailRow label="Project Status" value={project.status} isTag />
-          <DetailRow label="Project Priority" value={project.priority} isTag />
-          <DetailRow label="Category" value={project.category} />
-        </DetailSection>
-
-        {/* Timeline */}
-        <DetailSection title="Timeline" icon={<IoCalendarOutline size={20} />}>
-          <DetailRow label="Project Deadline" value={project.deadline} isDate />
-          <DetailRow label="Assignment Accepted" value={assignment.acceptedAt} isDate />
-          <DetailRow label="Work Started" value={assignment.workStartedAt} isDate />
-        </DetailSection>
-
+          <DetailRow label="Priority" value={project.priority} isTag />
         
-        <DetailSection title="Scope" icon={<IoDocumentTextOutline size={20} />}>
-          <DetailRow label="Responsibilities" value={parseJsonArray(responsibilities)} />
-          <DetailRow label="Deliverables" value={deliverables || []} />
+          <DetailRow label="Deadline" value={project.deadline} isDate />
+        </DetailSection>
+
+        {/* Hours & Timeline */}
+        <DetailSection title="Hours & Timeline" icon={<IoCalendarOutline size={20} />}>
+          <DetailRow label="Estimated Hours" value={estimatedHours ? `${estimatedHours} hours` : null} />
+         
+          <DetailRow label="Assignment Created" value={createdAt} isDate />
+          <DetailRow label="Last Updated" value={updatedAt} isDate />
+         
+        </DetailSection>
+
+        {/* Responsibilities & Deliverables */}
+        <DetailSection title="Scope & Deliverables" icon={<IoDocumentTextOutline size={20} />}>
+          <div className="md:col-span-2">
+            <DetailRow label="Responsibilities" value={parseJsonArray(responsibilities)} />
+          </div>
+          <div className="md:col-span-2">
+            <DetailRow label="Expected Deliverables" value={parseJsonArray(deliverables)} />
+          </div>
+          
+        </DetailSection>
+
+        {/* Materials & Consumables */}
+        <DetailSection title="Materials & Consumables" icon={<IoBusinessOutline size={20} />}>
+          <div className="md:col-span-2">
+            <DetailRow label="Estimated Materials" value={parseJsonArray(estimatedMaterials)} />
+          </div>
+          
+          <div className="md:col-span-2">
+            <DetailRow label="Estimated Consumables" value={parseJsonArray(estimatedConsumables)} />
+          </div>
+          
+        </DetailSection>
+
+        {/* Additional Information */}
+        {(notes || workVerifiedBy) && (
+          <DetailSection title="Additional Information" icon={<IoDocumentTextOutline size={20} />}>
+            <div className="md:col-span-2">
+              <DetailRow label="Notes" value={notes} />
+            </div>
+            <DetailRow label="Work Verified By" value={workVerifiedBy ? `Manager ID: ${workVerifiedBy}` : null} />
+          </DetailSection>
+        )}
+
+        {/* Assigner Details */}
+        <DetailSection title="Assigned By" icon={<IoPersonOutline size={20} />}>
+          <div className="md:col-span-2 flex items-center gap-4">
+            {assigner.profileImage && (
+              <img 
+                src={assigner.profileImage} 
+                alt={assigner.fullName}
+                className="w-16 h-16 rounded-full object-cover border-2 border-purple-500"
+              />
+            )}
+            <div>
+              <DetailRow label="Name" value={assigner.fullName} />
+              <DetailRow label="Email" value={assigner.email} />
+            </div>
+          </div>
         </DetailSection>
       </div>
     </div>

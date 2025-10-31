@@ -78,21 +78,16 @@ const Sidebar = ({
           onClick={() => handleItemClick('dashboard')}
         />
 
-        <SidebarItem
+        <SidebarGroup
           icon={<FiFolder size={20} />}
           text="Projects"
           collapsed={isCollapsed}
-          active={activeView === 'projects'}
-          onClick={() => handleItemClick('projects')}
+          onSubItemClick={handleItemClick}
+          items={[
+            { text: "Active Project", view: "active_projects" },
+            { text: "Completed Projects", view: "completed_projects" },
+          ]}
         />
-
-        {/* <SidebarItem
-          icon={<FiMessageSquare size={20} />}
-          text="Chat"
-          collapsed={isCollapsed}
-          active={activeView === 'chat'}
-          onClick={() => handleItemClick('chat')}
-        /> */}
 
         <SidebarItem
           icon={<FiUsers size={20} />}
@@ -101,7 +96,7 @@ const Sidebar = ({
           active={activeView === 'employees-all'}
           onClick={() => handleItemClick('employees-all')}
         />
-        
+
         <SidebarGroup
           icon={<FiBarChart2 size={20} />}
           text="Finance"
@@ -114,7 +109,7 @@ const Sidebar = ({
             { text: "Employee Allocations", view: "finance-allocations" },
           ]}
         />
-        
+
         <SidebarItem
           icon={<RiCustomerService2Line size={20} />}
           text="Support Tickets"
@@ -122,7 +117,7 @@ const Sidebar = ({
           active={activeView === 'supportTickets'}
           onClick={() => handleItemClick('supportTickets')}
         />
-        
+
 
         <SidebarGroup
           icon={<FiDollarSign size={20} />}
@@ -133,7 +128,7 @@ const Sidebar = ({
             { text: "All Payments", view: "payments" },
           ]}
         />
-       
+
         <SidebarItem
           icon={<IoMdNotificationsOutline size={20} />}
           text="Notifications"
