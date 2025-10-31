@@ -77,3 +77,13 @@ export const markMentionsAsViewed = async (projectId) => {
     throw error.response?.data || { message: 'Failed to mark mentions as viewed' };
   }
 };
+
+// Improve text with AI
+export const improveText = async (description) => {
+  try {
+    const response = await api.post('/ai/improve-text', { description });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to improve text' };
+  }
+};

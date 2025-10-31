@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { IoSend, IoAttach, IoClose } from "react-icons/io5";
 import { FaReply } from "react-icons/fa";
 import { BsEmojiSmile } from "react-icons/bs";
+import { HiSparkles } from "react-icons/hi2";
 import EmojiPicker from "emoji-picker-react";
+import { improveText } from "../../../../api/employee/chat";
 
 const MessageInput = ({
   selectedProjectId,
@@ -28,12 +30,15 @@ const MessageInput = ({
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionQuery, setMentionQuery] = useState("");
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [isImprovingText, setIsImprovingText] = useState(false);
+  const [showAiMenu, setShowAiMenu] = useState(false);
   const emojiPickerRef = useRef(null);
   const mentionDropdownRef = useRef(null);
+  const aiMenuRef = useRef(null);
   // Use messageInputRef passed from parent instead of local inputRef
   const inputRef = messageInputRef || useRef(null);
 
-  // Close emoji picker when clicking outside
+  // Close emoji picker, mention dropdown, and AI menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
@@ -42,13 +47,16 @@ const MessageInput = ({
       if (mentionDropdownRef.current && !mentionDropdownRef.current.contains(event.target)) {
         setShowMentionDropdown(false);
       }
+      if (aiMenuRef.current && !aiMenuRef.current.contains(event.target)) {
+        setShowAiMenu(false);
+      }
     };
 
-    if (showEmojiPicker || showMentionDropdown) {
+    if (showEmojiPicker || showMentionDropdown || showAiMenu) {
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [showEmojiPicker, showMentionDropdown]);
+  }, [showEmojiPicker, showMentionDropdown, showAiMenu]);
 
   // Detect @ mentions
   const handleInputChange = (value) => {
@@ -127,6 +135,38 @@ const MessageInput = ({
       handleMessageInputChange(newMessage);
     } else {
       setMessage(newMessage);
+    }
+  };
+
+  const handleImproveText = async () => {
+    if (!message.trim() || isImprovingText) return;
+
+    setShowAiMenu(false); // Close the menu
+    setIsImprovingText(true);
+    try {
+      const response = await improveText(message.trim());
+      
+      if (response.success && response.data?.improved) {
+        // Replace the message with improved text
+        if (handleMessageInputChange) {
+          handleMessageInputChange(response.data.improved);
+        } else {
+          setMessage(response.data.improved);
+        }
+
+        // Adjust textarea height after text is updated in the DOM
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.style.height = 'auto';
+            inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 150) + 'px';
+          }
+        }, 0);
+      }
+    } catch (error) {
+      console.error("Error improving text:", error);
+      // Optionally show error toast
+    } finally {
+      setIsImprovingText(false);
     }
   };
 
@@ -394,6 +434,39 @@ const MessageInput = ({
             {/* Connection Status Indicator */}
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} title={isConnected ? 'Connected' : 'Disconnected'}></div>
             
+            {/* AI Improve Text Button with Menu */}
+            <div className="relative" ref={aiMenuRef}>
+              <button
+                type="button"
+                onClick={() => setShowAiMenu(!showAiMenu)}
+                className={`p-3 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-full text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-blue-500/50 hover:scale-105 active:scale-95 ${isImprovingText ? 'animate-pulse' : ''}`}
+                aria-label="AI options"
+                disabled={!message.trim() || isImprovingText}
+                title="AI options"
+              >
+                {isImprovingText ? (
+                  <div className="animate-spin">
+                    <HiSparkles size={20} />
+                  </div>
+                ) : (
+                  <HiSparkles size={20} />
+                )}
+              </button>
+
+              {/* AI Menu Dropdown */}
+              {showAiMenu && !isImprovingText && (
+                <div className="absolute bottom-full mb-2 right-0 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[180px]">
+                  <button
+                    onClick={handleImproveText}
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-gray-700 flex items-center gap-3 text-blue-400 rounded-lg transition-colors"
+                  >
+                    <HiSparkles size={18} />
+                    <span>Improve with AI</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button
               type="submit"
               className="p-3 bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 rounded-full text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-purple-500/50 hover:scale-105 active:scale-95"
