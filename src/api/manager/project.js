@@ -44,3 +44,12 @@ export const deleteProject = async (id) => {
     throw error.response?.data || { message: 'Failed to delete project' };
   }
 };
+
+export const markProjectAsCompleted = async (projectId) => {
+  try {
+    const response = await api.patch(`/manager/projects/${projectId}/mark-completed`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to mark project as completed' };
+  }
+};

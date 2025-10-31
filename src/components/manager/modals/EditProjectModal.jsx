@@ -47,25 +47,25 @@ const formatDataForForm = (data) => {
   }
   if (!Array.isArray(formatted.referenceLinks)) formatted.referenceLinks = [];
 
-  // Parse estimatedMaterials if they are JSON strings
-  if (typeof formatted.estimatedMaterials === 'string') {
+  // Parse actualMaterials if they are JSON strings
+  if (typeof formatted.actualMaterials === 'string') {
     try {
-      formatted.estimatedMaterials = JSON.parse(formatted.estimatedMaterials);
+      formatted.actualMaterials = JSON.parse(formatted.actualMaterials);
     } catch (e) {
-      formatted.estimatedMaterials = [];
+      formatted.actualMaterials = [];
     }
   }
-  if (!Array.isArray(formatted.estimatedMaterials)) formatted.estimatedMaterials = [];
+  if (!Array.isArray(formatted.actualMaterials)) formatted.actualMaterials = [];
 
-  // Parse estimatedConsumables if they are JSON strings
-  if (typeof formatted.estimatedConsumables === 'string') {
+  // Parse actualConsumables if they are JSON strings
+  if (typeof formatted.actualConsumables === 'string') {
     try {
-      formatted.estimatedConsumables = JSON.parse(formatted.estimatedConsumables);
+      formatted.actualConsumables = JSON.parse(formatted.actualConsumables);
     } catch (e) {
-      formatted.estimatedConsumables = [];
+      formatted.actualConsumables = [];
     }
   }
-  if (!Array.isArray(formatted.estimatedConsumables)) formatted.estimatedConsumables = [];
+  if (!Array.isArray(formatted.actualConsumables)) formatted.actualConsumables = [];
 
   return formatted;
 };
@@ -117,11 +117,11 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
     setFormData(prev => ({ ...prev, referenceLinks: updatedLinks }));
   };
 
-  // Handle estimated materials
+  // Handle actual materials
   const addMaterialRow = () => {
     setFormData(prev => ({
       ...prev,
-      estimatedMaterials: [...prev.estimatedMaterials, '']
+      actualMaterials: [...prev.actualMaterials, '']
     }));
   };
 
@@ -142,11 +142,11 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
     });
   };
 
-  // Handle estimated consumables
+  // Handle actual consumables
   const addConsumableRow = () => {
     setFormData(prev => ({
       ...prev,
-      estimatedConsumables: [...prev.estimatedConsumables, '']
+      actualConsumables: [...prev.actualConsumables, '']
     }));
   };
 
@@ -271,7 +271,7 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput id="startDate" label="Start Date" type="date" value={formData.startDate} onChange={handleChange} required />
               <FormInput id="deadline" label="Deadline" type="date" value={formData.deadline} onChange={handleChange} required />
-              <FormInput id="estimatedHours" label="Estimated Hours" type="number" value={formData.estimatedHours} onChange={handleChange} />
+              <FormInput id="actualHours" label="Actual Hours" type="number" value={formData.actualHours} onChange={handleChange} />
               <FormSelect id="priority" label="Priority" value={formData.priority} onChange={handleChange} required>
                 <option value="">Select Priority</option>
                 <option value="low">Low</option>
@@ -289,25 +289,25 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
           {/* === CONSUMABLES AND MATERIALS === */}
           <Section title="Consumables and Materials">
             {/* Materials Section */}
-            <h3 className="font-semibold mb-2">Materials</h3>
+            <h3 className="font-semibold mb-2">Actual Materials</h3>
 
             {/* Loop through materials */}
-            {formData.estimatedMaterials && formData.estimatedMaterials.map((value, i) => (
+            {formData.actualMaterials && formData.actualMaterials.map((value, i) => (
               <div key={i} className="flex items-center gap-4 mb-2">
                 {/* Input field (takes up remaining space) */}
                 <div className="flex-grow">
                   <FormInput
-                    id={`estimatedMaterials-${i}`}
-                    label={`Estimated Material ${i + 1}`}
+                    id={`actualMaterials-${i}`}
+                    label={`Actual Material ${i + 1}`}
                     value={value}
-                    onChange={(e) => handleArrayChange(e, "estimatedMaterials", i)}
+                    onChange={(e) => handleArrayChange(e, "actualMaterials", i)}
                   />
                 </div>
 
                 {/* Remove Button */}
                 <button
                   type="button"
-                  onClick={() => handleArrayRemove("estimatedMaterials", i)}
+                  onClick={() => handleArrayRemove("actualMaterials", i)}
                   className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
                 >
                   Remove
@@ -321,25 +321,25 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
             </button>
 
             {/* Consumables Section */}
-            <h3 className="font-semibold mb-2">Consumables</h3>
+            <h3 className="font-semibold mb-2">Actual Consumables</h3>
 
             {/* Loop through consumables */}
-            {formData.estimatedConsumables && formData.estimatedConsumables.map((value, i) => (
+            {formData.actualConsumables && formData.actualConsumables.map((value, i) => (
               <div key={i} className="flex items-center gap-4 mb-2">
                 {/* Input field (takes up remaining space) */}
                 <div className="flex-grow">
                   <FormInput
-                    id={`estimatedConsumables-${i}`}
-                    label={`Estimated Consumable ${i + 1}`}
+                    id={`actualConsumables-${i}`}
+                    label={`Actual Consumable ${i + 1}`}
                     value={value}
-                    onChange={(e) => handleArrayChange(e, "estimatedConsumables", i)}
+                    onChange={(e) => handleArrayChange(e, "actualConsumables", i)}
                   />
                 </div>
 
                 {/* Remove Button */}
                 <button
                   type="button"
-                  onClick={() => handleArrayRemove("estimatedConsumables", i)}
+                  onClick={() => handleArrayRemove("actualConsumables", i)}
                   className="text-red-500 hover:text-red-700 font-medium text-sm self-center pt-5"
                 >
                   Remove

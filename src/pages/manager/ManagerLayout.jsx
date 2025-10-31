@@ -18,6 +18,7 @@ import FinanceOverview from "./finance/FinanceOverview";
 import ProfitLoss from "./finance/ProfitLoss";
 import IncomeSummary from "./finance/IncomeSummary";
 import EmployeeAllocations from "./finance/EmployeeAllocations";
+import ResourceComparison from "./finance/ResourceComparison";
 import CompletedProjects from "./project/CompletedProjects";
 
 const AssignEmployee = () => <div className="text-white text-2xl">Assign Employee Page</div>;
@@ -70,6 +71,8 @@ const ManagerLayout = () => {
         return <IncomeSummary />;
       case "finance-allocations":
         return <EmployeeAllocations />;
+      case "finance-resource-comparison":
+        return <ResourceComparison />;
       default:
         return <Dashboard />;
     }

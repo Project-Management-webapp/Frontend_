@@ -15,7 +15,10 @@ const AllProjects = () => {
     try {
       const response = await getAllProject();
       if (response.success && response.data.projects) {
-        setProjects(response.data.projects.rows);
+        // Filter out completed projects - only show active and in-progress projects
+        const allProjects = response.data.projects.rows;
+        const activeProjects = allProjects.filter(project => project.status !== 'completed');
+        setProjects(activeProjects);
       } else {
         setToast({ show: true, message: response.message || 'Failed to fetch projects', type: 'error' });
       }
@@ -44,47 +47,62 @@ const AllProjects = () => {
       )}
 
       {/* Main Container */}
-      <div className="p-4 sm:p-6 md:p-8 bg-gray-900 min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-10 bg-gray-900 min-h-screen">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center sm:text-left">
-            All Projects
-          </h1>
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-semibold transition-colors text-sm sm:text-base"
-          >
-            <FiPlus size={18} /> <span>New Project</span>
-          </button>
+        <div className="max-w-[1600px] mx-auto mb-10">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3">
+            <div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white flex items-center gap-3">
+                <FiFolderMinus className="text-purple-500" />
+                Active Projects
+              </h1>
+              <p className="text-gray-400 mt-3 text-base sm:text-lg">Manage and oversee all your projects efficiently</p>
+            </div>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 font-semibold transition-all shadow-lg hover:shadow-purple-500/50 text-sm sm:text-base"
+            >
+              <FiPlus size={20} /> <span>New Project</span>
+            </button>
+          </div>
         </div>
 
         {/* Loading / Empty / Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {[...Array(4)].map((_, idx) => (
-              <ProjectCardSkeleton key={idx} />
-            ))}
-          </div>
-        ) : projects.length === 0 ? (
-          <div className="bg-gray-800 rounded-lg border border-gray-700 p-10 sm:p-12 flex flex-col items-center justify-center text-center shadow-inner">
-            <div className="p-4 bg-purple-600/20 rounded-full mb-5 ring-4 ring-purple-600/10">
-              <FiFolderMinus className="text-purple-400" size={40} />
+        <div className="max-w-[1600px] mx-auto">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+              {[...Array(6)].map((_, idx) => (
+                <ProjectCardSkeleton key={idx} />
+              ))}
             </div>
-            <h3 className="text-xl sm:text-2xl font-semibold text-white">No Projects Found</h3>
-            <p className="mt-2 text-gray-400 text-sm sm:text-base">Get started by creating a new project.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {projects.map(project => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onDataChange={fetchProjects}
-                setToast={setToast} 
-              />
-            ))}
-          </div>
-        )}
+          ) : projects.length === 0 ? (
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-xl shadow-2xl p-12 sm:p-16 flex flex-col items-center justify-center text-center">
+              <div className="bg-purple-600/10 p-8 rounded-full mb-6">
+                <FiFolderMinus className="text-purple-500 text-7xl" />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">No Active Projects</h3>
+              <p className="text-gray-400 mb-8 text-base sm:text-lg max-w-md">Get started by creating your first project and begin managing your team efficiently</p>
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-purple-500/50 font-semibold"
+              >
+                <FiPlus size={20} />
+                <span>Create Project</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+              {projects.map(project => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onDataChange={fetchProjects}
+                  setToast={setToast} 
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Create Project Modal */}

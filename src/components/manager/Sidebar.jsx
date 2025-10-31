@@ -107,6 +107,7 @@ const Sidebar = ({
             { text: "Profit & Loss", view: "finance-profit-loss" },
             { text: "Income Summary", view: "finance-income" },
             { text: "Employee Allocations", view: "finance-allocations" },
+            { text: "Resource Comparison", view: "finance-resource-comparison" },
           ]}
         />
 

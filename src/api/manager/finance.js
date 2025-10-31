@@ -52,3 +52,14 @@ export const getEmployeeAllocations = async () => {
     throw error.response?.data || error;
   }
 };
+
+// Get resource comparison for a project
+export const getResourceComparison = async (projectId) => {
+  try {
+    const response = await api.get(`/manager/finance/projects/${projectId}/resource-comparison`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching resource comparison:", error);
+    throw error.response?.data || error;
+  }
+};

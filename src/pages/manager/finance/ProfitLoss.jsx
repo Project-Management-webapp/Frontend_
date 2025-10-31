@@ -14,7 +14,7 @@ const ProfitLoss = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [profitLossData, setProfitLossData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -29,6 +29,7 @@ const ProfitLoss = () => {
 
   const fetchProjects = async () => {
     try {
+      setLoading(true);
       const response = await getAllProject();
       
       // --- FIX ---
@@ -45,6 +46,8 @@ const ProfitLoss = () => {
 
     } catch (err) {
       console.error("Failed to fetch projects:", err);
+      setError("Failed to fetch projects");
+      setLoading(false);
     }
   };
 
@@ -68,46 +71,32 @@ const ProfitLoss = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Project Profit & Loss Analysis</h1>
-          <p className="text-gray-400 mt-1">Detailed financial breakdown by project</p>
-        </div>
-      </div>
+      {loading ? (
+        <div className="space-y-6">
+          {/* Header Skeleton */}
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-700 rounded w-96 mb-2"></div>
+            <div className="h-4 bg-gray-700 rounded w-64"></div>
+          </div>
 
-      {/* Project Selector */}
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
-        <label className="block text-sm font-medium text-gray-300 mb-2">Select Project</label>
-        <select
-          value={selectedProjectId}
-          onChange={(e) => setSelectedProjectId(e.target.value)}
-          className="w-full md:w-96 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-        >
-          {projects.map((project) => (
-            // This part is now correct because 'projects' state is set correctly
-            // and it uses .id and .name
-            <option key={project.id} value={project.id}>
-              {project.name} ({project.customProjectType || project.projectType})
-            </option>
-          ))}
-        </select>
-      </div>
+          {/* Project Selector Skeleton */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 animate-pulse">
+            <div className="h-4 bg-gray-700 rounded w-32 mb-2"></div>
+            <div className="h-10 bg-gray-700 rounded w-full md:w-96"></div>
+          </div>
 
-      {loading && (
-        <div className="animate-pulse space-y-6">
           {/* Project Info Banner Skeleton */}
-          <div className="h-24 bg-gray-700 rounded-lg"></div>
+          <div className="h-24 bg-gray-700 rounded-lg animate-pulse"></div>
 
           {/* Summary Cards Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-gray-700 rounded-lg"></div>
+              <div key={i} className="h-32 bg-gray-700 rounded-lg animate-pulse"></div>
             ))}
           </div>
 
           {/* Variance Analysis Skeleton */}
-          <div className="bg-gray-700 rounded-lg p-6">
+          <div className="bg-gray-700 rounded-lg p-6 animate-pulse">
             <div className="h-6 bg-gray-600 rounded w-48 mb-4"></div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
@@ -119,13 +108,13 @@ const ProfitLoss = () => {
           {/* Profit Comparison Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-700 rounded-lg"></div>
+              <div key={i} className="h-32 bg-gray-700 rounded-lg animate-pulse"></div>
             ))}
           </div>
 
           {/* Cost Breakdown Skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-gray-700 rounded-lg p-6">
+            <div className="bg-gray-700 rounded-lg p-6 animate-pulse">
               <div className="h-6 bg-gray-600 rounded w-48 mb-4"></div>
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -133,7 +122,7 @@ const ProfitLoss = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-gray-700 rounded-lg p-6">
+            <div className="bg-gray-700 rounded-lg p-6 animate-pulse">
               <div className="h-6 bg-gray-600 rounded w-48 mb-4"></div>
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -144,7 +133,7 @@ const ProfitLoss = () => {
           </div>
 
           {/* Breakdown Stats Skeleton */}
-          <div className="bg-gray-700 rounded-lg p-6">
+          <div className="bg-gray-700 rounded-lg p-6 animate-pulse">
             <div className="h-6 bg-gray-600 rounded w-40 mb-4"></div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
@@ -153,46 +142,81 @@ const ProfitLoss = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {error && (
-        <div className="bg-red-900/20 border border-red-500 rounded-lg p-4 text-red-200">
-          <FiAlertCircle className="inline mr-2" />
-          {error}
-        </div>
-      )}
-
-      {!loading && profitLossData && (
-        <>
-          {/* Project Info Banner */}
-          <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500 rounded-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white">{profitLossData.project.name}</h2>
-                <div className="flex items-center gap-4 mt-2 text-sm">
-                  <span className="text-gray-300">
-                    Type: <span className="text-white font-medium">
-                      {profitLossData.project.customProjectType || profitLossData.project.projectType}
-                    </span>
-                  </span>
-                  <span className="text-gray-400">•</span>
-                  <span className="text-gray-300">
-                    Status: <span className={`font-medium ${
-                      profitLossData.project.status === 'completed' ? 'text-green-400' :
-                      profitLossData.project.status === 'in-progress' ? 'text-blue-400' :
-                      'text-yellow-400'
-                    }`}>
-                      {profitLossData.project.status}
-                    </span>
-                  </span>
-                  <span className="text-gray-400">•</span>
-                  <span className="text-gray-300">
-                    Currency: <span className="text-white font-medium">{profitLossData.project.currency}</span>
-                  </span>
-                </div>
-              </div>
+      ) : error ? (
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white">Project Profit & Loss Analysis</h1>
+              <p className="text-gray-400 mt-1">Detailed financial breakdown by project</p>
             </div>
           </div>
+          
+          {/* Error Message */}
+          <div className="bg-red-900/20 border border-red-500 rounded-lg p-4 text-red-200">
+            <FiAlertCircle className="inline mr-2" />
+            {error}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white">Project Profit & Loss Analysis</h1>
+              <p className="text-gray-400 mt-1">Detailed financial breakdown by project</p>
+            </div>
+          </div>
+
+          {/* Project Selector */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Select Project</label>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+              className="w-full md:w-96 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              {projects.map((project) => (
+                // This part is now correct because 'projects' state is set correctly
+                // and it uses .id and .name
+                <option key={project.id} value={project.id}>
+                  {project.name} ({project.customProjectType || project.projectType})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {profitLossData && (
+            <>
+              {/* Project Info Banner */}
+              <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500 rounded-lg p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">{profitLossData.project.name}</h2>
+                    <div className="flex items-center gap-4 mt-2 text-sm">
+                      <span className="text-gray-300">
+                        Type: <span className="text-white font-medium">
+                          {profitLossData.project.customProjectType || profitLossData.project.projectType}
+                        </span>
+                      </span>
+                      <span className="text-gray-400">•</span>
+                      <span className="text-gray-300">
+                        Status: <span className={`font-medium ${
+                          profitLossData.project.status === 'completed' ? 'text-green-400' :
+                          profitLossData.project.status === 'in-progress' ? 'text-blue-400' :
+                          'text-yellow-400'
+                        }`}>
+                          {profitLossData.project.status}
+                        </span>
+                      </span>
+                      <span className="text-gray-400">•</span>
+                      <span className="text-gray-300">
+                        Currency: <span className="text-white font-medium">{profitLossData.project.currency}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -236,7 +260,7 @@ const ProfitLoss = () => {
           </div>
 
           {/* Variance Analysis */}
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          {/* <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-white mb-4">Cost Variance Analysis</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <VarianceCard
@@ -259,7 +283,7 @@ const ProfitLoss = () => {
                 variance={profitLossData.variance.consumables}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Profit Comparison */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -376,6 +400,8 @@ const ProfitLoss = () => {
               </div>
             </div>
           </div>
+            </>
+          )}
         </>
       )}
     </div>

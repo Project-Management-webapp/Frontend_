@@ -50,3 +50,13 @@ export const submitWork = async (assignmentId) => {
   }
 };
 
+// Update assignment details (actualHours, actualConsumables, actualMaterials)
+export const updateAssignmentDetails = async (assignmentId, payload) => {
+  try {
+    const response = await api.put(`manager/project-assignments/${assignmentId}/role`, payload);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to update assignment details" };
+  }
+};
+

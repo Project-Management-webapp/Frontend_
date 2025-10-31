@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getOngoingProjects, submitWork } from "../../../api/employee/assignProject"; 
+import { getOngoingProjects, submitWork, updateAssignmentDetails } from "../../../api/employee/assignProject"; 
 import OngoingProjectCard, { OngoingProjectCardSkeleton } from '../../../components/employee/cards/OngoingProjectCard';
 import ChatModal from '../../../components/modals/ChatModal';
+import FinishWorkModal from '../../../components/employee/modals/FinishWorkModal';
 import Toaster from '../../../components/Toaster';
 import { FiInbox, FiActivity } from 'react-icons/fi';
 import ProjectAssignmentDetail from './ProjectAssignmentDetail';
@@ -12,7 +13,8 @@ const OngoingProjects = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success', loading: false }); // Added loading to toast state
   const [selectedAssignment, setSelectedAssignment] = useState(null); 
-  const [isChatOpen, setIsChatOpen] = useState(false); 
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isFinishWorkOpen, setIsFinishWorkOpen] = useState(false); 
 
   const fetchOngoingProjects = useCallback(async () => {
     setIsLoading(true);
@@ -39,7 +41,9 @@ const OngoingProjects = () => {
     setSelectedAssignment(assignment);
   };
 
-  // Removed handleOpenSubmitModal
+  const handleOpenFinishWorkModal = () => {
+    setIsFinishWorkOpen(true);
+  };
 
   const handleOpenChatModal = () => {
     setIsChatOpen(true);
@@ -50,22 +54,33 @@ const OngoingProjects = () => {
   };
 
   // --- New Handler for Finishing Work ---
-  const handleFinishWork = async (assignmentId) => {
-    // Show loading toast
-    setToast({ show: true, message: 'Submitting your work...', type: 'loading', loading: true });
+  const handleFinishWorkSubmit = async (payload) => {
+    if (!selectedAssignment) return;
+
     try {
-      const response = await submitWork(assignmentId);
+      // Step 1: Update assignment details (actualHours, actualConsumables, actualMaterials)
+      setToast({ show: true, message: 'Updating assignment details...', type: 'loading', loading: true });
       
-      if (response.success) {
+      const updateResponse = await updateAssignmentDetails(selectedAssignment.id, payload);
+      
+      if (!updateResponse.success) {
+        throw new Error(updateResponse.message || 'Failed to update assignment details');
+      }
+
+      // Step 2: Submit work
+      setToast({ show: true, message: 'Submitting your work...', type: 'loading', loading: true });
+      
+      const submitResponse = await submitWork(selectedAssignment.id);
+      
+      if (submitResponse.success) {
         setToast({ show: true, message: 'Work submitted successfully!', type: 'success', loading: false });
+        setIsFinishWorkOpen(false);
         fetchOngoingProjects(); 
         handleBackToList();     
       } else {
-        
-        throw new Error(response.message || 'Failed to submit work.');
+        throw new Error(submitResponse.message || 'Failed to submit work.');
       }
     } catch (error) {
-     
       setToast({ show: true, message: error.message || 'An error occurred.', type: 'error', loading: false });
     }
   };
@@ -120,7 +135,7 @@ const OngoingProjects = () => {
           assignment={selectedAssignment}
           onBack={handleBackToList}
           onOpenChatModal={handleOpenChatModal}
-          onFinishWork={() => handleFinishWork(selectedAssignment.id)} 
+          onFinishWork={handleOpenFinishWorkModal}
         />
       ) : (
       
@@ -145,6 +160,15 @@ const OngoingProjects = () => {
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
           assignmentId={selectedAssignment.id} 
+        />
+      )}
+
+      {selectedAssignment && isFinishWorkOpen && (
+        <FinishWorkModal
+          isOpen={isFinishWorkOpen}
+          onClose={() => setIsFinishWorkOpen(false)}
+          assignment={selectedAssignment}
+          onSubmit={handleFinishWorkSubmit}
         />
       )}
 

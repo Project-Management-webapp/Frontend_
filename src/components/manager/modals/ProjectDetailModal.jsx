@@ -193,7 +193,9 @@ const ProjectDetailsModal = ({ project, onClose }) => {
 {/* consumables and materials */}
           <DetailSection title="Consumables and Materials" icon={<IoBusinessOutline size={22} />}>
             <DetailRow label="Estimated Materials" value={project.estimatedMaterials.join(', ')} />
+            <DetailRow label="Actual Materials" value={project.actualMaterials.join(', ')} />
             <DetailRow label="Estimated Consumables" value={project.estimatedConsumables.join(', ')} />
+            <DetailRow label="Actual Consumables" value={project.actualConsumables.join(', ')} />
           </DetailSection>
 
           {/* Team Information */}
