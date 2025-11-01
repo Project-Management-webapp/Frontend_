@@ -5,9 +5,10 @@ import ChatModal from '../../../components/modals/ChatModal';
 import FinishWorkModal from '../../../components/employee/modals/FinishWorkModal';
 import Toaster from '../../../components/Toaster';
 import { FiInbox, FiActivity } from 'react-icons/fi';
+import { FaChevronLeft } from 'react-icons/fa';
 import ProjectAssignmentDetail from './ProjectAssignmentDetail';
 
-const OngoingProjects = () => {
+const OngoingProjects = ({ setActiveView }) => {
   const [assignments, setAssignments] = useState([]);
   const [summary, setSummary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);

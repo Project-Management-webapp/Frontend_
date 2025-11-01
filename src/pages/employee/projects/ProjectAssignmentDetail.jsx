@@ -142,7 +142,7 @@ const ProjectAssignmentDetail = ({
         {/* Your Assignment Details */}
         <DetailSection title="Your Assignment" icon={<IoPersonOutline size={20} />}>
           <DetailRow label="Your Role" value={role} isTag />
-          <DetailRow label="Work Status" value={workStatus} isTag />
+          {/* <DetailRow label="Work Status" value={workStatus} isTag /> */}
 
           <DetailRow label="Assigned Date" value={assignedDate} isDate />
           <DetailRow label="Allocated Amount" value={`${currency} ${parseFloat(allocatedAmount || 0).toLocaleString()}`} />
@@ -184,8 +184,8 @@ const ProjectAssignmentDetail = ({
 
         {/* Materials & Consumables */}
         <DetailSection title="Materials & Consumables" icon={<IoBusinessOutline size={20} />}>
-          <DetailRow label="Estimated Hours" value={estimatedConsumables ? `${estimatedConsumables} ${currency}` : null} />
-          <DetailRow label="Estimated Hours" value={estimatedMaterials ? `${estimatedMaterials} ${currency}` : null} />
+          <DetailRow label="Estimated Consumables" value={estimatedConsumables ? `${estimatedConsumables} ${currency}` : null} />
+          <DetailRow label="Estimated Materials" value={estimatedMaterials ? `${estimatedMaterials} ${currency}` : null} />
 
 
         </DetailSection>

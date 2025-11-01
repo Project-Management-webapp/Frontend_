@@ -241,7 +241,7 @@ export const useChatLogic = () => {
 
       if (response.success && response.projects) {
         const acceptedProjects = response.projects.filter(
-          (assignment) => assignment.workStatus === "in_progress"
+          (assignment) => assignment.workStatus === "in_progress" || assignment.workStatus === "not_started"
         );
 
         const formattedProjects = acceptedProjects.map((assignment) => ({

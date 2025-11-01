@@ -7,9 +7,9 @@ import {
   FiAlertCircle,
   FiCheckCircle,
 } from "react-icons/fi";
-import { FaProjectDiagram, FaUsers, FaClock } from "react-icons/fa";
+import { FaProjectDiagram, FaUsers, FaClock, FaChevronLeft } from "react-icons/fa";
 
-const FinanceOverview = () => {
+const FinanceOverview = ({ setActiveView }) => {
   const [financialData, setFinancialData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

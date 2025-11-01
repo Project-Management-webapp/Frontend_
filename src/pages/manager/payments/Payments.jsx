@@ -7,6 +7,7 @@ import {
     RiHourglassFill 
 } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
+import { FaChevronLeft } from "react-icons/fa";
 import Toaster from "../../../components/Toaster";
 import { getAllPayments, approvePayment, rejectPayment } from "../../../api/manager/payment"; 
 import PaymentStatusBadge from "../../../components/payments/PaymentStatusBadge";
@@ -40,7 +41,7 @@ const PaymentItemSkeleton = () => (
     </div>
   </div>
 );
-const Payments = () => {
+const Payments = ({ setActiveView }) => {
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);

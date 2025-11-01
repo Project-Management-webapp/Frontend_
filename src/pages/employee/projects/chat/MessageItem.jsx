@@ -82,8 +82,8 @@ const MessageItem = ({
           key={`mention-${keyIndex++}`}
           className={`font-bold ${
             isMyMessage 
-              ? "text-white bg-purple-700/40" 
-              : "text-blue-400 bg-blue-900/20"
+              ? "text-green-400 bg-purple-700/40" 
+              : "text-green-400 bg-blue-900/20"
           } px-0.5 rounded`}
         >
           {match[0]}

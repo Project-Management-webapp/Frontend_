@@ -1,21 +1,6 @@
 import React from 'react';
 import { FiEye, FiClock } from 'react-icons/fi';
 import { formatDate } from '../../atoms/FormatedDate';
-import Badge  from "../../atoms/Badge";
-import { WORK_STATUS_COLOR_CONFIG } from "../../../lib/badgeConfigs"
-
-const WorkStatusTag = ({ status }) => {
-  return (
-    <Badge
-      value={status} 
-      configMap={WORK_STATUS_COLOR_CONFIG} 
-      defaultKey="default"
-      className="px-2 py-0.5 text-xs font-semibold capitalize"
-    />
-  );
-};
-
-
 // --- Main Card Component (Updated) ---
 const OngoingProjectCard = ({ assignment, onViewDetails }) => {
   const { project, role, workStatus, assigner } = assignment;
@@ -32,7 +17,6 @@ const OngoingProjectCard = ({ assignment, onViewDetails }) => {
           >
             {project.name}
           </h3>
-          <WorkStatusTag status={workStatus} />
         </div>
         <span className="text-sm font-semibold text-purple-300 bg-purple-600/20 px-2 py-0.5 rounded-full">
           {role}

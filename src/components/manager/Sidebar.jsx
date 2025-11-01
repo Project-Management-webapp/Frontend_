@@ -49,7 +49,8 @@ const Sidebar = ({
           <img
             src={isCollapsed ? logo : logo}
             alt="Logo"
-            className={`transition-all text-center duration-300 ease-in-out ${isCollapsed ? "w-0" : "w-28"}`}
+            className={`transition-all text-center duration-300 ease-in-out cursor-pointer hover:opacity-80 ${isCollapsed ? "w-0" : "w-28"}`}
+            onClick={() => setActiveView("dashboard")}
           />
         </div>
         {!isMobile && (
@@ -105,7 +106,7 @@ const Sidebar = ({
           items={[
             { text: "Overview", view: "finance-overview" },
             { text: "Profit & Loss", view: "finance-profit-loss" },
-            { text: "Income Summary", view: "finance-income" },
+            // { text: "Income Summary", view: "finance-income" },
             { text: "Employee Allocations", view: "finance-allocations" },
             { text: "Resource Comparison", view: "finance-resource-comparison" },
           ]}

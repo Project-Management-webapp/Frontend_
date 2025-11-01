@@ -34,13 +34,13 @@ const EmployeeLayout = () => {
       case "dashboard":
         return <Dashboard />;
       case "profile":
-        return <Profile />;
+        return <Profile setActiveView={setActiveView} />;
       case "notification":
-        return <Notification />;
+        return <Notification setActiveView={setActiveView} />;
       case "ongoingProjects":
-        return <OngoingProjects />;
+        return <OngoingProjects setActiveView={setActiveView} />;
       case "completedProjects":
-        return <CompletedProjects />;
+        return <CompletedProjects setActiveView={setActiveView} />;
       case "supportTickets":
         return <SupportTickets setActiveView={setActiveView} />;
       case "createTicket":
@@ -81,7 +81,12 @@ const EmployeeLayout = () => {
             >
               <FiMenu className="text-2xl" />
             </button>
-            <img src={logo} alt="Logo" className="w-26" />
+            <img 
+              src={logo} 
+              alt="Logo" 
+              className="w-26 cursor-pointer" 
+              onClick={() => setActiveView("dashboard")}
+            />
           </header>
 
           <main className="flex-1 p-6 overflow-y-auto">

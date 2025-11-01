@@ -227,9 +227,9 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput id="startDate" label="Start Date" type="date" value={formData.startDate} onChange={handleChange} required />
               <FormInput id="deadline" label="Deadline" type="date" value={formData.deadline} onChange={handleChange} required />
-              <FormInput id="estimatedHours" label="Estimated Hours" min="0" type="number" step="0.01" value={formData.estimatedHours} onChange={handleChange} />
-              <FormInput id="actualHours" label="Actual Hours" min="0" type="number" step="0.01" value={formData.actualHours} onChange={handleChange} />
-              <FormInput id="rate" label="Hourly Rate" min="0" type="number" step="0.01" value={formData.rate} onChange={handleChange} />
+              <FormInput id="estimatedHours" label="Estimated Hours" min="0" type="number" step="0.01" value={formData.estimatedHours} onChange={handleChange} onWheel={(e) => e.target.blur()} />
+              <FormInput id="actualHours" label="Actual Hours" min="0" type="number" step="0.01" value={formData.actualHours} onChange={handleChange} onWheel={(e) => e.target.blur()} />
+              <FormInput id="rate" label="Hourly Rate" min="0" type="number" step="0.01" value={formData.rate} onChange={handleChange} onWheel={(e) => e.target.blur()} />
               <FormSelect id="priority" label="Priority" value={formData.priority} onChange={handleChange} required>
                 <option value="">Select Priority</option>
                 <option value="low">Low</option>
@@ -256,6 +256,7 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
                 value={formData.estimatedMaterials} 
                 onChange={handleChange}
                 placeholder="0.00"
+                onWheel={(e) => e.target.blur()}
               />
               <FormInput 
                 id="actualMaterials" 
@@ -266,6 +267,7 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
                 value={formData.actualMaterials} 
                 onChange={handleChange}
                 placeholder="0.00"
+                onWheel={(e) => e.target.blur()}
               />
               <FormInput 
                 id="estimatedConsumables" 
@@ -276,6 +278,7 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
                 value={formData.estimatedConsumables} 
                 onChange={handleChange}
                 placeholder="0.00"
+                onWheel={(e) => e.target.blur()}
               />
               <FormInput 
                 id="actualConsumables" 
@@ -286,6 +289,7 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
                 value={formData.actualConsumables} 
                 onChange={handleChange}
                 placeholder="0.00"
+                onWheel={(e) => e.target.blur()}
               />
             </div>
             {/* Auto-calculated Budget Display */}
@@ -323,8 +327,8 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
               </FormSelect>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <FormInput id="allocatedAmount" label="Allocated Amount" min="0" type="number" value={formData.allocatedAmount} onChange={handleChange} />
-              <FormInput id="spentAmount" label="Spent Amount" min="0" type="number" value={formData.spentAmount} onChange={handleChange} />
+              <FormInput id="allocatedAmount" label="Allocated Amount" min="0" type="number" value={formData.allocatedAmount} onChange={handleChange} onWheel={(e) => e.target.blur()} />
+              <FormInput id="spentAmount" label="Spent Amount" min="0" type="number" value={formData.spentAmount} onChange={handleChange} onWheel={(e) => e.target.blur()} />
             </div>
           </Section>
 
@@ -460,7 +464,7 @@ const EditProjectModal = ({ project, onClose, onSuccess }) => {
           {/* === TEAM & SETTINGS === */}
           <Section title="Team & Settings">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormInput id="teamSize" label="Team Size" type="number" min="1" value={formData.teamSize} onChange={handleChange} />
+              <FormInput id="teamSize" label="Team Size" type="number" min="1" value={formData.teamSize} onChange={handleChange} onWheel={(e) => e.target.blur()} />
               <FormSelect id="visibility" label="Visibility" value={formData.visibility} onChange={handleChange}>
                 <option value="">Select Visibility</option>
                 <option value="internal">Internal</option>

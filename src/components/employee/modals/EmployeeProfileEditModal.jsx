@@ -144,6 +144,7 @@ const EmployeeProfileEditModal = ({ isOpen, onClose, userData, onSave, onShowToa
               placeholder="e.g., 50"
               type="number"
               min="0"
+              onWheel={(e) => e.target.blur()}
             />
             <FormSelect id="status" label="Status" value={formData.status} onChange={handleChange}>
               <option value="">Select...</option>

@@ -4,8 +4,9 @@ import { getAllEmployees, addEmployee, updateEmployeeDetails } from '../../api/m
 import Toaster from '../../components/Toaster';
 import AddEmployeeModal from '../../components/manager/modals/AddEmployeeModal'; 
 import { FaPlus } from 'react-icons/fa';
+import { FiUserPlus, FiUsers } from 'react-icons/fi';
 
-const AllEmployee = () => {
+const AllEmployee = ({ setActiveView }) => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
@@ -104,7 +105,6 @@ const AllEmployee = () => {
 
   return (
     <div className="p-6 space-y-4">
-     
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-4xl font-bold text-white">Employees</h2>
         <button
@@ -117,7 +117,41 @@ const AllEmployee = () => {
       </div>
       
       {employees.length === 0 ? (
-        <p className="text-gray-400 text-center py-10">No employees found.</p>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="max-w-md w-full mx-auto">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-purple-500/30 rounded-2xl shadow-2xl p-8 text-center">
+              {/* Icon */}
+              <div className="flex justify-center mb-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-purple-600/20 rounded-full blur-xl"></div>
+                  <div className="relative bg-purple-600/10 p-6 rounded-full border-2 border-purple-500/50">
+                    <FiUsers className="text-purple-400 text-6xl" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-3xl font-bold text-white mb-3">No Employees Yet</h3>
+              
+              {/* Description */}
+              <p className="text-gray-400 mb-8 text-lg leading-relaxed">
+                Start building your team by adding your first employee. 
+                Click the button below to get started!
+              </p>
+
+              {/* Action Button */}
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="btn flex w-full justify-center items-center gap-2"
+              >
+                <FiUserPlus className="text-md" />
+                Add Your First Employee
+              </button>
+
+             
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {employees.map((employee) => (

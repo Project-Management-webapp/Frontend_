@@ -60,6 +60,7 @@ const EditRateModal = ({ isOpen, onClose, employee, onUpdateRate }) => {
               value={rate}
               onChange={(e) => setRate(e.target.value)}
               placeholder="Enter hourly rate"
+              onWheel={(e) => e.target.blur()}
             />
             <p className="text-xs text-gray-400 mt-1">
               Current rate: ${employee?.rate || 'N/A'}/hr

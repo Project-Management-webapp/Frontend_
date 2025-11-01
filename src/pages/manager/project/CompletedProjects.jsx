@@ -3,9 +3,10 @@ import { getAllProject } from '../../../api/manager/project'
 import CompletedProjectCard, { CompletedProjectCardSkeleton } from '../../../components/manager/cards/CompletedProjectCard'
 import CompletedProjectDetailModal from '../../../components/manager/modals/CompletedProjectDetailModal'
 import { FiCheckCircle } from 'react-icons/fi'
+import { FaChevronLeft } from 'react-icons/fa'
 import Toaster from '../../../components/Toaster'
 
-const CompletedProjects = () => {
+const CompletedProjects = ({ setActiveView }) => {
   // State for loading, error, and the filtered list of projects
   const [projects, setProjects] = useState([])
   const [isLoading, setIsLoading] = useState(true)

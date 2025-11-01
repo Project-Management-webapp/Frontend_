@@ -210,6 +210,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               onChange={(e) => setRate(e.target.value)}
               placeholder="Enter hourly rate"
               required
+              onWheel={(e) => e.target.blur()}
             />
 
             {/* Estimated Hours */}
@@ -222,6 +223,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               value={estimatedHours}
               onChange={(e) => setEstimatedHours(e.target.value)}
               placeholder="Enter estimated hours"
+              onWheel={(e) => e.target.blur()}
             />
 
             <FormInput
@@ -233,6 +235,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               value={estimatedMaterials}
               onChange={(e) => setEstimatedMaterials(e.target.value)}
               placeholder="0.00"
+              onWheel={(e) => e.target.blur()}
             />
 
             <FormInput
@@ -244,6 +247,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
               value={estimatedConsumables}
               onChange={(e) => setEstimatedConsumables(e.target.value)}
               placeholder="0.00"
+              onWheel={(e) => e.target.blur()}
             />
 
             {/* Allocated Amount (Auto-calculated - disabled) */}
@@ -258,6 +262,7 @@ const AssignTeamModal = ({ project, onClose, onSuccess }) => {
                 onChange={(e) => setAllocatedAmount(e.target.value)}
                 placeholder="Auto-calculated"
                 disabled={true}
+                onWheel={(e) => e.target.blur()}
               />
             </div>
 

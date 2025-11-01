@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiMessageSquare, FiFolder, FiCheckSquare, FiAlertTriangle, FiTrash2, FiDollarSign } from 'react-icons/fi';
 import { IoNotificationsOffOutline } from 'react-icons/io5';
 import { RiTimeLine } from 'react-icons/ri';
+import { FaChevronLeft } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { getMyNotifications, deleteNotification } from '../../api/common/notification';
 
@@ -38,7 +39,7 @@ const getTimeAgo = (date) => {
     return 'Just now';
 };
 
-const Notification = () => {
+const Notification = ({ setActiveView }) => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [expandedId, setExpandedId] = useState(null);

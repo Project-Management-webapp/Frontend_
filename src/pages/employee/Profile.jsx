@@ -4,11 +4,11 @@ import Toaster from "../../components/Toaster";
 import { getEmployeeProfile, updateEmployeeProfileImage } from "../../api/employee/auth";
 import { formatDate } from "../../components/atoms/FormatedDate";
 import {
-  FaPencilAlt, FaBriefcase, FaSitemap, FaCalendarAlt, FaClock, FaTint, FaRing,
+  FaPencilAlt, FaBriefcase, FaSitemap, FaCalendarAlt, FaClock, 
   FaLanguage, FaUser, FaHeartbeat, FaPhoneAlt, FaMapMarkerAlt, FaInfoCircle,
-  FaLayerGroup, FaBirthdayCake, FaVenusMars, FaFlag, FaFileContract, FaCalendarCheck,
-  FaMoneyBillWave, FaTools, FaGraduationCap, FaCertificate, FaToggleOn, FaGlobe,
-  FaChartLine, FaStar, FaUmbrellaBeach, FaIdCard, FaTachometerAlt, FaAward
+   FaBirthdayCake, FaVenusMars, FaFileContract, 
+   FaTools, FaGraduationCap,  FaToggleOn, FaGlobe
+, FaIdCard, FaTachometerAlt,  FaChevronLeft
 } from 'react-icons/fa';
 import { IoMdClose } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
@@ -46,10 +46,11 @@ const DetailItemWithIcon = ({ icon, label, value, isDate = false }) => {
   );
 };
 
-const Profile = () => {
+const Profile = ({ setActiveView }) => {
 
   const [employeeData, setEmployeeData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [profileImage, setProfileImage] = useState("/default-profile.png");
@@ -115,6 +116,7 @@ const Profile = () => {
         setProfileImage(profile.profileImage || "/default-profile.png");
       } catch (error) {
         console.error("Failed to fetch profile:", error);
+        setError(error.message || "Failed to load profile data.");
         setToast({ show: true, message: "Failed to load profile data.", type: "error" });
       } finally {
         setLoading(false);
@@ -160,6 +162,55 @@ const Profile = () => {
 
   const handleEditIconClick = () => fileInputRef.current.click();
 
+
+  // Error/Not Found State
+  if (error || (!loading && !employeeData)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-md w-full">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-red-500/30 rounded-xl shadow-2xl p-8 text-center">
+            <div className="bg-red-600/10 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+              <FaUser className="text-red-500 text-5xl" />
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-3">Profile Not Found</h2>
+            <p className="text-gray-400 mb-6 text-lg">
+              {error || "We couldn't load your profile data. Please try again or contact support."}
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Retry
+              </button>
+              <button
+                onClick={() => setError(null)}
+                className="w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-semibold transition-colors"
+              >
+                Dismiss
+              </button>
+            </div>
+            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <p className="text-sm text-blue-300">
+                <FaInfoCircle className="inline mr-2" />
+                If the problem persists, please contact our support team.
+              </p>
+            </div>
+          </div>
+        </div>
+        {toast.show && (
+          <Toaster
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast({ show: false, message: "", type: "" })}
+          />
+        )}
+      </div>
+    );
+  }
 
   if (loading) {
 

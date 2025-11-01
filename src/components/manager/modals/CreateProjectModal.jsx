@@ -226,8 +226,8 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput id="startDate" label="Start Date" type="date" value={formData.startDate} onChange={handleChange} required />
               <FormInput id="deadline" label="Deadline" type="date" value={formData.deadline} onChange={handleChange} required />
-              <FormInput id="estimatedHours" label="Estimated Hours" min="0" type="number" step="0.01" value={formData.estimatedHours} onChange={handleChange} />
-              <FormInput id="rate" label="Hourly Rate" min="0" type="number" step="0.01" value={formData.rate} onChange={handleChange} />
+              <FormInput id="estimatedHours" label="Estimated Hours" min="0" type="number" step="0.01" value={formData.estimatedHours} onChange={handleChange} onWheel={(e) => e.target.blur()} />
+              <FormInput id="rate" label="Hourly Rate" min="0" type="number" step="0.01" value={formData.rate} onChange={handleChange} onWheel={(e) => e.target.blur()} />
               <FormSelect id="priority" label="Priority" value={formData.priority} onChange={handleChange} required>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -240,25 +240,27 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
           {/* === MATERIALS AND CONSUMABLES === */}
           <Section title="Materials and Consumables">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormInput 
-                id="estimatedMaterials" 
-                label="Estimated Materials Cost" 
-                type="number" 
-                min="0" 
+              <FormInput
+                id="estimatedMaterials"
+                label="Estimated Materials Cost"
+                type="number"
+                min="0"
                 step="0.01"
-                value={formData.estimatedMaterials} 
+                value={formData.estimatedMaterials}
                 onChange={handleChange}
                 placeholder="0.00"
+                onWheel={(e) => e.target.blur()}
               />
-              <FormInput 
-                id="estimatedConsumables" 
-                label="Estimated Consumables Cost" 
-                type="number" 
-                min="0" 
+              <FormInput
+                id="estimatedConsumables"
+                label="Estimated Consumables Cost"
+                type="number"
+                min="0"
                 step="0.01"
-                value={formData.estimatedConsumables} 
+                value={formData.estimatedConsumables}
                 onChange={handleChange}
                 placeholder="0.00"
+                onWheel={(e) => e.target.blur()}
               />
             </div>
             {/* Auto-calculated Budget Display */}
@@ -272,7 +274,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
                     (parseFloat(formData.estimatedConsumables) || 0)
                   ).toFixed(2)}
                 </p>
-                
+
               </div>
             )}
           </Section>
@@ -427,7 +429,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
           {/* === TEAM === */}
           <Section title="Team & Settings">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormInput id="teamSize" label="Team Size" type="number" min="0" value={formData.teamSize} onChange={handleChange} />
+              <FormInput id="teamSize" label="Team Size" type="number" min="0" value={formData.teamSize} onChange={handleChange} onWheel={(e) => e.target.blur()} />
               <FormSelect id="visibility" label="Visibility" value={formData.visibility} onChange={handleChange}>
                 <option value="internal">Internal</option>
                 <option value="public">Public</option>
@@ -538,7 +540,7 @@ const CreateProjectModal = ({ isOpen, onClose, onSuccess }) => {
                       <option value="in-progress">In Progress</option>
                       <option value="resolved">Resolved</option>
                     </FormSelect>
-                    
+
                   </div>
                   <div className="flex justify-end">
                     <button

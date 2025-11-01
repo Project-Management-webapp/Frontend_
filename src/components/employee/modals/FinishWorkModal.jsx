@@ -62,6 +62,7 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
               value={actualHours}
               onChange={(e) => setActualHours(e.target.value)}
               placeholder="Enter actual hours worked"
+              onWheel={(e) => e.target.blur()}
 
             />
             
@@ -80,6 +81,7 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
               value={actualConsumables}
               onChange={(e) => setActualConsumables(e.target.value)}
               placeholder="0.00"
+              onWheel={(e) => e.target.blur()}
             />
           </div>
 
@@ -96,6 +98,7 @@ const FinishWorkModal = ({ isOpen, onClose, assignment, onSubmit }) => {
               value={actualMaterials}
               onChange={(e) => setActualMaterials(e.target.value)}
               placeholder="0.00"
+              onWheel={(e) => e.target.blur()}
             />
           </div>
 

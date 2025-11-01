@@ -44,11 +44,11 @@ const ManagerLayout = () => {
       case "dashboard":
         return <Dashboard />;
       case "profile":
-        return <Profile />;
+        return <Profile setActiveView={setActiveView} />;
       case "notifications":
-        return <Notification />;
+        return <Notification setActiveView={setActiveView} />;
       case "employees-all":
-        return <AllEmployee />;
+        return <AllEmployee setActiveView={setActiveView} />;
       case "employees-assign":
         return <AssignEmployee />;
       case "employees-workload":
@@ -56,23 +56,23 @@ const ManagerLayout = () => {
       case "employees-performance":
         return <Performance />;
       case "active_projects":
-        return <AllProjects />;
+        return <AllProjects setActiveView={setActiveView} />;
       case "completed_projects":
-        return <CompletedProjects />;
+        return <CompletedProjects setActiveView={setActiveView} />;
       case "supportTickets":
         return <SupportTickets setActiveView={setActiveView} />;
       case "payments":
-        return <Payments />;
+        return <Payments setActiveView={setActiveView} />;
       case "finance-overview":
-        return <FinanceOverview />;
+        return <FinanceOverview setActiveView={setActiveView} />;
       case "finance-profit-loss":
-        return <ProfitLoss />;
+        return <ProfitLoss setActiveView={setActiveView} />;
       case "finance-income":
-        return <IncomeSummary />;
+        return <IncomeSummary setActiveView={setActiveView} />;
       case "finance-allocations":
-        return <EmployeeAllocations />;
+        return <EmployeeAllocations setActiveView={setActiveView} />;
       case "finance-resource-comparison":
-        return <ResourceComparison />;
+        return <ResourceComparison setActiveView={setActiveView} />;
       default:
         return <Dashboard />;
     }
@@ -106,7 +106,12 @@ const ManagerLayout = () => {
             >
               <FiMenu className="text-2xl" />
             </button>
-            <img src={logo} alt="Logo" className="w-28" />
+            <img 
+              src={logo} 
+              alt="Logo" 
+              className="w-28 cursor-pointer" 
+              onClick={() => setActiveView("dashboard")}
+            />
           </header>
 
           <main className="flex-1 p-6 overflow-y-auto">

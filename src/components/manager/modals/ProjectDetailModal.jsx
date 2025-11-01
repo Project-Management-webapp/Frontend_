@@ -310,9 +310,7 @@ const ProjectDetailsModal = ({ project, onClose }) => {
           {/* Notes and Testing Status */}
           {(project.notes || project.testingStatus) && (
             <DetailSection title="Additional Information" icon={<IoDocumentTextOutline size={22} />}>
-              {/* {project.testingStatus && (
-                <DetailRow label="Testing Status" value={project.testingStatus} isTag />
-              )} */}
+             
               {project.notes && (
                 <div className="md:col-span-2">
                   <DetailRow label="Notes" value={project.notes} />

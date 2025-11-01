@@ -5,7 +5,7 @@ import Toaster from '../../../components/Toaster';
 import { FiInbox, FiCheckCircle } from 'react-icons/fi';
 import CompleteProjectDetailModal from '../../../components/employee/modals/CompleteProjectDetailModal';
 
-const CompletedProjects = () => {
+const CompletedProjects = ({ setActiveView }) => {
   const [assignments, setAssignments] = useState([]);
   const [summary, setSummary] = useState(null);
   const [totalEarned, setTotalEarned] = useState(null);

@@ -5,7 +5,8 @@ import ProjectCard, { ProjectCardSkeleton } from '../../../components/manager/ca
 import CreateProjectModal from '../../../components/manager/modals/CreateProjectModal';
 import { FiPlus, FiFolderMinus } from 'react-icons/fi';
 
-const AllProjects = () => {
+
+const AllProjects = ({ setActiveView }) => {
   const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });

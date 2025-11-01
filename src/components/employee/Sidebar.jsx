@@ -43,8 +43,9 @@ const Sidebar = ({
           <img
             src={logo}
             alt="Logo"
-            className={`transition-all duration-300 ease-in-out ${isCollapsed ? "w-0" : "w-28"
+            className={`transition-all duration-300 ease-in-out cursor-pointer hover:opacity-80 ${isCollapsed ? "w-0" : "w-28"
               }`}
+            onClick={() => setActiveView("dashboard")}
           />
         </div>
 
