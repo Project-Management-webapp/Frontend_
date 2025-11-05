@@ -6,8 +6,6 @@ import {
   FiPackage,
   FiBox,
   FiAlertCircle,
-  FiTrendingUp,
-  FiTrendingDown,
   FiActivity,
 } from "react-icons/fi";
 import { FaUsers } from "react-icons/fa";
@@ -466,13 +464,13 @@ const ResourceComparison = () => {
                             Efficiency
                           </th>
                           <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            Consumables
+                            Consumables (Est/Act)
                           </th>
                           <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            Materials
+                            Materials (Est/Act)
                           </th>
                           <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            Allocation
+                            Amount (Allocated/Actual)
                           </th>
                         </tr>
                       </thead>
@@ -504,7 +502,7 @@ const ResourceComparison = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                               <div className="text-sm text-gray-300">
-                                ${assignment.consumables.actualCost.toLocaleString()}
+                                ${assignment.consumables.estimatedCost.toLocaleString()} / ${assignment.consumables.actualCost.toLocaleString()}
                               </div>
                               <div className={`text-xs ${assignment.consumables.variance >= 0 ? 'text-red-400' : 'text-green-400'}`}>
                                 {assignment.consumables.variance > 0 ? '+' : ''}${assignment.consumables.variance.toLocaleString()}
@@ -512,14 +510,25 @@ const ResourceComparison = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                               <div className="text-sm text-gray-300">
-                                ${assignment.materials.actualCost.toLocaleString()}
+                                ${assignment.materials.estimatedCost.toLocaleString()} / ${assignment.materials.actualCost.toLocaleString()}
                               </div>
                               <div className={`text-xs ${assignment.materials.variance >= 0 ? 'text-red-400' : 'text-green-400'}`}>
                                 {assignment.materials.variance > 0 ? '+' : ''}${assignment.materials.variance.toLocaleString()}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-300">
-                              ${assignment.totalAllocation.toLocaleString()}
+                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                              <div className="text-sm text-gray-300">
+                                ${assignment.totalAllocation.toLocaleString()} / ${assignment.actualAmount > 0 ? assignment.actualAmount.toLocaleString() : (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost).toLocaleString()}
+                              </div>
+                              <div className={`text-xs ${((assignment.actualAmount > 0 ? assignment.actualAmount : (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost)) - assignment.totalAllocation) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
+                                {((assignment.actualAmount > 0 ? assignment.actualAmount : (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost)) - assignment.totalAllocation) > 0 ? '+' : ''}${Math.abs((assignment.actualAmount > 0 ? assignment.actualAmount : (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost)) - assignment.totalAllocation).toLocaleString()}
+                              </div>
+                              {assignment.actualAmount > 0 && 
+                               assignment.actualAmount !== (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost) && (
+                                <div className="text-[10px] text-green-400 mt-1">
+                                  ✓ Manager verified
+                                </div>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -648,11 +657,32 @@ const ResourceComparison = () => {
                           </div>
                         </div>
 
-                        {/* Total Allocation */}
-                        <div className="mt-4 pt-4 border-t border-gray-700">
+                        {/* Total Allocation & Actual Amount */}
+                        <div className="mt-4 pt-4 border-t border-gray-700 space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-400 font-medium">Total Allocation:</span>
+                            <span className="text-sm text-gray-400 font-medium">Allocated Budget:</span>
                             <span className="text-lg text-purple-400 font-bold">${assignment.totalAllocation.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-400 font-medium">
+                              Actual Amount:
+                              {assignment.actualAmount > 0 && 
+                               assignment.actualAmount !== (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost) && (
+                                <span className="ml-2 text-[10px] text-green-400">✓ Manager Verified</span>
+                              )}
+                            </span>
+                            <span className={`text-lg font-bold ${assignment.actualAmount > 0 && assignment.actualAmount !== (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost) ? 'text-green-400' : 'text-blue-400'}`}>
+                              ${assignment.actualAmount > 0 
+                                ? assignment.actualAmount.toLocaleString() 
+                                : (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-500">Variance:</span>
+                            <span className={`font-semibold ${((assignment.actualAmount > 0 ? assignment.actualAmount : (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost)) - assignment.totalAllocation) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
+                              {((assignment.actualAmount > 0 ? assignment.actualAmount : (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost)) - assignment.totalAllocation) > 0 ? '+' : ''}
+                              ${Math.abs((assignment.actualAmount > 0 ? assignment.actualAmount : (assignment.hours.actualCost + assignment.consumables.actualCost + assignment.materials.actualCost)) - assignment.totalAllocation).toLocaleString()}
+                            </span>
                           </div>
                         </div>
                       </div>

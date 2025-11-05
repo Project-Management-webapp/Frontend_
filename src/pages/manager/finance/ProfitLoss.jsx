@@ -150,17 +150,6 @@ const ProfitLoss = ({ setActiveView }) => {
         </div>
       ) : (
         <>
-          {/* Back Button */}
-          <div className="flex items-center gap-4 mb-4">
-            <button
-              onClick={() => setActiveView("dashboard")}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-all duration-200 group"
-            >
-              <FaChevronLeft className="text-purple-400 group-hover:text-purple-300 transition-colors" />
-              <span className="text-sm font-medium">Back to Dashboard</span>
-            </button>
-          </div>
-
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -319,11 +308,7 @@ const ProfitLoss = ({ setActiveView }) => {
                       label="Materials"
                       value={profitLossData.actual.materials.totalCost}
                     />
-                    <CostItem
-                      icon={<FaUsers className="text-green-400" />}
-                      label="Employee Payments"
-                      value={profitLossData.actual.employeePayments}
-                    />
+                    
                     <div className="pt-4 border-t border-gray-700">
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-semibold text-white">Total Actual</span>

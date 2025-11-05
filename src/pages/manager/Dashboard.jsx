@@ -12,6 +12,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import DashboardCard from "../../components/manager/cards/DashboardCard";
 import { getAllProject } from "../../api/manager/project";
 import { getAllEmployees } from "../../api/manager/employeedetail";
+import { getAllPayments } from "../../api/manager/payment";
 import Toaster from "../../components/Toaster";
 
 const Dashboard = () => {
@@ -22,6 +23,8 @@ const Dashboard = () => {
     completedProjects: 0,
     totalBudget: 0,
     totalAllocated: 0,
+    totalActualAmount: 0,
+    totalPaidAmount: 0,
   });
   const [teamWorkload, setTeamWorkload] = useState([]);
   const [projectFinancials, setProjectFinancials] = useState([]); // Added for new chart
@@ -37,9 +40,10 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       // Fetch all data
-      const [projectsRes, employeesRes] = await Promise.all([
+      const [projectsRes, employeesRes, paymentsRes] = await Promise.all([
         getAllProject(),
         getAllEmployees(),
+        getAllPayments(),
       ]);
 
       const allProjects = projectsRes?.data?.projects?.rows || [];
@@ -58,6 +62,16 @@ const Dashboard = () => {
         employees = employeesRes.data.employees.rows;
       }
 
+      // Extract payments and calculate total paid amount
+      const allPayments = paymentsRes?.data?.payments?.rows || [];
+      const totalPaidAmountCalc = allPayments.reduce((acc, payment) => {
+        // Only count payments that are completed/paid
+        if (payment.requestStatus === 'paid' && payment.status === 'completed') {
+          return acc + (parseFloat(payment.amount) || 0);
+        }
+        return acc;
+      }, 0);
+
       const activeCount = allProjects.filter(p =>
         ['in_progress', 'planning', 'review'].includes(p.status?.toLowerCase())
       ).length;
@@ -73,15 +87,31 @@ const Dashboard = () => {
         return acc + (parseFloat(project.allocatedAmount) || 0);
       }, 0);
 
+      // Calculate total actual amount (actualHours * rate + actualConsumables + actualMaterials)
+      const totalActualAmountCalc = allProjects.reduce((acc, project) => {
+        const actualHours = parseFloat(project.actualHours) || 0;
+        const rate = parseFloat(project.rate) || 0;
+        const actualConsumables = parseFloat(project.actualConsumables) || 0;
+        const actualMaterials = parseFloat(project.actualMaterials) || 0;
+        const actualAmount = (actualHours * rate) + actualConsumables + actualMaterials;
+        return acc + actualAmount;
+      }, 0);
+
       // --- Calculate Project Financials for chart ---
       const financialsData = allProjects.map(project => {
         const budget = parseFloat(project.budget) || 0;
         const allocated = parseFloat(project.allocatedAmount) || 0;
-        const profit = budget - allocated;
+        const actualHours = parseFloat(project.actualHours) || 0;
+        const rate = parseFloat(project.rate) || 0;
+        const actualConsumables = parseFloat(project.actualConsumables) || 0;
+        const actualMaterials = parseFloat(project.actualMaterials) || 0;
+        const actualAmount = (actualHours * rate) + actualConsumables + actualMaterials;
+        const profit = budget - actualAmount;
         return {
           name: project.name, // Use project name for X-axis
           budget,
           allocated,
+          actualAmount,
           profit,
         };
       });
@@ -94,15 +124,58 @@ const Dashboard = () => {
         completedProjects: completedCount,
         totalBudget: totalBudgetCalc,
         totalAllocated: totalAllocatedCalc,
+        totalActualAmount: totalActualAmountCalc,
+        totalPaidAmount: totalPaidAmountCalc,
       });
 
-      // Mock team workload
-      const workloadData = employees.slice(0, 5).map(emp => ({
-        name: emp.fullName || emp.email.split('@')[0],
-        projects: Math.floor(Math.random() * 5) + 1,
-        tasks: Math.floor(Math.random() * 15) + 5,
-      }));
-      setTeamWorkload(workloadData);
+      // Calculate team workload from actual project assignments
+      const employeeWorkload = {};
+      
+      // Initialize workload for all employees
+      employees.forEach(emp => {
+        employeeWorkload[emp.id] = {
+          name: emp.fullName || emp.email.split('@')[0],
+          projects: 0,
+          assignments: 0,
+        };
+      });
+
+      // Count actual assignments per employee from projects
+      allProjects.forEach(project => {
+        if (project.assignments && Array.isArray(project.assignments)) {
+          project.assignments.forEach(assignment => {
+            if (assignment.employeeId && employeeWorkload[assignment.employeeId]) {
+              if (assignment.isActive) {
+                employeeWorkload[assignment.employeeId].projects += 1;
+                employeeWorkload[assignment.employeeId].assignments += 1;
+              }
+            }
+          });
+        }
+      });
+
+      // Convert to array and sort by workload, take top 5
+      const workloadData = Object.values(employeeWorkload)
+        .filter(emp => emp.projects > 0 || emp.assignments > 0) // Only show employees with work
+        .sort((a, b) => (b.projects + b.assignments) - (a.projects + a.assignments))
+        .slice(0, 5)
+        .map(emp => ({
+          name: emp.name,
+          projects: emp.projects,
+          assignments: emp.assignments,
+        }));
+
+      // If no workload data, show top 5 employees with 0 workload
+      if (workloadData.length === 0) {
+        const defaultWorkload = employees.slice(0, 5).map(emp => ({
+          name: emp.fullName || emp.email.split('@')[0],
+          projects: 0,
+          assignments: 0,
+        }));
+        setTeamWorkload(defaultWorkload);
+      } else {
+        setTeamWorkload(workloadData);
+      }
 
       // Recent activity
       const activity = allProjects
@@ -127,6 +200,8 @@ const Dashboard = () => {
         completedProjects: prev.completedProjects || 0,
         totalBudget: prev.totalBudget || 0,
         totalAllocated: prev.totalAllocated || 0,
+        totalActualAmount: prev.totalActualAmount || 0,
+        totalPaidAmount: prev.totalPaidAmount || 0,
       }));
     } finally {
       setIsLoading(false);
@@ -159,9 +234,11 @@ const Dashboard = () => {
 
   const totalBudget = stats.totalBudget || 0;
   const totalAllocated = stats.totalAllocated || 0;
-  const totalProfit = totalBudget - totalAllocated;
-  const allocatedPercentage = totalBudget > 0
-    ? Math.round((totalAllocated / totalBudget) * 100)
+  const totalActualAmount = stats.totalActualAmount || 0;
+  const totalPaidAmount = stats.totalPaidAmount || 0;
+  const totalProfit = totalBudget - totalActualAmount;
+  const paidPercentage = totalBudget > 0
+    ? Math.round((totalPaidAmount / totalBudget) * 100)
     : 0;
 
   const cardData = [
@@ -210,13 +287,13 @@ const Dashboard = () => {
       iconColor: isLoading ? 'text-gray-300' : 'text-yellow-400',
     },
     {
-      title: 'Total Allocated',
+      title: 'Total Paid',
       value: isLoading
         ? <Skeleton className="h-7 w-20" />
-        : `$${totalAllocated.toLocaleString()}`,
+        : `$${totalPaidAmount.toLocaleString()}`,
       subtitle: isLoading
         ? <Skeleton className="h-4 w-28" />
-        : `${allocatedPercentage}% of budget used`,
+        : `${paidPercentage}% of budget paid`,
       IconComponent: RiHandCoinFill,
       iconColor: isLoading ? 'text-gray-300' : 'text-orange-400',
     },
@@ -227,7 +304,7 @@ const Dashboard = () => {
         : `$${totalProfit.toLocaleString()}`,
       subtitle: isLoading
         ? <Skeleton className="h-4 w-28" />
-        : 'Budget vs. Allocated',
+        : '',
       IconComponent: RiLineChartFill,
       iconColor: isLoading ? 'text-gray-300' : 'text-cyan-400',
     },
@@ -266,7 +343,7 @@ const Dashboard = () => {
       <div className="bg-gray-800/50 backdrop-blur-md rounded-lg p-7 border border-gray-700 mb-8">
   <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
     <RiLineChartFill className="text-cyan-400" />
-    Project Financials (Budget vs. Allocated)
+    Project Financials (Budget vs. Actual Amount)
   </h3>
   {isLoading ? (
     <div className="h-80 flex items-center justify-center">
@@ -295,7 +372,7 @@ const Dashboard = () => {
         />
         <Legend />
         <Bar dataKey="budget" fill="#3B82F6" name="Budget" />
-        <Bar dataKey="allocated" fill="#F59E0B" name="Allocated" />
+        <Bar dataKey="actualAmount" fill="#F59E0B" name="Actual Amount" />
         <Bar dataKey="profit" fill="#10B981" name="Est. Profit" />
       </BarChart>
     </ResponsiveContainer>
@@ -328,7 +405,7 @@ const Dashboard = () => {
                 />
                 <Legend />
                 <Bar dataKey="projects" fill="#8B5CF6" name="Projects" />
-                <Bar dataKey="tasks" fill="#10B981" name="Tasks" />
+                <Bar dataKey="assignments" fill="#10B981" name="Assignments" />
               </BarChart>
             </ResponsiveContainer>
           )}

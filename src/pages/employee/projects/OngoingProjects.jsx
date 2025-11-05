@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getOngoingProjects, submitWork, updateAssignmentDetails } from "../../../api/employee/assignProject"; 
+import { getOngoingProjects, submitWork } from "../../../api/employee/assignProject"; 
 import OngoingProjectCard, { OngoingProjectCardSkeleton } from '../../../components/employee/cards/OngoingProjectCard';
 import ChatModal from '../../../components/modals/ChatModal';
 import FinishWorkModal from '../../../components/employee/modals/FinishWorkModal';
 import Toaster from '../../../components/Toaster';
 import { FiInbox, FiActivity } from 'react-icons/fi';
-import { FaChevronLeft } from 'react-icons/fa';
 import ProjectAssignmentDetail from './ProjectAssignmentDetail';
 
 const OngoingProjects = ({ setActiveView }) => {
@@ -54,24 +53,15 @@ const OngoingProjects = ({ setActiveView }) => {
     setSelectedAssignment(null);
   };
 
-  // --- New Handler for Finishing Work ---
+  // Handler for Finishing Work - Single API call
   const handleFinishWorkSubmit = async (payload) => {
     if (!selectedAssignment) return;
 
     try {
-      // Step 1: Update assignment details (actualHours, actualConsumables, actualMaterials)
-      setToast({ show: true, message: 'Updating assignment details...', type: 'loading', loading: true });
-      
-      const updateResponse = await updateAssignmentDetails(selectedAssignment.id, payload);
-      
-      if (!updateResponse.success) {
-        throw new Error(updateResponse.message || 'Failed to update assignment details');
-      }
-
-      // Step 2: Submit work
+      // Submit work with actual hours, consumables, and materials in a single API call
       setToast({ show: true, message: 'Submitting your work...', type: 'loading', loading: true });
       
-      const submitResponse = await submitWork(selectedAssignment.id);
+      const submitResponse = await submitWork(selectedAssignment.id, payload);
       
       if (submitResponse.success) {
         setToast({ show: true, message: 'Work submitted successfully!', type: 'success', loading: false });

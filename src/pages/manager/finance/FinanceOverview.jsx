@@ -107,21 +107,21 @@ const FinanceOverview = ({ setActiveView }) => {
         <SummaryCard
           icon={<FiDollarSign className="text-blue-400" size={24} />}
           title="Total Budget"
-          value={`$${summary.totalBudget.toLocaleString()}`}
+          value={`$${(summary.totalBudget || 0).toLocaleString()}`}
           bgColor="bg-blue-900/20"
           borderColor="border-blue-500"
         />
         <SummaryCard
           icon={<FiTrendingUp className="text-green-400" size={24} />}
-          title="Total Income"
-          value={`$${summary.overallIncome.toLocaleString()}`}
+          title="Estimated Cost"
+          value={`$${(summary.totalEstimatedCost || 0).toLocaleString()}`}
           bgColor="bg-green-900/20"
           borderColor="border-green-500"
         />
         <SummaryCard
           icon={<FiTrendingDown className="text-red-400" size={24} />}
           title="Total Expenses"
-          value={`$${summary.overallExpenses.toLocaleString()}`}
+          value={`$${(summary.overallExpenses || 0).toLocaleString()}`}
           bgColor="bg-red-900/20"
           borderColor="border-red-500"
         />
@@ -134,8 +134,8 @@ const FinanceOverview = ({ setActiveView }) => {
             )
           }
           title="Net Profit/Loss"
-          value={`$${summary.overallProfitLoss.toLocaleString()}`}
-          subtitle={`${summary.overallProfitLossPercentage}% margin`}
+          value={`$${(summary.overallProfitLoss || 0).toLocaleString()}`}
+          subtitle={`${summary.overallProfitLossPercentage || 0}% margin`}
           bgColor={isProfitable ? "bg-green-900/20" : "bg-red-900/20"}
           borderColor={isProfitable ? "border-green-500" : "border-red-500"}
         />
@@ -146,30 +146,30 @@ const FinanceOverview = ({ setActiveView }) => {
         <StatCard
           icon={<FaProjectDiagram className="text-purple-400" />}
           title="Total Projects"
-          value={summary.totalProjects}
+          value={summary.totalProjects || 0}
           details={[
-            { label: "Pending", value: byStatus.pending },
-            { label: "In Progress", value: byStatus.inProgress },
-            { label: "Completed", value: byStatus.completed },
+            { label: "Pending", value: byStatus?.pending || 0 },
+            { label: "In Progress", value: byStatus?.inProgress || 0 },
+            { label: "Completed", value: byStatus?.completed || 0 },
           ]}
         />
         <StatCard
           icon={<FaUsers className="text-cyan-400" />}
           title="Employee Allocations"
-          value={`$${summary.totalAllocatedToEmployees.toLocaleString()}`}
+          value={`$${(summary.totalAllocatedToEmployees || 0).toLocaleString()}`}
           details={[
-            { label: "Paid", value: `$${summary.totalPaidToEmployees.toLocaleString()}` },
-            { label: "Pending", value: `$${summary.totalPendingPayments.toLocaleString()}` },
+            { label: "Paid", value: `$${(summary.totalPaidToEmployees || 0).toLocaleString()}` },
+            { label: "Pending", value: `$${(summary.totalPendingPayments || 0).toLocaleString()}` },
           ]}
         />
         <StatCard
           icon={<FaClock className="text-yellow-400" />}
           title="Budget Status"
-          value={`$${summary.remainingBudget.toLocaleString()}`}
+          value={`$${(summary.remainingBudget || 0).toLocaleString()}`}
           subtitle="Remaining Budget"
           details={[
-            { label: "Estimated Cost", value: `$${summary.totalEstimatedCost.toLocaleString()}` },
-            { label: "Actual Cost", value: `$${summary.totalActualCost.toLocaleString()}` },
+            { label: "Estimated Cost", value: `$${(summary.totalEstimatedCost || 0).toLocaleString()}` },
+            { label: "Actual Cost", value: `$${(summary.totalActualCost || 0).toLocaleString()}` },
           ]}
         />
       </div>
@@ -204,7 +204,7 @@ const FinanceOverview = ({ setActiveView }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
-              {projects.map((project) => (
+              {projects && projects.length > 0 ? projects.map((project) => (
                 <tr key={project.projectId} className="hover:bg-gray-700/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-white">{project.projectName}</div>
@@ -226,23 +226,29 @@ const FinanceOverview = ({ setActiveView }) => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-300">
-                    ${project.budget.toLocaleString()}
+                    ${(project.budget || 0).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-300">
-                    ${project.actualCost.total.toLocaleString()}
+                    ${(project.actualCost?.total || 0).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <span className={project.profitLoss >= 0 ? "text-green-400" : "text-red-400"}>
-                      ${project.profitLoss.toLocaleString()}
+                    <span className={(project.profitLoss || 0) >= 0 ? "text-green-400" : "text-red-400"}>
+                      ${(project.profitLoss || 0).toLocaleString()}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <span className={project.profitLoss >= 0 ? "text-green-400" : "text-red-400"}>
-                      {project.profitLossPercentage}%
+                    <span className={(project.profitLoss || 0) >= 0 ? "text-green-400" : "text-red-400"}>
+                      {project.profitLossPercentage || 0}%
                     </span>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
+                    No projects found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

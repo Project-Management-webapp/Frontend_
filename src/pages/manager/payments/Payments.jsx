@@ -7,7 +7,6 @@ import {
     RiHourglassFill 
 } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
-import { FaChevronLeft } from "react-icons/fa";
 import Toaster from "../../../components/Toaster";
 import { getAllPayments, approvePayment, rejectPayment } from "../../../api/manager/payment"; 
 import PaymentStatusBadge from "../../../components/payments/PaymentStatusBadge";
@@ -57,6 +56,8 @@ const Payments = ({ setActiveView }) => {
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [transactionProofLink, setTransactionProofLink] = useState("");
+  const [approvedAmount, setApprovedAmount] = useState("");
+  const [approvalNotes, setApprovalNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -101,7 +102,10 @@ const Payments = ({ setActiveView }) => {
 
   const openApproveModal = (payment) => {
     setSelectedPayment(payment);
-    setTransactionProofLink(payment.transactionProofLink || ""); 
+    setTransactionProofLink(payment.transactionProofLink || "");
+    // Pre-fill with requested amount, but manager can change it
+    setApprovedAmount(payment.requestedAmount || payment.amount || "");
+    setApprovalNotes("");
     setShowApproveModal(true);
   };
 
@@ -111,11 +115,13 @@ const Payments = ({ setActiveView }) => {
     setShowRejectModal(true);
   };
 
-  const closeModal = () => {
+  function closeModal() {
     setShowApproveModal(false);
     setShowRejectModal(false);
     setSelectedPayment(null);
     setTransactionProofLink("");
+    setApprovedAmount("");
+    setApprovalNotes("");
     setRejectionReason("");
   }
 
@@ -123,13 +129,20 @@ const Payments = ({ setActiveView }) => {
     e.preventDefault();
     console.log("🟢 Approve payment initiated", { 
       selectedPayment: selectedPayment?.id, 
-      transactionProofLink: transactionProofLink 
+      transactionProofLink: transactionProofLink,
+      approvedAmount: approvedAmount
     });
     
     if (!transactionProofLink.trim()) {
       setToast({ show: true, message: "Transaction proof link is required", type: "error" });
       return;
     }
+
+    if (!approvedAmount || parseFloat(approvedAmount) <= 0) {
+      setToast({ show: true, message: "Approved amount must be greater than 0", type: "error" });
+      return;
+    }
+
     if (!selectedPayment) {
       console.error("No payment selected");
       return;
@@ -137,19 +150,25 @@ const Payments = ({ setActiveView }) => {
 
     setSubmitting(true);
     try {
+      const payload = { 
+        transactionProofLink: transactionProofLink.trim(),
+        actualAmount: parseFloat(approvedAmount), // Manager's approved amount becomes the actualAmount
+        approvalNotes: approvalNotes.trim() || undefined
+      };
+
       console.log("📤 Sending approve request:", { 
         paymentId: selectedPayment.id, 
-        transactionProofLink: transactionProofLink.trim() 
+        ...payload
       });
       
-      const response = await approvePayment(selectedPayment.id, { transactionProofLink: transactionProofLink.trim() });
+      const response = await approvePayment(selectedPayment.id, payload);
       
       console.log("✅ Approve response:", response);
       setToast({ show: true, message: "Payment approved successfully!", type: "success" });
       closeModal();
       fetchPayments(); // Refresh list & stats
     } catch (error) {
-      console.error("❌ Error approving payment:", error);
+      console.error("Error approving payment:", error);
       const errorMessage = error?.message || error?.error || "Failed to approve payment";
       setToast({ show: true, message: errorMessage, type: "error" });
     } finally {
@@ -159,7 +178,7 @@ const Payments = ({ setActiveView }) => {
 
   const handleRejectSubmit = async (e) => {
     e.preventDefault();
-    console.log("🔴 Reject payment initiated", { 
+    console.log(" Reject payment initiated", { 
       selectedPayment: selectedPayment?.id, 
       rejectionReason: rejectionReason 
     });
@@ -302,6 +321,35 @@ const Payments = ({ setActiveView }) => {
                          Request: {payment.requestStatus} {/* Request status */}
                       </span>
                     </div>
+                    
+                    {/* Amount Breakdown for Requested Payments */}
+                    {payment.requestStatus === 'requested' && (
+                      <div className="mb-3 text-xs space-y-1">
+                        <div className="flex gap-4">
+                          <span className="text-gray-500">Allocated: <span className="text-gray-300">${parseFloat(payment.assignment.allocatedAmount || 0).toLocaleString()}</span></span>
+                          <span className="text-gray-500">Requested: <span className="text-yellow-400 font-semibold">${parseFloat(payment.requestedAmount || payment.amount || 0).toLocaleString()}</span></span>
+                          {payment.calculatedActualAmount && (
+                            <span className="text-gray-500">Calculated: <span className="text-gray-300">${parseFloat(payment.calculatedActualAmount).toLocaleString()}</span></span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Amount Breakdown for Approved/Paid Payments */}
+                    {(payment.requestStatus === 'paid' && payment.approvedAmount) && (
+                      <div className="mb-3 text-xs space-y-1">
+                        <div className="flex gap-4">
+                          <span className="text-gray-500">Requested: <span className="text-gray-300">${parseFloat(payment.requestedAmount || 0).toLocaleString()}</span></span>
+                          <span className="text-gray-500">Approved: <span className="text-green-400 font-semibold">${parseFloat(payment.approvedAmount).toLocaleString()}</span></span>
+                          {payment.requestedAmount && payment.approvedAmount && parseFloat(payment.requestedAmount) !== parseFloat(payment.approvedAmount) && (
+                            <span className="text-gray-500">Difference: <span className={parseFloat(payment.approvedAmount) > parseFloat(payment.requestedAmount) ? "text-green-400" : "text-red-400"}>
+                              ${Math.abs(parseFloat(payment.approvedAmount) - parseFloat(payment.requestedAmount)).toLocaleString()}
+                            </span></span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                      <p className="text-gray-300 text-sm mb-1">
                         Project: <span className="text-purple-300">{payment.project?.name || 'N/A'}</span>
                      </p>
@@ -417,22 +465,69 @@ const Payments = ({ setActiveView }) => {
               <h3 className="text-xl font-bold text-white">Approve Payment</h3>
               <button onClick={closeModal} className="text-gray-400 hover:text-white transition-colors"> <IoMdClose size={24} /> </button>
             </div>
-            <form onSubmit={handleApproveSubmit} className="p-6">
-              <p className="text-gray-300 mb-4 text-sm">
-                 Approving <span className="font-bold text-white">${parseFloat(selectedPayment.amount).toLocaleString()}</span> for <span className="font-bold text-purple-300">{selectedPayment.project?.name}</span> requested by <span className="font-bold text-blue-300">{selectedPayment.employee?.email}</span>.
-              </p>
-              <div className="mb-4">
-                <label htmlFor="transactionProofLink" className="block text-sm font-medium text-gray-300 mb-1.5"> Transaction Proof Link <span className="text-red-400">*</span> </label>
-                <input id="transactionProofLink" type="text" value={transactionProofLink} onChange={(e) => setTransactionProofLink(e.target.value)} placeholder="Enter transaction link or reference ID..." required className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400 text-sm" />
+            <form onSubmit={handleApproveSubmit} className="p-6 space-y-4">
+              
+              {/* Approved Amount Input */}
+              <div>
+                <label htmlFor="approvedAmount" className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Approved Payment Amount <span className="text-red-400">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                  <input
+                    id="approvedAmount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    onWheel={(e) => e.target.blur()}
+                    value={approvedAmount}
+                    onChange={(e) => setApprovedAmount(e.target.value)}
+                    required
+                    className="w-full pl-8 pr-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400 text-sm"
+                    placeholder="Enter approved amount"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Amount to pay the employee (can differ from requested amount)</p>
               </div>
-               {/* Optional Approval Notes */}
-               <div className="mb-4">
-                 <label htmlFor="approvalNotes" className="block text-sm font-medium text-gray-300 mb-1.5"> Approval Notes (Optional) </label>
-                 <textarea id="approvalNotes" name="approvalNotes" rows={2} placeholder="Add any notes for the approval..." className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400 text-sm" />
-               </div>
+
+              {/* Transaction Proof Link */}
+              <div>
+                <label htmlFor="transactionProofLink" className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Transaction Proof Link <span className="text-red-400">*</span>
+                </label>
+                <input
+                  id="transactionProofLink"
+                  type="text"
+                  value={transactionProofLink}
+                  onChange={(e) => setTransactionProofLink(e.target.value)}
+                  placeholder="Enter transaction link or reference ID..."
+                  required
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400 text-sm"
+                />
+              </div>
+
+              {/* Approval Notes */}
+              <div>
+                <label htmlFor="approvalNotes" className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Approval Notes (Optional)
+                </label>
+                <textarea
+                  id="approvalNotes"
+                  value={approvalNotes}
+                  onChange={(e) => setApprovalNotes(e.target.value)}
+                  rows={2}
+                  placeholder="Add any notes for the approval..."
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400 text-sm"
+                />
+              </div>
+
               <div className="flex justify-end gap-3 mt-6">
-                <button type="button" onClick={closeModal} disabled={submitting} className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors text-sm disabled:opacity-50"> Cancel </button>
-                <button type="submit" disabled={submitting} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-wait text-sm min-w-[100px] flex items-center justify-center"> {submitting ? <RiHourglassFill className="animate-spin" size={18} /> : "Approve"} </button>
+                <button type="button" onClick={closeModal} disabled={submitting} className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors text-sm disabled:opacity-50">
+                  Cancel
+                </button>
+                <button type="submit" disabled={submitting} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-wait text-sm min-w-[100px] flex items-center justify-center">
+                  {submitting ? <RiHourglassFill className="animate-spin" size={18} /> : "Approve"}
+                </button>
               </div>
             </form>
           </div>

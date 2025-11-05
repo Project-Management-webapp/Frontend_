@@ -184,12 +184,61 @@ const Payments = ({ setActiveView }) => {
               <div className="flex flex-col md:flex-row md:items-start justify-between mb-4">
                 {/* Left Side: Amount, Status, Project, Notes */}
                 <div className="mb-4 md:mb-0 md:mr-4">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <h3 className="text-2xl font-bold text-white">
                        ${parseFloat(payment.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h3>
                     <PaymentStatusBadge status={payment.requestStatus} />
                   </div>
+
+                  {/* Amount Breakdown */}
+                  <div className="mb-3 text-xs space-y-1">
+                    {payment.assignment && (
+                      <>
+                        <div className="flex gap-4 flex-wrap items-center">
+                          <span className="text-gray-500">
+                            Allocated: <span className="text-gray-300 font-semibold">${parseFloat(payment.assignment.allocatedAmount || 0).toLocaleString()}</span>
+                          </span>
+                         
+                          
+                         
+                          {payment.requestStatus === 'requested' && (
+                            <>
+                              <span className="text-gray-500">|</span>
+                              <span className="text-gray-500">
+                                Requested: <span className="text-yellow-400 font-semibold">${parseFloat(payment.amount || 0).toLocaleString()}</span>
+                              </span>
+                            </>
+                          )}
+                          {payment.requestStatus === 'paid' && payment.assignment.actualAmount && (
+                            <>
+                              <span className="text-gray-500">|</span>
+                              <span className="text-gray-500">
+                                Approved: <span className="text-green-400 font-semibold">${parseFloat(payment.assignment.actualAmount || payment.amount || 0).toLocaleString()}</span>
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        {/* Detailed Breakdown */}
+                        <div className="text-[10px] text-gray-500 mt-1">
+                          Work: {parseFloat(payment.assignment.actualHours || 0)}h × ${parseFloat(payment.assignment.rate || 0)}/h 
+                          + ${parseFloat(payment.assignment.actualConsumables || 0)} consumables 
+                          + ${parseFloat(payment.assignment.actualMaterials || 0)} materials
+                          {payment.requestStatus === 'paid' && 
+                           payment.assignment.actualAmount && 
+                           parseFloat(payment.assignment.actualAmount) > 0 &&
+                           payment.assignment.actualAmount !== (
+                             (parseFloat(payment.assignment.actualHours || 0) * parseFloat(payment.assignment.rate || 0)) +
+                             parseFloat(payment.assignment.actualConsumables || 0) +
+                             parseFloat(payment.assignment.actualMaterials || 0)
+                           ) && (
+                            <span className="text-green-400 ml-2">✓ Manager verified: ${parseFloat(payment.assignment.actualAmount).toLocaleString()}</span>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+
                    <p className="text-gray-300 text-sm mb-1">
                       Project: <span className="text-purple-300">{payment.project?.name || 'N/A'}</span>
                    </p>

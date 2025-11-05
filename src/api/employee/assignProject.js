@@ -40,10 +40,10 @@ export const getProjectTeammates = async (projectId) => {
   }
 };
 
-// Submit work
-export const submitWork = async (assignmentId) => {
+// Submit work with actual hours, consumables, and materials
+export const submitWork = async (assignmentId, payload) => {
   try {
-    const response = await api.post(`employee/project-assignments/${assignmentId}/submit-work`);
+    const response = await api.post(`employee/project-assignments/${assignmentId}/submit-work`, payload);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Failed to submit work" };
@@ -51,6 +51,8 @@ export const submitWork = async (assignmentId) => {
 };
 
 // Update assignment details (actualHours, actualConsumables, actualMaterials)
+// Note: This is a manager endpoint and should not be used by employees for submitting work
+// Employees should use submitWork instead
 export const updateAssignmentDetails = async (assignmentId, payload) => {
   try {
     const response = await api.put(`manager/project-assignments/${assignmentId}/role`, payload);

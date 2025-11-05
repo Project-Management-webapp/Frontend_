@@ -89,7 +89,7 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
   if (!assignment) return null;
 
   const {
-   
+
     project,
     assigner,
     role,
@@ -106,6 +106,7 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
     performanceFeedback,
     deliverables,
     actualDeliverables,
+    actualAmount,
     responsibilities,
     estimatedHours,
     actualHours,
@@ -196,13 +197,18 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
 
           {/* Payment Information */}
           <DetailSection title="Payment Information" icon={<FiDollarSign size={22} />}>
-            <DetailRow label="Allocated Amount" value={`${currency || 'USD'} ${parseFloat(allocatedAmount || 0).toLocaleString()}`} />
+            <DetailRow label="Allocated Amount (Budget)" value={`${currency || 'USD'} ${parseFloat(allocatedAmount || 0).toLocaleString()}`} />
+            <div className="py-2 md:col-span-2">
+              <strong className="text-sm font-medium text-gray-400 block mb-1 uppercase tracking-wide">
+                Actual Amount (Manager Approved)
+              </strong>
+              <span className="text-lg font-bold text-green-400">
+                {currency || 'USD'} {parseFloat(actualAmount || 0).toLocaleString()}
+              </span>
+            </div>
             <DetailRow label="Rate per hour" value={`${currency || 'USD'} ${parseFloat(rate || 0).toLocaleString()}`} />
-  
             <DetailRow label="Payment Schedule" value={paymentSchedule} isTag />
-            
-              <DetailRow label="Payment Terms" value={paymentTerms} />
-          
+            <DetailRow label="Payment Terms" value={paymentTerms} />
           </DetailSection>
 
           {/* Hours Tracking */}
@@ -242,16 +248,16 @@ const CompleteProjectDetailModal = ({ assignment, onClose }) => {
 
           {/* Materials & Consumables */}
           <DetailSection title="Materials & Consumables" icon={<IoDocumentTextOutline size={22} />}>
-            
-              <DetailRow label="Estimated Materials" value={parseJsonArray(estimatedMaterials)} />
-           
-          
-              <DetailRow label="Actual Materials" value={parseJsonArray(actualMaterials)} />
-           
-              <DetailRow label="Estimated Consumables" value={parseJsonArray(estimatedConsumables)} />
-           
-              <DetailRow label="Actual Consumables" value={parseJsonArray(actualConsumables)} />
-          
+
+            <DetailRow label="Estimated Materials" value={parseJsonArray(estimatedMaterials)} />
+
+
+            <DetailRow label="Actual Materials" value={parseJsonArray(actualMaterials)} />
+
+            <DetailRow label="Estimated Consumables" value={parseJsonArray(estimatedConsumables)} />
+
+            <DetailRow label="Actual Consumables" value={parseJsonArray(actualConsumables)} />
+
           </DetailSection>
 
           {/* Additional Notes */}

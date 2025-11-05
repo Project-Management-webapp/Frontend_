@@ -9,8 +9,19 @@ import {getMyPayments} from "../../../api/employee/payment"
 
 const RequestPaymentModal = ({ isOpen, onClose, assignment, onSubmit, setToast }) => {
   const [requestNotes, setRequestNotes] = useState("");
+  const [requestedAmount, setRequestedAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  // Calculate actual amount safely - check if assignment exists first
+  const calculatedActualAmount = assignment ? (assignment.actualAmount || 0) : 0;
+  
+  // Pre-fill requested amount with calculated actual amount when modal opens
+  useEffect(() => {
+    if (isOpen && assignment) {
+      setRequestedAmount(calculatedActualAmount.toFixed(2));
+    }
+  }, [isOpen, assignment, calculatedActualAmount]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,13 +31,19 @@ const RequestPaymentModal = ({ isOpen, onClose, assignment, onSubmit, setToast }
       return;
     }
 
+    if (!requestedAmount || parseFloat(requestedAmount) <= 0) {
+      setError("Please enter a valid requested amount.");
+      return;
+    }
+
     setIsSubmitting(true);
     setError("");
 
     try {
-      await onSubmit(assignment.id, requestNotes);
+      await onSubmit(assignment.id, requestNotes, parseFloat(requestedAmount));
       setToast({ show: true, message: "Payment request submitted successfully!", type: "success" });
       setRequestNotes("");
+      setRequestedAmount("");
       onClose();
     } catch (err) {
       setToast({ show: true, message: err.message || "Failed to submit request.", type: "error" });
@@ -48,26 +65,58 @@ const RequestPaymentModal = ({ isOpen, onClose, assignment, onSubmit, setToast }
               <IoMdClose size={24} />
             </button>
           </div>
-          <div className="p-6">
-            <label htmlFor="requestNotes" className="block text-sm font-medium text-gray-300 mb-2">
-              Notes <span className="text-red-400">*</span>
-            </label>
-            <textarea 
-              id="requestNotes" 
-              name="requestNotes" 
-              rows={4} 
-              value={requestNotes} 
-              onChange={(e) => { 
-                setRequestNotes(e.target.value); 
-                if (error) setError(""); 
-              }} 
-              placeholder="e.g., Work has been submitted and completed as per requirements. Please process payment." 
-              className={`w-full p-2 bg-gray-700/50 border rounded-md focus:ring-2 focus:ring-purple-500 ${error ? "border-red-500" : "border-gray-600"}`} 
-            />
-            {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
-            <div className="mt-4 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
-              <p className="text-sm text-gray-300 mb-1">Role: <span className="text-purple-400">{assignment.role}</span></p>
-              <p className="text-lg text-white font-bold">Amount: ${parseFloat(assignment.allocatedAmount).toLocaleString()} {assignment.currency}</p>
+          <div className="p-6 space-y-4">
+            
+
+            {/* Requested Amount */}
+            <div>
+              <label htmlFor="requestedAmount" className="block text-sm font-medium text-gray-300 mb-2">
+                Requested Amount <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  onWheel={(e) => e.target.blur()}
+                  id="requestedAmount"
+                  value={requestedAmount}
+                  onChange={(e) => {
+                    setRequestedAmount(e.target.value);
+                    if (error) setError("");
+                  }}
+                  className="w-full pl-8 pr-3 py-2 bg-gray-700/50 border border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 text-white"
+                  placeholder="Enter amount to request"
+                />
+              </div>
+              
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label htmlFor="requestNotes" className="block text-sm font-medium text-gray-300 mb-2">
+                Notes <span className="text-red-400">*</span>
+              </label>
+              <textarea 
+                id="requestNotes" 
+                name="requestNotes" 
+                rows={4} 
+                value={requestNotes} 
+                onChange={(e) => { 
+                  setRequestNotes(e.target.value); 
+                  if (error) setError(""); 
+                }} 
+                placeholder="e.g., Work has been submitted and completed as per requirements. Please process payment." 
+                className={`w-full p-2 bg-gray-700/50 border rounded-md focus:ring-2 focus:ring-purple-500 ${error ? "border-red-500" : "border-gray-600"}`} 
+              />
+              {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
+            </div>
+
+            <div className="p-3 bg-blue-600/10 rounded-lg border border-blue-500/30">
+              <p className="text-sm text-blue-300">
+                <span className="font-semibold">Note:</span> The manager will review your request and may approve a different amount.
+              </p>
             </div>
           </div>
           <div className="flex justify-end space-x-4 p-6 pt-4 border-t border-gray-700">
@@ -85,11 +134,21 @@ const RequestPaymentModal = ({ isOpen, onClose, assignment, onSubmit, setToast }
 };
 
 // Project Payment Card Component
-const ProjectPaymentCard = ({ assignment, onRequestPayment, paymentStatus }) => {
-  const { project, role, allocatedAmount, currency, workSubmittedAt, assigner } = assignment;
+const ProjectPaymentCard = ({ assignment, onRequestPayment, paymentStatus, paymentAmount }) => {
+  const { project, role, allocatedAmount, actualHours, actualConsumables, actualMaterials, rate, currency, workSubmittedAt, assigner } = assignment;
+  
+  // Calculate actual amount from assignment
+  const calculatedActualAmount = (
+    (parseFloat(actualHours || 0) * parseFloat(rate || 0)) +
+    parseFloat(actualConsumables || 0) +
+    parseFloat(actualMaterials || 0)
+  );
   
   const isRequested = paymentStatus === "requested";
   const isApproved = paymentStatus === "approved";
+  
+  // Use payment amount if available (when requested), otherwise use calculated amount
+  const displayAmount = paymentAmount || calculatedActualAmount;
 
   return (
     <div className="bg-gray-800/50 rounded-lg border border-gray-700 overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
@@ -113,13 +172,28 @@ const ProjectPaymentCard = ({ assignment, onRequestPayment, paymentStatus }) => 
 
       {/* Body */}
       <div className="p-5 space-y-3">
-        <div className="flex items-start gap-3">
-          <FiDollarSign className="text-green-400 mt-1" size={20} />
-          <div className="flex-1">
-            <p className="text-xs text-gray-400 uppercase mb-1">Allocated Amount</p>
-            <p className="text-2xl font-bold text-green-400">
-              ${parseFloat(allocatedAmount).toLocaleString()} <span className="text-sm text-gray-400">{currency}</span>
-            </p>
+        <div className="space-y-2">
+          <div className="flex items-start gap-3">
+            <FiDollarSign className="text-green-400 mt-1" size={20} />
+            <div className="flex-1">
+              <p className="text-xs text-gray-400 uppercase mb-1">
+                {isRequested ? "Requested Amount" : "Request Amount"}
+              </p>
+              <p className="text-xl font-bold text-green-400">
+                ${displayAmount.toLocaleString()}
+                 <span className="text-sm text-gray-400"> {currency}</span>
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-3 pl-8">
+            <div className="flex-1 p-3 bg-blue-600/10 rounded-lg border border-blue-500/30">
+              <p className="text-xs text-gray-400 uppercase mb-1">Allocated Amount</p>
+              <p className="text-lg font-bold text-blue-400">
+                ${parseFloat(allocatedAmount).toLocaleString()} <span className="text-sm text-gray-400">{currency}</span>
+              </p>
+              
+            </div>
           </div>
         </div>
 
@@ -239,7 +313,7 @@ const RequestPayment = () => {
     fetchCompletedProjects();
   }, []);
 
-  // Filter projects with workStatus "submitted" and exclude paid/rejected/cancelled projects
+  
   const submittedProjects = allAssignments.filter((assign) => {
     // Check if workStatus is submitted
     if (assign.workStatus !== "submitted") return false;
@@ -266,6 +340,13 @@ const RequestPayment = () => {
     return payment.requestStatus; // 'requested', 'paid', etc.
   };
 
+  // Helper function to get payment amount
+  const getPaymentAmount = (assignmentId) => {
+    const payment = myPayments.find(p => p.assignmentId === assignmentId);
+    if (!payment) return null;
+    return parseFloat(payment.amount) || 0;
+  };
+
   const handleOpenModal = (assignment) => {
     setSelectedAssignment(assignment);
   };
@@ -275,11 +356,12 @@ const RequestPayment = () => {
   };
 
   // Handle payment request submission
-  const handleSubmitPaymentRequest = async (assignmentId, requestNotes) => {
+  const handleSubmitPaymentRequest = async (assignmentId, requestNotes, requestedAmount) => {
     try {
       const response = await requestPayment({
         assignmentId: assignmentId,
         requestNotes: requestNotes,
+        requestedAmount: requestedAmount,
       });
       
       if (response.success) {
@@ -299,14 +381,66 @@ const RequestPayment = () => {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-gray-800/50 rounded-lg border border-gray-700 p-5 animate-pulse">
-              <div className="h-6 bg-gray-700 rounded w-3/4 mb-2"></div>
-              <div className="h-4 bg-gray-700 rounded w-1/3 mb-4"></div>
-              <div className="space-y-3 mt-4">
-                <div className="h-4 bg-gray-700 rounded w-full"></div>
-                <div className="h-4 bg-gray-700 rounded w-2/3"></div>
+            <div key={i} className="bg-gray-800/50 rounded-lg border border-gray-700 overflow-hidden shadow-lg">
+              {/* Header Skeleton */}
+              <div className="p-5 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-b border-gray-700 animate-pulse">
+                <div className="h-6 bg-gray-700 rounded w-3/4 mb-3"></div>
+                <div className="h-6 bg-gray-700 rounded-full w-20"></div>
               </div>
-              <div className="h-10 bg-gray-700 rounded w-full mt-4"></div>
+              
+              {/* Body Skeleton */}
+              <div className="p-5 space-y-4 animate-pulse">
+                {/* Amount Section */}
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-gray-700 rounded mt-1"></div>
+                    <div className="flex-1">
+                      <div className="h-3 bg-gray-700 rounded w-24 mb-2"></div>
+                      <div className="h-8 bg-gray-700 rounded w-32"></div>
+                    </div>
+                  </div>
+                  
+                  <div className="pl-8">
+                    <div className="p-3 bg-blue-600/10 rounded-lg border border-blue-500/30">
+                      <div className="h-3 bg-gray-700 rounded w-28 mb-2"></div>
+                      <div className="h-6 bg-gray-700 rounded w-24"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Work Submitted Section */}
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-gray-700 rounded mt-1"></div>
+                  <div className="flex-1">
+                    <div className="h-3 bg-gray-700 rounded w-28 mb-2"></div>
+                    <div className="h-4 bg-gray-700 rounded w-32"></div>
+                  </div>
+                </div>
+
+                {/* Assigner Section */}
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-gray-700 rounded mt-1"></div>
+                  <div className="flex-1">
+                    <div className="h-3 bg-gray-700 rounded w-24 mb-2"></div>
+                    <div className="h-4 bg-gray-700 rounded w-36 mb-1"></div>
+                    <div className="h-3 bg-gray-700 rounded w-40"></div>
+                  </div>
+                </div>
+
+                {/* Status Section */}
+                <div className="pt-2 border-t border-gray-700">
+                  <div className="h-3 bg-gray-700 rounded w-24 mb-2"></div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 bg-gray-700 rounded-full w-20"></div>
+                    <div className="h-6 bg-gray-700 rounded-full w-16"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Skeleton */}
+              <div className="p-4 bg-gray-900/50 border-t border-gray-700 animate-pulse">
+                <div className="h-12 bg-gray-700 rounded-lg w-full"></div>
+              </div>
             </div>
           ))}
         </div>
@@ -334,12 +468,14 @@ const RequestPayment = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {submittedProjects.map((assignment) => {
           const paymentStatus = getPaymentStatus(assignment.id);
+          const paymentAmount = getPaymentAmount(assignment.id);
           return (
             <ProjectPaymentCard
               key={assignment.id}
               assignment={assignment}
               onRequestPayment={handleOpenModal}
               paymentStatus={paymentStatus}
+              paymentAmount={paymentAmount}
             />
           );
         })}
@@ -363,13 +499,13 @@ const RequestPayment = () => {
             <p className="text-2xl font-bold text-white">{submittedProjects.length}</p>
           </div>
           <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 rounded-lg p-4 border border-green-500/30">
-            <p className="text-sm text-gray-400 mb-1">Total Amount</p>
+            <p className="text-sm text-gray-400 mb-1">Total Allocated Amount</p>
             <p className="text-2xl font-bold text-white">
               ${submittedProjects.reduce((sum, a) => sum + parseFloat(a.allocatedAmount), 0).toLocaleString()}
             </p>
           </div>
           <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 rounded-lg p-4 border border-blue-500/30">
-            <p className="text-sm text-gray-400 mb-1">Average per Project</p>
+            <p className="text-sm text-gray-400 mb-1">Average per Project (Allocated)</p>
             <p className="text-2xl font-bold text-white">
               ${(submittedProjects.reduce((sum, a) => sum + parseFloat(a.allocatedAmount), 0) / submittedProjects.length).toFixed(2)}
             </p>
