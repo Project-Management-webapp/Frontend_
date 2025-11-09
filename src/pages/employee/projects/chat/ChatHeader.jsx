@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { FaBars, FaUsers } from "react-icons/fa";
-import { IoPerson } from "react-icons/io5";
+import { IoPerson, IoVideocam } from "react-icons/io5";
 import { HiRefresh } from "react-icons/hi";
 import { useSocket } from "../../../../context/SocketContext";
 
-const ChatHeader = ({ selectedProject, selectedProjectDetails, setIsSidebarOpen }) => {
+const ChatHeader = ({ selectedProject, selectedProjectDetails, setIsSidebarOpen, onStartVideoCall }) => {
   const { isConnected, getUserStatus, socket } = useSocket();
   const currentUserId = localStorage.getItem('userId');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -93,6 +93,15 @@ const ChatHeader = ({ selectedProject, selectedProjectDetails, setIsSidebarOpen 
                   </span>
                 </div>
                 
+                {/* Video Call Button */}
+                <button
+                  onClick={onStartVideoCall}
+                  className="p-1.5 rounded-full bg-blue-900/20 hover:bg-blue-900/40 text-blue-400 transition-all cursor-pointer hover:scale-110"
+                  title="Start video call"
+                >
+                  <IoVideocam size={14} />
+                </button>
+
                 {/* Refresh Button */}
                 <button
                   onClick={handleReconnect}

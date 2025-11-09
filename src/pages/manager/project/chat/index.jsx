@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ProjectSidebar from "./ProjectSidebar";
 import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
@@ -6,8 +6,15 @@ import MessageInput from "./MessageInput";
 import { useChatLogic } from "./useChatLogic";
 import { getFileIcon, formatTimestamp } from "./utils.jsx";
 import Toaster from "../../../../components/Toaster";
+import VideoCall from "../../../../components/VideoCall/VideoCall";
+import IncomingCallNotification from "../../../../components/VideoCall/IncomingCallNotification";
+import { useSocket } from "../../../../context/SocketContext";
 
 const Chat = () => {
+  const { socket } = useSocket();
+  const [isInVideoCall, setIsInVideoCall] = useState(false);
+  const [incomingCall, setIncomingCall] = useState(null);
+  
   const {
     message,
     setMessage,
@@ -54,6 +61,53 @@ const Chat = () => {
   } = useChatLogic();
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const currentUserName = localStorage.getItem('userName') || 'Manager';
+
+  // Handle incoming video call
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleIncomingCall = (data) => {
+      console.log('Incoming video call:', data);
+      // Only show notification if not already in a call
+      if (!isInVideoCall) {
+        setIncomingCall(data);
+      }
+    };
+
+    socket.on('incoming_video_call', handleIncomingCall);
+
+    return () => {
+      socket.off('incoming_video_call', handleIncomingCall);
+    };
+  }, [socket, isInVideoCall]);
+
+  const handleStartVideoCall = () => {
+    if (!selectedProjectId || !selectedProject) return;
+
+    // Emit event to notify other participants
+    socket?.emit('start_video_call', {
+      projectId: selectedProjectId,
+      callerId: currentUserId,
+      callerName: currentUserName,
+      projectName: selectedProject.projectName
+    });
+
+    setIsInVideoCall(true);
+  };
+
+  const handleAcceptCall = () => {
+    setIncomingCall(null);
+    setIsInVideoCall(true);
+  };
+
+  const handleDeclineCall = () => {
+    setIncomingCall(null);
+  };
+
+  const handleCloseVideoCall = () => {
+    setIsInVideoCall(false);
+  };
 
   return (
     <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
@@ -62,6 +116,28 @@ const Chat = () => {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
+
+      {/* Incoming Call Notification */}
+      {incomingCall && !isInVideoCall && (
+        <IncomingCallNotification
+          callerName={incomingCall.callerName}
+          projectName={incomingCall.projectName}
+          onAccept={handleAcceptCall}
+          onDecline={handleDeclineCall}
+        />
+      )}
+
+      {/* Video Call Component */}
+      {isInVideoCall && selectedProject && (
+        <VideoCall
+          projectId={selectedProjectId}
+          projectName={selectedProject.projectName}
+          onClose={handleCloseVideoCall}
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          showToast={(message, type) => setToast({ show: true, message, type })}
         />
       )}
       
@@ -82,6 +158,7 @@ const Chat = () => {
           selectedProject={selectedProject}
           selectedProjectDetails={selectedProjectDetails}
           setIsSidebarOpen={setIsSidebarOpen}
+          onStartVideoCall={handleStartVideoCall}
         />
 
         <MessageList
