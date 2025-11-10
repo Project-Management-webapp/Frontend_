@@ -13,12 +13,18 @@ const RequestPaymentModal = ({ isOpen, onClose, assignment, onSubmit, setToast }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Calculate actual amount safely - check if assignment exists first
-  const calculatedActualAmount = assignment ? (assignment.actualAmount || 0) : 0;
+  // Calculate actual amount safely from assignment fields
+  const calculatedActualAmount = assignment 
+    ? (
+        (parseFloat(assignment.actualHours || 0) * parseFloat(assignment.rate || 0)) +
+        parseFloat(assignment.actualConsumables || 0) +
+        parseFloat(assignment.actualMaterials || 0)
+      )
+    : 0;
   
   // Pre-fill requested amount with calculated actual amount when modal opens
   useEffect(() => {
-    if (isOpen && assignment) {
+    if (isOpen && assignment && calculatedActualAmount > 0) {
       setRequestedAmount(calculatedActualAmount.toFixed(2));
     }
   }, [isOpen, assignment, calculatedActualAmount]);
