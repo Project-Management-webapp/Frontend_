@@ -6,7 +6,9 @@ import { FaArrowLeft } from "react-icons/fa";
 import logo from "/login_logo.png";
 import { employeeLogin, forgotPassword } from "../../api/employee/auth";
 import { managerLogin } from "../../api/manager/auth";
+import { sendOTP, verifyOTP, completeLogin } from "../../api/twoFactor";
 import Toaster from "../../components/Toaster";
+import TwoFactorVerification from "../../components/TwoFactorVerification/TwoFactorVerification";
 import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
@@ -35,6 +37,10 @@ const Login = () => {
   const [forgotEmail, setForgotEmail] = useState("");
   const [toast, setToast] = useState({ show: false, message: "", type: "info", loading: false });
 
+  // 2FA States
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [twoFactorData, setTwoFactorData] = useState(null);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -51,7 +57,24 @@ const Login = () => {
       } else {
         response = await employeeLogin(formData);
       }
+      
       if (response && response.data) {
+        // Check if 2FA is required
+        if (response.require2FA) {
+          setToast({ show: true, message: "Sending verification code...", type: "info", loading: false });
+          
+          // Store user data for 2FA
+          setTwoFactorData(response.data);
+          
+          // Send OTP to user's email
+          await sendOTP(response.data.userId, response.data.email);
+          
+          setToast({ show: true, message: "Verification code sent to your email", type: "success", loading: false });
+          setShow2FAModal(true);
+          return;
+        }
+
+        // Normal login without 2FA
         const { user, token } = response.data;
         login(user, token);
 
@@ -71,6 +94,49 @@ const Login = () => {
       setToast({ show: true, message: error.message || "Login failed. Check credentials.", type: "error", loading: false });
       setFormData({ email: "", password: "" });
     }
+  };
+
+  const handle2FAVerify = async (otp) => {
+    try {
+      // Verify OTP
+      await verifyOTP(twoFactorData.userId, otp);
+      
+      // Complete login after successful verification
+      const response = await completeLogin(twoFactorData.userId);
+      
+      if (response && response.data) {
+        const { user, token } = response.data;
+        login(user, token);
+
+        setShow2FAModal(false);
+        setToast({ show: true, message: "Successfully logged in!", type: "success", loading: false });
+        
+        setTimeout(() => {
+          if (user.role === "manager") {
+            navigate("/manager");
+          } else {
+            navigate("/employee");
+          }
+        }, 500);
+      }
+    } catch (error) {
+      throw new Error(error.message || "Invalid OTP. Please try again.");
+    }
+  };
+
+  const handle2FAResend = async () => {
+    try {
+      await sendOTP(twoFactorData.userId, twoFactorData.email);
+      setToast({ show: true, message: "New verification code sent", type: "success", loading: false });
+    } catch (error) {
+      throw new Error(error.message || "Failed to resend code");
+    }
+  };
+
+  const handle2FAClose = () => {
+    setShow2FAModal(false);
+    setTwoFactorData(null);
+    setFormData({ email: "", password: "" });
   };
 
   const handleForgot = async (e) => {
@@ -212,6 +278,17 @@ const Login = () => {
 
       {toast.show && (
         <Toaster message={toast.message} type={toast.type} loading={toast.loading} onClose={() => setToast({ ...toast, show: false })} />
+      )}
+
+      {/* Two-Factor Authentication Modal */}
+      {twoFactorData && (
+        <TwoFactorVerification
+          isOpen={show2FAModal}
+          onClose={handle2FAClose}
+          onVerify={handle2FAVerify}
+          onResend={handle2FAResend}
+          userEmail={twoFactorData.email}
+        />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import EmployeeProfileEditModal from "../../components/employee/modals/EmployeeProfileEditModal";
 import Toaster from "../../components/Toaster";
+import TwoFactorToggle from "../../components/TwoFactorToggle/TwoFactorToggle";
 import { getEmployeeProfile, updateEmployeeProfileImage } from "../../api/employee/auth";
 import { formatDate } from "../../components/atoms/FormatedDate";
 import {
@@ -440,6 +441,11 @@ const Profile = ({ setActiveView }) => {
             </div>
           </div>
         </div>
+
+        {/* --- Two-Factor Authentication Section --- */}
+        <TwoFactorToggle 
+          onToast={(message, type) => setToast({ show: true, message, type })}
+        />
       </div>
 
       {isImageModalOpen && (

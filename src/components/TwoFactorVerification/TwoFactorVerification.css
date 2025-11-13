@@ -1,0 +1,259 @@
+.two-factor-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.two-factor-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.two-factor-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.two-factor-close:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.two-factor-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.two-factor-content {
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.two-factor-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.two-factor-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+}
+
+.two-factor-description {
+  font-size: 15px;
+  color: #666;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+}
+
+.two-factor-description strong {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.two-factor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.otp-inputs {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.otp-input {
+  width: 56px;
+  height: 64px;
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.2s;
+  font-family: 'Courier New', monospace;
+  color: #1a1a1a;
+}
+
+.otp-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: scale(1.05);
+}
+
+.otp-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.two-factor-error {
+  background: #fee;
+  color: #c33;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border-left: 4px solid #c33;
+}
+
+.two-factor-submit {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.two-factor-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.two-factor-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.two-factor-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.two-factor-resend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40px;
+}
+
+.resend-cooldown {
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.resend-button {
+  background: transparent;
+  border: none;
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.resend-button:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.resend-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.two-factor-note {
+  font-size: 13px;
+  color: #999;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .two-factor-modal {
+    max-width: 95%;
+  }
+
+  .two-factor-content {
+    padding: 32px 20px;
+  }
+
+  .two-factor-icon {
+    font-size: 48px;
+  }
+
+  .two-factor-title {
+    font-size: 24px;
+  }
+
+  .otp-inputs {
+    gap: 8px;
+  }
+
+  .otp-input {
+    width: 44px;
+    height: 52px;
+    font-size: 24px;
+  }
+}

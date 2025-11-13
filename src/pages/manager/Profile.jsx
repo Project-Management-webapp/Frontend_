@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ManagerProfileEditModal from "../../components/manager/modals/ManagerProfileEditModal";
 import Toaster from "../../components/Toaster";
+import TwoFactorToggle from "../../components/TwoFactorToggle/TwoFactorToggle";
 import { getManagerProfile, updateManagerProfileImage } from "../../api/manager/auth";
 import { FaRegSadTear } from 'react-icons/fa';
 import {
@@ -368,6 +369,11 @@ const Profile = ({ setActiveView }) => {
           </div>
 
         </div>
+
+        {/* --- Two-Factor Authentication Section --- */}
+        <TwoFactorToggle 
+          onToast={(message, type) => setToast({ show: true, message, type })}
+        />
       </div>
       {isImageModalOpen && (<div className="fixed inset-0 bg-black/80 flex justify-center items-center z-50" onClick={() => setIsImageModalOpen(false)}><img src={profileImage} alt="Profile Preview" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" /><button className="absolute top-5 right-5 text-white text-3xl cursor-pointer hover:text-purple-300"><IoMdClose /></button></div>)}
       {isEditModalOpen && (<ManagerProfileEditModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} userData={managerData} onShowToast={setToast} onSave={handleProfileUpdate} />)}
