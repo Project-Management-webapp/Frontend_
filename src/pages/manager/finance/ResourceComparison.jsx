@@ -37,6 +37,9 @@ const ResourceComparison = () => {
         setProjects(projectList);
         if (projectList.length > 0) {
           setSelectedProjectId(projectList[0].id);
+        } else {
+          // No projects available
+          setInitialLoading(false);
         }
       }
     } catch (err) {
@@ -122,6 +125,21 @@ const ResourceComparison = () => {
                 <div key={i} className="h-96 bg-gray-600 rounded-lg"></div>
               ))}
             </div>
+          </div>
+        </div>
+      ) : projects.length === 0 ? (
+        <div className="space-y-6">
+          {/* Header */}
+          <div>
+            <h1 className="text-3xl font-bold text-white">Resource Comparison & Tracking</h1>
+            <p className="text-gray-400 mt-1">Compare estimated vs actual resources (hours, materials, consumables)</p>
+          </div>
+
+          {/* No Projects Message */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-12 text-center">
+            <FiBox className="mx-auto text-6xl text-gray-600 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-300 mb-2">No Projects Available</h3>
+            <p className="text-gray-400">Create your first project to view resource allocation data.</p>
           </div>
         </div>
       ) : error ? (

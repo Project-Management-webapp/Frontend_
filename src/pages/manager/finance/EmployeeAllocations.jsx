@@ -141,6 +141,26 @@ const EmployeeAllocations = () => {
 
   if (!allocationsData) return null;
 
+  // No employees/projects state
+  if (allocationsData.employees.length === 0) {
+    return (
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-white">Employee Payment Allocations</h1>
+          <p className="text-gray-400 mt-1">Track employee payments across all projects</p>
+        </div>
+
+        {/* No Data Message */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-12 text-center">
+          <FaUsers className="mx-auto text-6xl text-gray-600 mb-4" />
+          <h3 className="text-xl font-semibold text-gray-300 mb-2">No Employee Data Available</h3>
+          <p className="text-gray-400">Create projects and assign employees to view allocation data.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}

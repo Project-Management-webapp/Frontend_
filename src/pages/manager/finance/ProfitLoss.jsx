@@ -41,6 +41,9 @@ const ProfitLoss = ({ setActiveView }) => {
         if (projectList.length > 0) {
           // The .id field is correct from the sample
           setSelectedProjectId(projectList[0].id);
+        } else {
+          // No projects available
+          setInitialLoading(false);
         }
       }
       // --- END FIX ---
@@ -130,6 +133,21 @@ const ProfitLoss = ({ setActiveView }) => {
                 <div key={i} className="h-20 bg-gray-600 rounded"></div>
               ))}
             </div>
+          </div>
+        </div>
+      ) : projects.length === 0 ? (
+        <div className="space-y-6">
+          {/* Header */}
+          <div>
+            <h1 className="text-3xl font-bold text-white">Project Profit & Loss Analysis</h1>
+            <p className="text-gray-400 mt-1">Detailed financial breakdown by project</p>
+          </div>
+
+          {/* No Projects Message */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-12 text-center">
+            <FaBoxOpen className="mx-auto text-6xl text-gray-600 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-300 mb-2">No Projects Available</h3>
+            <p className="text-gray-400">Create your first project to view profit & loss analysis.</p>
           </div>
         </div>
       ) : error ? (

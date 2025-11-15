@@ -5,6 +5,7 @@ import { RiTimeLine } from 'react-icons/ri';
 import { FaChevronLeft } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { getMyNotifications, deleteNotification } from '../../api/common/notification';
+import ConfirmationDeleteNotification from '../../components/modals/ConfirmationDeleteNotification';
 
 const getNotificationStyle = (type) => {
     switch (type) {
@@ -44,6 +45,8 @@ const Notification = ({ setActiveView }) => {
     const [loading, setLoading] = useState(true);
     const [expandedId, setExpandedId] = useState(null);
     const [filterType, setFilterType] = useState('all');
+    const [notificationToDelete, setNotificationToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         fetchNotifications();
@@ -70,29 +73,39 @@ const Notification = ({ setActiveView }) => {
 
     const handleDelete = async (notificationId, e) => {
         e.stopPropagation();
-        
-        if (!confirm("Delete this notification?")) return;
-
-        try {
-            await deleteNotification(notificationId);
-            setNotifications(notifications.filter(n => n.id !== notificationId));
-            toast.success("Notification deleted");
-        } catch (error) {
-            console.error("Error:", error);
-            toast.error(error.message || "Failed to delete notification");
-        }
+        setNotificationToDelete(notificationId);
     };
 
     const clearAll = async () => {
-        if (!confirm("Delete all notifications?")) return;
+        setNotificationToDelete('all');
+    };
 
+    const confirmDelete = async () => {
         try {
-            await Promise.all(notifications.map(n => deleteNotification(n.id)));
-            setNotifications([]);
-            toast.success("All notifications cleared");
+            setIsDeleting(true);
+            
+            if (notificationToDelete === 'all') {
+                await Promise.all(notifications.map(n => deleteNotification(n.id)));
+                setNotifications([]);
+                toast.success("All notifications cleared");
+            } else {
+                await deleteNotification(notificationToDelete);
+                setNotifications(notifications.filter(n => n.id !== notificationToDelete));
+                toast.success("Notification deleted");
+            }
+            
+            setNotificationToDelete(null);
+            // Refresh notifications immediately
+            await fetchNotifications();
         } catch (error) {
             console.error("Error:", error);
-            toast.error("Failed to clear all notifications");
+            toast.error(
+                notificationToDelete === 'all'
+                    ? "Failed to clear all notifications"
+                    : "Failed to delete notification"
+            );
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -227,6 +240,25 @@ const Notification = ({ setActiveView }) => {
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmationDeleteNotification
+                isOpen={!!notificationToDelete}
+                onClose={() => setNotificationToDelete(null)}
+                onConfirm={confirmDelete}
+                isLoading={isDeleting}
+                title={
+                    notificationToDelete === 'all'
+                        ? "Delete All Notifications?"
+                        : "Delete Notification?"
+                }
+                message={
+                    notificationToDelete === 'all'
+                        ? "Are you sure you want to delete all notifications? This action cannot be undone."
+                        : "Are you sure you want to delete this notification? This action cannot be undone."
+                }
+                confirmText={isDeleting ? "Deleting..." : "Delete"}
+            />
         </div>
     );
 };

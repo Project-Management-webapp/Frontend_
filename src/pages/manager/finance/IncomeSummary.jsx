@@ -139,6 +139,26 @@ const IncomeSummary = () => {
 
   if (!incomeData) return null;
 
+  // No projects state
+  if (incomeData.summary?.totalProjects === 0) {
+    return (
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-white">Income Summary</h1>
+          <p className="text-gray-400 mt-1">Comprehensive income analysis and trends</p>
+        </div>
+
+        {/* No Data Message */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-12 text-center">
+          <FaProjectDiagram className="mx-auto text-6xl text-gray-600 mb-4" />
+          <h3 className="text-xl font-semibold text-gray-300 mb-2">No Income Data Available</h3>
+          <p className="text-gray-400">Create projects to start tracking income and revenue.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
