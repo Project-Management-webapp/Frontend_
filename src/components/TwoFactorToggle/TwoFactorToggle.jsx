@@ -59,7 +59,21 @@ const TwoFactorToggle = ({ onToast }) => {
   if (isLoading) {
     return (
       <div className="twofa-toggle-card">
-        <div className="twofa-loading">Loading 2FA settings...</div>
+        <div className="twofa-header">
+          <div className="twofa-icon-wrapper skeleton-icon"></div>
+          <div className="twofa-text" style={{ flex: 1 }}>
+            <div className="skeleton-title"></div>
+            <div className="skeleton-description"></div>
+          </div>
+        </div>
+        <div className="twofa-toggle-wrapper">
+          <div className="skeleton-toggle"></div>
+        </div>
+        <div className="twofa-status">
+          <div className="skeleton-badge"></div>
+          <div className="skeleton-info"></div>
+          <div className="skeleton-info-short"></div>
+        </div>
       </div>
     );
   }
@@ -99,7 +113,7 @@ const TwoFactorToggle = ({ onToast }) => {
           {is2FAEnabled ? (
             <>
               <p className="twofa-info-text">
-                ✅ Your account is protected with 2FA. You'll receive a verification code via email each time you log in.
+                 Your account is protected with 2FA. You'll receive a verification code via email each time you log in.
               </p>
             </>
           ) : (
@@ -119,9 +133,9 @@ const TwoFactorToggle = ({ onToast }) => {
           {isToggling ? (
             'Processing...'
           ) : is2FAEnabled ? (
-            'Disable 2FA'
+            'Disable 2FA With Email OTP'
           ) : (
-            'Enable 2FA'
+            'Enable 2FA With Email OTP'
           )}
         </button>
 

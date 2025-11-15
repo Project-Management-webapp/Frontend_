@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import ManagerProfileEditModal from "../../components/manager/modals/ManagerProfileEditModal";
 import Toaster from "../../components/Toaster";
 import TwoFactorToggle from "../../components/TwoFactorToggle/TwoFactorToggle";
+import GoogleAuthToggle from "../../components/GoogleAuthToggle/GoogleAuthToggle";
 import { getManagerProfile, updateManagerProfileImage } from "../../api/manager/auth";
 import { FaRegSadTear } from 'react-icons/fa';
 import {
@@ -372,6 +373,11 @@ const Profile = ({ setActiveView }) => {
 
         {/* --- Two-Factor Authentication Section --- */}
         <TwoFactorToggle 
+          onToast={(message, type) => setToast({ show: true, message, type })}
+        />
+
+        {/* --- Google Authenticator Section --- */}
+        <GoogleAuthToggle 
           onToast={(message, type) => setToast({ show: true, message, type })}
         />
       </div>
