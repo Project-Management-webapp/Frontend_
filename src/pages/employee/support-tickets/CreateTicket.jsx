@@ -10,7 +10,7 @@ const CreateTicket = ({ setActiveView }) => {
     subject: "",
     description: "",
     priority: "medium",
-    category: "technical",
+    category: "technical_issue",
   });
   const [attachments, setAttachments] = useState([]);
   const [errors, setErrors] = useState({});
