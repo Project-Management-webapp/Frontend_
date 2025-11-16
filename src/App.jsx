@@ -1,6 +1,7 @@
 import React from "react";
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import NotFound from "./pages/NotFound";
 import EmployeeLayout from "./pages/employee/EmployeeLayout";
@@ -17,7 +18,8 @@ function App() {
     <SocketProvider>
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/Login" element={<Login />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
      

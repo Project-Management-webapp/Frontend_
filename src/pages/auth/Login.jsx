@@ -5,7 +5,7 @@ import { FiUser, FiBriefcase } from "react-icons/fi";
 import { FaArrowLeft } from "react-icons/fa";
 import logo from "/login_logo.png";
 import { employeeLogin, forgotPassword } from "../../api/employee/auth";
-import { managerLogin } from "../../api/manager/auth";
+import { managerLogin, managerRegister } from "../../api/manager/auth";
 import { sendOTP, verifyOTP, completeLogin } from "../../api/twoFactor";
 import { verifyGoogleAuthCode } from "../../api/googleAuth";
 import Toaster from "../../components/Toaster";
@@ -35,9 +35,11 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [signupData, setSignupData] = useState({ email: "", password: "" });
 
   const [forgotEmail, setForgotEmail] = useState("");
   const [toast, setToast] = useState({ show: false, message: "", type: "info", loading: false });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // 2FA States
   const [show2FAModal, setShow2FAModal] = useState(false);
@@ -47,6 +49,42 @@ const Login = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSignupInputChange = (e) => {
+    const { name, value } = e.target;
+    setSignupData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleManagerSignup = async (e) => {
+    e.preventDefault();
+    setToast({ show: true, message: "Creating your account...", type: "info", loading: true });
+
+    try {
+      const response = await managerRegister(signupData);
+      if (response.success) {
+        setToast({ show: false, message: "", type: "info", loading: false });
+        setSignupData({ email: "", password: "" });
+        setShowSuccessModal(true);
+        
+        // Redirect to home after 10 seconds
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          navigate("/");
+        }, 10000);
+      } else {
+        setToast({
+          show: true,
+          message: response.message || "Registration failed",
+          type: "error",
+          loading: false,
+        });
+      }
+    } catch (error) {
+      console.error("Manager signup error:", error);
+      const msg = error.message || "Registration failed. Please try again.";
+      setToast({ show: true, message: msg, type: "error", loading: false });
+    }
   };
 
   const handleLogin = async (e) => {
@@ -254,6 +292,89 @@ const Login = () => {
                 {toast.loading ? "Signing in..." : "Sign in"}
               </button>
             </form>
+            {role === "manager" && (
+              <div className="mt-6 text-center">
+                <p className="text-gray-300 text-sm">
+                  Don't have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setView("manager-signup")}
+                    className="text-[#ac51fc] hover:text-purple-300 font-semibold"
+                    disabled={toast.loading}
+                  >
+                    Sign up as Manager
+                  </button>
+                </p>
+              </div>
+            )}
+          </>
+        );
+      
+      case "manager-signup":
+        return (
+          <>
+            <div className="flex items-center mb-6">
+              <button
+                onClick={() => { setView("login"); }}
+                className="text-gray-300 hover:text-white"
+              >
+                <span className="mr-2 text-lg cursor-pointer hover:text-purple-300"><FaArrowLeft /></span>
+              </button>
+              <h2 className="text-3xl font-extrabold text-center flex-1 text-white">Manager Signup</h2>
+            </div>
+            <div className="text-center text-gray-300 mb-6">
+              <p className="text-sm">Create your manager account and wait for admin approval</p>
+            </div>
+            <form onSubmit={handleManagerSignup} className="space-y-4">
+              <div>
+                <label className="block text-gray-200 text-sm font-bold mb-2">Email</label>
+                <input 
+                  type="email" 
+                  name="email" 
+                  value={signupData.email} 
+                  onChange={handleSignupInputChange} 
+                  className="input" 
+                  placeholder="Enter your Email" 
+                  required 
+                />
+              </div>
+              <div className="relative">
+                <label className="block text-gray-200 text-sm font-bold mb-2">Password</label>
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  name="password" 
+                  value={signupData.password} 
+                  onChange={handleSignupInputChange} 
+                  className="input" 
+                  placeholder="Create Password (min 6 characters)" 
+                  minLength="6"
+                  required 
+                />
+                <span onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-[2.4rem] text-gray-400 text-lg cursor-pointer">
+                  {showPassword ? <AiOutlineEye /> : <AiOutlineEyeInvisible />}
+                </span>
+              </div>
+              <button 
+                type="submit" 
+                className="btn w-full mt-4 disabled:opacity-70 disabled:cursor-not-allowed" 
+                disabled={toast.loading}
+              >
+                {toast.loading ? "Creating Account..." : "Sign Up"}
+              </button>
+            </form>
+            <div className="mt-6 text-center">
+              <p className="text-gray-300 text-sm">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setView("login")}
+                  className="text-[#ac51fc] hover:text-purple-300 font-semibold"
+                  disabled={toast.loading}
+                >
+                  Sign in
+                </button>
+              </p>
+            </div>
           </>
         );
       case "forgot":
@@ -320,6 +441,60 @@ const Login = () => {
 
       {toast.show && (
         <Toaster message={toast.message} type={toast.type} loading={toast.loading} onClose={() => setToast({ ...toast, show: false })} />
+      )}
+
+      {/* Success Modal for Manager Registration */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-xl">
+          <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl max-w-md w-full mx-4">
+          
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center animate-bounce">
+                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Content */}
+            <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+              Registration Successful!
+            </h2>
+            
+            <p className="text-center text-gray-200 text-lg mb-4">
+              Your manager account has been created successfully.
+            </p>
+            
+            <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4 mb-6">
+              <p className="text-center text-blue-300 text-sm">
+                ⏳ <strong>Please wait for admin approval</strong> to access your account.
+              </p>
+            </div>
+
+            <p className="text-center text-gray-400 text-sm">
+              You will be redirected to the home page in a few seconds...
+            </p>
+
+            {/* Progress Bar */}
+            <div className="mt-6 w-full bg-white/10 rounded-full h-2 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[#ac51fc] to-purple-600 rounded-full animate-progress"
+                style={{ animation: 'progress 10s linear forwards' }}
+              ></div>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                navigate("/");
+              }}
+              className="mt-6 w-full py-3 bg-gradient-to-r from-[#ac51fc] to-purple-600 rounded-xl font-semibold hover:opacity-90 transition-all"
+            >
+              Go to Home Now
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Two-Factor Authentication Modal */}

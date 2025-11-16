@@ -1,5 +1,14 @@
 import api from "../index";
 
+export const managerRegister = async (credentials) => {
+  try {
+    const response = await api.post("/auth/manager/signup", credentials);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Something went wrong" };
+  }
+};
+
 export const managerLogin = async (credentials) => {
   try {
     const response = await api.post("/auth/manager/login", credentials);

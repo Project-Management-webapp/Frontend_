@@ -8,6 +8,7 @@ import {
   FiUser,
   FiLogOut,
   FiDollarSign,
+  FiSettings,
 } from "react-icons/fi";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { RiCustomerService2Line } from "react-icons/ri";
@@ -128,6 +129,13 @@ const Sidebar = ({
 
       {/* Footer */}
       <div className="p-4 space-y-2 border-t border-white/20 shrink-0">
+        <SidebarItem
+          icon={<FiSettings size={20} />}
+          text="Settings"
+          collapsed={isCollapsed}
+          active={activeView === "settings"}
+          onClick={() => handleItemClick("settings")}
+        />
         <SidebarItem
           icon={<FiUser size={20} />}
           text="Profile"

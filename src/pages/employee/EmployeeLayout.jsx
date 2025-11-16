@@ -6,6 +6,7 @@ import Toaster from "../../components/Toaster";
 import logo from "/login_logo.png";
 import Dashboard from "./Dashboard";
 import Profile from "./Profile";
+import Settings from "./Settings";
 import Notification from "./Notification";
 import OngoingProjects from "./projects/OngoingProjects";
 import CompletedProjects from "./projects/CompletedProjects";
@@ -35,6 +36,8 @@ const EmployeeLayout = () => {
         return <Dashboard />;
       case "profile":
         return <Profile setActiveView={setActiveView} />;
+      case "settings":
+        return <Settings setActiveView={setActiveView} />;
       case "notification":
         return <Notification setActiveView={setActiveView} />;
       case "ongoingProjects":

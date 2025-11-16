@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import EmployeeProfileEditModal from "../../components/employee/modals/EmployeeProfileEditModal";
 import Toaster from "../../components/Toaster";
-import TwoFactorToggle from "../../components/TwoFactorToggle/TwoFactorToggle";
-import GoogleAuthToggle from "../../components/GoogleAuthToggle/GoogleAuthToggle";
 import { getEmployeeProfile, updateEmployeeProfileImage } from "../../api/employee/auth";
 import { formatDate } from "../../components/atoms/FormatedDate";
 import {
@@ -443,15 +441,7 @@ const Profile = ({ setActiveView }) => {
           </div>
         </div>
 
-        {/* --- Two-Factor Authentication Section --- */}
-        <TwoFactorToggle 
-          onToast={(message, type) => setToast({ show: true, message, type })}
-        />
-
-        {/* --- Google Authenticator Section --- */}
-        <GoogleAuthToggle 
-          onToast={(message, type) => setToast({ show: true, message, type })}
-        />
+        {/* Two-Factor and Google Auth moved to Settings tab */}
       </div>
 
       {isImageModalOpen && (

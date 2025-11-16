@@ -3,6 +3,7 @@ import { FiMenu } from "react-icons/fi";
 import Sidebar from "../../components/manager/Sidebar";
 import Dashboard from "./Dashboard";
 import Profile from "./Profile";
+import Settings from "./Settings";
 import logo from "/login_logo.png";
 import LogoutModal from "../../components/modals/LogoutModal";
 import Notification from "./Notification";
@@ -45,6 +46,8 @@ const ManagerLayout = () => {
         return <Dashboard />;
       case "profile":
         return <Profile setActiveView={setActiveView} />;
+      case "settings":
+        return <Settings setActiveView={setActiveView} />;
       case "notifications":
         return <Notification setActiveView={setActiveView} />;
       case "employees-all":
